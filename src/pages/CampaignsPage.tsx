@@ -48,7 +48,7 @@ export default function CampaignsPage() {
       product: newProduct,
       status: 'draft',
       type: newType,
-      scheduledDate: newType === 'Scheduled' ? new Date(Date.now() + 7 * 86400000).toISOString() : '',
+      scheduledDate: newType === 'Scheduled' && newDate ? new Date(`${newDate}T${newTime || '00:00'}`).toISOString() : '',
       createdAt: new Date().toISOString(),
       templateName: templates.find(t => t.id === newTemplate)?.name || templates[0]?.name || '',
       stats: { sent: 0, opened: 0, replied: 0 },
