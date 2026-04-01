@@ -5,9 +5,12 @@ let _templates = [...defaultTemplates];
 let _history = generateHistory();
 let _campaigns = generateCampaigns();
 let _listeners: (() => void)[] = [];
-let _version = 0;
+let _snapshot = { templates: _templates, history: _history, campaigns: _campaigns };
 
-function notify() { _version++; _listeners.forEach(fn => fn()); }
+function notify() {
+  _snapshot = { templates: _templates, history: _history, campaigns: _campaigns };
+  _listeners.forEach(fn => fn());
+}
 
 export function getTemplates() { return _templates; }
 export function addTemplate(t: EmailTemplate) { _templates = [..._templates, t]; notify(); }
@@ -27,7 +30,7 @@ function subscribe(fn: () => void) {
   return () => { _listeners = _listeners.filter(l => l !== fn); };
 }
 
-function getSnapshot() { return { templates: _templates, history: _history, campaigns: _campaigns, v: _version }; }
+function getSnapshot() { return _snapshot; }
 
 export function useStore() {
   return useSyncExternalStore(subscribe, getSnapshot);
