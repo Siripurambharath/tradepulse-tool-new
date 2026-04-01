@@ -26,6 +26,8 @@ export default function CampaignsPage() {
   const [newProduct, setNewProduct] = useState('');
   const [newTemplate, setNewTemplate] = useState('');
   const [newType, setNewType] = useState<'Instant' | 'Scheduled'>('Instant');
+  const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('');
 
   const templates = getTemplates();
   const products = useMemo(() => [...new Set(allCompanies.map(c => c.product))].sort(), []);
@@ -46,7 +48,7 @@ export default function CampaignsPage() {
       product: newProduct,
       status: 'draft',
       type: newType,
-      scheduledDate: newType === 'Scheduled' ? new Date(Date.now() + 7 * 86400000).toISOString() : '',
+      scheduledDate: newType === 'Scheduled' && newDate ? new Date(`${newDate}T${newTime || '00:00'}`).toISOString() : '',
       createdAt: new Date().toISOString(),
       templateName: templates.find(t => t.id === newTemplate)?.name || templates[0]?.name || '',
       stats: { sent: 0, opened: 0, replied: 0 },
@@ -55,7 +57,7 @@ export default function CampaignsPage() {
       ),
     });
     setCreateOpen(false);
-    setNewName(''); setNewProduct(''); setNewTemplate('');
+    setNewName(''); setNewProduct(''); setNewTemplate(''); setNewDate(''); setNewTime('');
     toast.success('Campaign created');
   };
 
@@ -174,41 +176,52 @@ export default function CampaignsPage() {
 
       {/* Create Campaign Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-card">
-          <DialogHeader><DialogTitle>Create Campaign</DialogTitle></DialogHeader>
-          <div className="space-y-4">
+        <DialogContent className="bg-card sm:max-w-[480px]">
+          <DialogHeader><DialogTitle className="text-xl font-bold">Create Campaign</DialogTitle></DialogHeader>
+          <div className="space-y-4 mt-2">
+            <Input placeholder="Campaign name" value={newName} onChange={e => setNewName(e.target.value)} className="bg-background" />
+            <Select value={newProduct} onValueChange={setNewProduct}>
+              <SelectTrigger className="bg-background"><SelectValue placeholder="Select Product" /></SelectTrigger>
+              <SelectContent>{products.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+            </Select>
+            <Select value={newTemplate} onValueChange={setNewTemplate}>
+              <SelectTrigger className="bg-background"><SelectValue placeholder="Select Template" /></SelectTrigger>
+              <SelectContent>{templates.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
+            </Select>
             <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Campaign Name</label>
-              <Input value={newName} onChange={e => setNewName(e.target.value)} className="bg-card" />
+              <label className="text-sm font-medium text-foreground mb-2 block">Send Type</label>
+              <div className="grid grid-cols-2 gap-0 border rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setNewType('Instant')}
+                  className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+                    newType === 'Instant'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-background text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Zap className="h-4 w-4" /> Instant
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNewType('Scheduled')}
+                  className={`flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+                    newType === 'Scheduled'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-background text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Calendar className="h-4 w-4" /> Scheduled
+                </button>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Product</label>
-              <Select value={newProduct} onValueChange={setNewProduct}>
-                <SelectTrigger className="bg-card"><SelectValue placeholder="Select product" /></SelectTrigger>
-                <SelectContent>{products.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Type</label>
-              <Select value={newType} onValueChange={v => setNewType(v as 'Instant' | 'Scheduled')}>
-                <SelectTrigger className="bg-card"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Instant">Instant</SelectItem>
-                  <SelectItem value="Scheduled">Scheduled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Template</label>
-              <Select value={newTemplate} onValueChange={setNewTemplate}>
-                <SelectTrigger className="bg-card"><SelectValue placeholder="Select template" /></SelectTrigger>
-                <SelectContent>{templates.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-              <Button onClick={handleCreate}>Create</Button>
-            </div>
+            {newType === 'Scheduled' && (
+              <div className="grid grid-cols-2 gap-3">
+                <Input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} className="bg-background" />
+                <Input type="time" value={newTime} onChange={e => setNewTime(e.target.value)} className="bg-background" />
+              </div>
+            )}
+            <Button onClick={handleCreate} className="w-full" size="lg">Create Campaign</Button>
           </div>
         </DialogContent>
       </Dialog>
