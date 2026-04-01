@@ -57,7 +57,7 @@ export default function CampaignsPage() {
       ),
     });
     setCreateOpen(false);
-    setNewName(''); setNewProduct(''); setNewTemplate('');
+    setNewName(''); setNewProduct(''); setNewTemplate(''); setNewDate(''); setNewTime('');
     toast.success('Campaign created');
   };
 
