@@ -26,6 +26,8 @@ export default function CampaignsPage() {
   const [newProduct, setNewProduct] = useState('');
   const [newTemplate, setNewTemplate] = useState('');
   const [newType, setNewType] = useState<'Instant' | 'Scheduled'>('Instant');
+  const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('');
 
   const templates = getTemplates();
   const products = useMemo(() => [...new Set(allCompanies.map(c => c.product))].sort(), []);
