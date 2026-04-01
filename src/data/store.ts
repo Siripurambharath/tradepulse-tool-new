@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { useSyncExternalStore } from 'react';
 import { EmailTemplate, HistoryEntry, Campaign, Company, defaultTemplates, generateHistory, generateCampaigns } from './mockData';
 
 // Simple store using React context pattern - we'll use a simpler approach with useState in a context
