@@ -1,15 +1,13 @@
 import { useSyncExternalStore } from 'react';
-import { EmailTemplate, HistoryEntry, Campaign, Company, defaultTemplates, generateHistory, generateCampaigns } from './mockData';
-
-// Simple store using React context pattern - we'll use a simpler approach with useState in a context
-// For now, export mutable arrays that pages can import and modify
+import { EmailTemplate, HistoryEntry, Campaign, defaultTemplates, generateHistory, generateCampaigns } from './mockData';
 
 let _templates = [...defaultTemplates];
 let _history = generateHistory();
 let _campaigns = generateCampaigns();
 let _listeners: (() => void)[] = [];
+let _version = 0;
 
-function notify() { _listeners.forEach(fn => fn()); }
+function notify() { _version++; _listeners.forEach(fn => fn()); }
 
 export function getTemplates() { return _templates; }
 export function addTemplate(t: EmailTemplate) { _templates = [..._templates, t]; notify(); }
@@ -24,18 +22,13 @@ export function updateCampaign(id: string, updates: Partial<Campaign>) {
   notify();
 }
 
-export function subscribe(fn: () => void) {
+function subscribe(fn: () => void) {
   _listeners.push(fn);
   return () => { _listeners = _listeners.filter(l => l !== fn); };
 }
 
-// Hook for re-rendering
-import { useSyncExternalStore } from 'react';
+function getSnapshot() { return { templates: _templates, history: _history, campaigns: _campaigns, v: _version }; }
+
 export function useStore() {
-  const snap = useSyncExternalStore(subscribe, () => ({
-    templates: _templates,
-    history: _history,
-    campaigns: _campaigns,
-  }));
-  return snap;
+  return useSyncExternalStore(subscribe, getSnapshot);
 }
