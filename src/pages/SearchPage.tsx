@@ -12,7 +12,7 @@ import { allCompanies, Company } from '@/data/mockData';
 import {
   Search, ChevronDown, ChevronRight, Mail, LayoutGrid, List, MapPin,
   Ship, Globe, Package, FileText, Eye, BadgeCheck, Zap, Building2,
-  Anchor, IndianRupee, ChevronLeft
+  Anchor, IndianRupee, ChevronLeft, X
 } from 'lucide-react';
 
 export default function SearchPage() {
