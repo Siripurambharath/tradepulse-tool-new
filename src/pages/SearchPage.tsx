@@ -24,6 +24,7 @@ export default function SearchPage() {
   const [page, setPage] = useState(0);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [detailCompany, setDetailCompany] = useState<Company | null>(null);
+  const [previewCompany, setPreviewCompany] = useState<Company | null>(null);
   const perPage = viewMode === 'cards' ? 12 : 50;
 
   const products = useMemo(() => [...new Set(allCompanies.map(c => c.product))].sort(), []);
