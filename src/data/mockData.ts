@@ -24,6 +24,14 @@ export type Company = {
   lastShipmentDate: string;
   contacts: Contact[];
   status: 'Not Contacted' | 'Email Sent' | 'Opened' | 'Replied' | 'Interested' | 'Not Interested';
+  address: string;
+  portOfLoading: string;
+  portOfDischarge: string;
+  buyerAddress: string;
+  destinationCountry: string;
+  productDescription: string;
+  totalValue: string;
+  verified: boolean;
 };
 
 export type EmailTemplate = {
