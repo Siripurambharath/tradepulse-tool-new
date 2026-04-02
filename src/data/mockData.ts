@@ -101,10 +101,11 @@ function generateContacts(count: number): Contact[] {
 function generateCompanies(count: number): Company[] {
   return Array.from({ length: count }, () => {
     const product = faker.helpers.arrayElement(products);
+    const country = faker.helpers.arrayElement(countries);
     return {
       id: faker.string.uuid(),
       name: faker.company.name(),
-      country: faker.helpers.arrayElement(countries),
+      country,
       type: faker.helpers.arrayElement(['Buyer', 'Seller']) as 'Buyer' | 'Seller',
       product,
       hsn: hsnCodes[product] || '0000',
@@ -114,6 +115,14 @@ function generateCompanies(count: number): Company[] {
       lastShipmentDate: faker.date.past({ years: 2 }).toISOString().split('T')[0],
       contacts: generateContacts(faker.number.int({ min: 2, max: 5 })),
       status: faker.helpers.arrayElement(['Not Contacted', 'Email Sent', 'Opened', 'Replied', 'Interested', 'Not Interested']) as Company['status'],
+      address: `${faker.location.streetAddress()}, ${faker.location.city()}`,
+      portOfLoading: faker.helpers.arrayElement(ports),
+      portOfDischarge: faker.helpers.arrayElement(dischargePorts),
+      buyerAddress: `${faker.location.streetAddress()}, ${faker.location.city()}, ${country}`,
+      destinationCountry: faker.helpers.arrayElement(countries),
+      productDescription: `${product.toUpperCase()} - ${faker.commerce.productDescription()}`,
+      totalValue: `₹${faker.number.int({ min: 50, max: 9999 })}.${faker.number.int({ min: 10, max: 99 })}K`,
+      verified: faker.datatype.boolean(),
     };
   });
 }
