@@ -3,10 +3,16 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusBadge } from '@/components/StatusBadge';
 import { EmailModal } from '@/components/EmailModal';
 import { allCompanies, Company } from '@/data/mockData';
-import { Search, ChevronDown, ChevronRight, Mail } from 'lucide-react';
+import {
+  Search, ChevronDown, ChevronRight, Mail, LayoutGrid, List, MapPin,
+  Ship, Globe, Package, FileText, Eye, BadgeCheck, Zap, Building2,
+  Anchor, IndianRupee, ChevronLeft
+} from 'lucide-react';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -16,7 +22,9 @@ export default function SearchPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [emailOpen, setEmailOpen] = useState(false);
   const [page, setPage] = useState(0);
-  const perPage = 50;
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [detailCompany, setDetailCompany] = useState<Company | null>(null);
+  const perPage = viewMode === 'cards' ? 12 : 50;
 
   const products = useMemo(() => [...new Set(allCompanies.map(c => c.product))].sort(), []);
 
@@ -66,9 +74,29 @@ export default function SearchPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Search Companies</h1>
-        <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
-          <Mail className="h-4 w-4" /> Send Email ({selected.size})
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center border rounded-lg overflow-hidden">
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => { setViewMode('table'); setPage(0); }}
+              className="rounded-none gap-1.5"
+            >
+              <List className="h-4 w-4" /> List
+            </Button>
+            <Button
+              variant={viewMode === 'cards' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => { setViewMode('cards'); setPage(0); }}
+              className="rounded-none gap-1.5"
+            >
+              <LayoutGrid className="h-4 w-4" /> Cards
+            </Button>
+          </div>
+          <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
+            <Mail className="h-4 w-4" /> Send Email ({selected.size})
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-3 mb-4">
@@ -98,72 +126,91 @@ export default function SearchPage() {
         </Select>
       </div>
 
-      <p className="text-sm text-muted-foreground mb-3">
-        {filtered.length.toLocaleString()} companies found
-        {query && <span className="ml-2">— {buyerCount} buyers and {sellerCount} sellers</span>}
-      </p>
-
-      <div className="bg-card rounded-lg border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/30">
-              <th className="p-3 w-10"><Checkbox checked={selected.size === paginated.length && paginated.length > 0} onCheckedChange={selectAll} /></th>
-              <th className="p-3 w-10"></th>
-              <th className="p-3 text-left font-medium text-foreground">Company</th>
-              <th className="p-3 text-left font-medium text-foreground">Country</th>
-              <th className="p-3 text-left font-medium text-foreground">Type</th>
-              <th className="p-3 text-left font-medium text-foreground">Product</th>
-              <th className="p-3 text-left font-medium text-foreground">HSN</th>
-              <th className="p-3 text-right font-medium text-foreground">Volume</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginated.map(c => (
-              <>
-                <tr key={c.id} className="border-b hover:bg-muted/20 transition-colors">
-                  <td className="p-3"><Checkbox checked={selected.has(c.id)} onCheckedChange={() => toggleSelect(c.id)} /></td>
-                  <td className="p-3 cursor-pointer" onClick={() => toggleExpand(c.id)}>
-                    {expanded.has(c.id) ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                  </td>
-                  <td className="p-3 font-medium text-foreground">{c.name}</td>
-                  <td className="p-3 text-muted-foreground">{c.country}</td>
-                  <td className="p-3"><StatusBadge status={c.type} /></td>
-                  <td className="p-3 text-muted-foreground">{c.product}</td>
-                  <td className="p-3 text-muted-foreground">{c.hsn}</td>
-                  <td className="p-3 text-right text-muted-foreground">{c.volume}</td>
-                </tr>
-                {expanded.has(c.id) && (
-                  <tr key={`${c.id}-exp`}>
-                    <td colSpan={8} className="bg-muted/20 px-8 py-3">
-                      <p className="text-xs font-medium text-muted-foreground mb-2">Contacts ({c.contacts.length})</p>
-                      <div className="grid gap-2">
-                        {c.contacts.map(ct => (
-                          <div key={ct.id} className="flex items-center gap-6 text-sm py-1">
-                            <span className="font-medium text-foreground w-40">{ct.name}</span>
-                            <span className="text-muted-foreground w-40">{ct.role}</span>
-                            <span className="text-primary w-48">{ct.email}</span>
-                            <span className="text-muted-foreground">{ct.phone}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm text-muted-foreground">
+          Showing {page * perPage + 1} – {Math.min((page + 1) * perPage, filtered.length)} of {filtered.length.toLocaleString()} records
+          {query && <span className="ml-2">— {buyerCount} buyers and {sellerCount} sellers</span>}
+        </p>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="icon" className="h-8 w-8" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: Math.min(3, totalPages) }, (_, i) => (
+              <Button
+                key={i}
+                variant={page === i ? 'default' : 'outline'}
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => setPage(i)}
+              >
+                {i + 1}
+              </Button>
             ))}
-          </tbody>
-        </table>
+            {totalPages > 3 && <span className="px-1 text-muted-foreground">...</span>}
+            {totalPages > 3 && (
+              <Button variant="outline" size="sm" className="h-8 px-2 text-xs">{totalPages}</Button>
+            )}
+            <Button variant="outline" size="icon" className="h-8 w-8" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-sm text-muted-foreground">Page {page + 1} of {totalPages}</p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Previous</Button>
-            <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next</Button>
-          </div>
+      {/* TABLE VIEW */}
+      {viewMode === 'table' && (
+        <div className="bg-card rounded-lg border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/30">
+                <th className="p-3 w-10"><Checkbox checked={selected.size === paginated.length && paginated.length > 0} onCheckedChange={selectAll} /></th>
+                <th className="p-3 w-10"></th>
+                <th className="p-3 text-left font-medium text-foreground">Company</th>
+                <th className="p-3 text-left font-medium text-foreground">Country</th>
+                <th className="p-3 text-left font-medium text-foreground">Type</th>
+                <th className="p-3 text-left font-medium text-foreground">Product</th>
+                <th className="p-3 text-left font-medium text-foreground">HSN</th>
+                <th className="p-3 text-right font-medium text-foreground">Volume</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginated.map(c => (
+                <CompanyTableRow
+                  key={c.id}
+                  company={c}
+                  expanded={expanded.has(c.id)}
+                  selected={selected.has(c.id)}
+                  onToggleExpand={() => toggleExpand(c.id)}
+                  onToggleSelect={() => toggleSelect(c.id)}
+                  onViewDetails={() => setDetailCompany(c)}
+                />
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
+
+      {/* CARDS VIEW */}
+      {viewMode === 'cards' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {paginated.map((c, idx) => (
+            <CompanyCard
+              key={c.id}
+              company={c}
+              index={page * perPage + idx + 1}
+              onViewDetails={() => setDetailCompany(c)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* COMPANY DETAIL MODAL */}
+      <Dialog open={!!detailCompany} onOpenChange={open => !open && setDetailCompany(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+          {detailCompany && <CompanyDetail company={detailCompany} />}
+        </DialogContent>
+      </Dialog>
 
       <EmailModal
         open={emailOpen}
@@ -171,6 +218,267 @@ export default function SearchPage() {
         recipients={getRecipients()}
         product={productFilter !== 'all' ? productFilter : query}
       />
+    </div>
+  );
+}
+
+/* ─── TABLE ROW ─── */
+function CompanyTableRow({ company: c, expanded, selected, onToggleExpand, onToggleSelect, onViewDetails }: {
+  company: Company; expanded: boolean; selected: boolean;
+  onToggleExpand: () => void; onToggleSelect: () => void; onViewDetails: () => void;
+}) {
+  return (
+    <>
+      <tr className="border-b hover:bg-muted/20 transition-colors">
+        <td className="p-3"><Checkbox checked={selected} onCheckedChange={onToggleSelect} /></td>
+        <td className="p-3 cursor-pointer" onClick={onToggleExpand}>
+          {expanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+        </td>
+        <td className="p-3 font-medium text-foreground">
+          <button onClick={onViewDetails} className="hover:text-primary hover:underline text-left">{c.name}</button>
+        </td>
+        <td className="p-3 text-muted-foreground">{c.country}</td>
+        <td className="p-3"><StatusBadge status={c.type} /></td>
+        <td className="p-3 text-muted-foreground">{c.product}</td>
+        <td className="p-3 text-muted-foreground">{c.hsn}</td>
+        <td className="p-3 text-right text-muted-foreground">{c.volume}</td>
+      </tr>
+      {expanded && (
+        <tr>
+          <td colSpan={8} className="bg-muted/20 px-8 py-3">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Contacts ({c.contacts.length})</p>
+            <div className="grid gap-2">
+              {c.contacts.map(ct => (
+                <div key={ct.id} className="flex items-center gap-6 text-sm py-1">
+                  <span className="font-medium text-foreground w-40">{ct.name}</span>
+                  <span className="text-muted-foreground w-40">{ct.role}</span>
+                  <span className="text-primary w-48">{ct.email}</span>
+                  <span className="text-muted-foreground">{ct.phone}</span>
+                </div>
+              ))}
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
+/* ─── COMPANY CARD (Image 1 style) ─── */
+function CompanyCard({ company: c, index, onViewDetails }: { company: Company; index: number; onViewDetails: () => void }) {
+  return (
+    <div className="bg-card rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+      {/* Header */}
+      <div className="bg-[hsl(var(--primary)/0.9)] text-primary-foreground p-4 relative">
+        <span className="absolute top-3 left-3 text-xs font-mono bg-background/20 px-2 py-0.5 rounded">
+          #{String(index).padStart(3, '0')}
+        </span>
+        <div className="text-center pt-3">
+          <h3 className="font-bold text-sm uppercase tracking-wide">{c.name}</h3>
+          <p className="text-xs opacity-80 flex items-center justify-center gap-1 mt-1">
+            <MapPin className="h-3 w-3" /> {c.address}
+          </p>
+        </div>
+      </div>
+      <div className="h-1 bg-emerald-400" />
+
+      {/* Body */}
+      <div className="p-4 space-y-4 text-sm">
+        <InfoRow icon={<Building2 className="h-4 w-4 text-primary" />} label="EXPORTER ADDRESS" value={c.address} />
+
+        <div className="grid grid-cols-2 gap-3">
+          <InfoRow icon={<Anchor className="h-4 w-4 text-primary" />} label="PORT OF LOADING" value={c.portOfLoading} />
+          <InfoRow icon={<Ship className="h-4 w-4 text-primary" />} label={`${c.type === 'Buyer' ? 'IMPORTER' : 'EXPORTER'}/BUYER`} value={c.contacts[0]?.name || 'N/A'} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <InfoRow icon={<MapPin className="h-4 w-4 text-primary" />} label="BUYER ADDRESS" value={c.buyerAddress} />
+          <InfoRow icon={<Anchor className="h-4 w-4 text-primary" />} label="PORT OF DISCHARGE" value={c.portOfDischarge} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <InfoRow icon={<Globe className="h-4 w-4 text-primary" />} label="DESTINATION COUNTRY" value={c.destinationCountry} />
+          <InfoRow icon={<Package className="h-4 w-4 text-primary" />} label="HSN CODE" value={c.hsn} />
+        </div>
+
+        <InfoRow icon={<FileText className="h-4 w-4 text-primary" />} label="PRODUCT DESCRIPTION" value={c.productDescription} />
+      </div>
+
+      {/* Footer */}
+      <div className="px-4 pb-4">
+        <Button onClick={onViewDetails} className="w-full gap-2" variant="default">
+          <Eye className="h-4 w-4" /> View Details
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <div className="mt-0.5 shrink-0">{icon}</div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+        <p className="text-foreground text-xs leading-snug break-words">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── COMPANY DETAIL (Image 2 style) ─── */
+function CompanyDetail({ company: c }: { company: Company }) {
+  return (
+    <div>
+      {/* Hero header */}
+      <div className="bg-gradient-to-br from-primary via-primary/80 to-primary/60 text-primary-foreground p-8 relative overflow-hidden">
+        <div className="absolute top-4 right-4 flex gap-2">
+          {c.verified && (
+            <span className="flex items-center gap-1 bg-background/20 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-green-300">
+              <BadgeCheck className="h-3.5 w-3.5" /> Verified
+            </span>
+          )}
+          <span className="flex items-center gap-1 bg-background/20 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-yellow-300">
+            <Zap className="h-3.5 w-3.5" /> Active
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-xl bg-background/20 backdrop-blur flex items-center justify-center">
+            <Building2 className="h-7 w-7" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold uppercase tracking-wide">{c.name}</h2>
+            <p className="text-sm opacity-80 flex items-center gap-1 mt-1">
+              <MapPin className="h-3.5 w-3.5" /> {c.address}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-6 -mt-4">
+        <StatCard icon={<Ship className="h-5 w-5 text-primary" />} value={String(c.shipmentCount)} label="Total Shipments" color="text-primary" />
+        <StatCard icon={<IndianRupee className="h-5 w-5 text-emerald-500" />} value={c.totalValue} label="Total Value" color="text-emerald-500" />
+        <StatCard icon={<Globe className="h-5 w-5 text-orange-500" />} value="1" label="Countries" color="text-orange-500" />
+        <StatCard icon={<Package className="h-5 w-5 text-primary" />} value={String(c.contacts.length)} label="Products" color="text-primary" />
+
+        {/* Location card */}
+        <div className="bg-card border rounded-xl p-4 flex flex-col">
+          <p className="text-xs font-semibold text-foreground flex items-center gap-1 mb-2">
+            <MapPin className="h-3.5 w-3.5 text-primary" /> Location
+          </p>
+          <div className="flex-1 bg-muted rounded-lg flex items-center justify-center min-h-[60px]">
+            <p className="text-xs text-muted-foreground">Map Placeholder</p>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">{c.country}</p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="px-6 pb-6">
+        <Tabs defaultValue="overview">
+          <TabsList className="mb-4">
+            <TabsTrigger value="overview" className="gap-1.5"><Globe className="h-3.5 w-3.5" /> Overview</TabsTrigger>
+            <TabsTrigger value="shipments" className="gap-1.5"><Ship className="h-3.5 w-3.5" /> Shipments</TabsTrigger>
+            <TabsTrigger value="products" className="gap-1.5"><Package className="h-3.5 w-3.5" /> Products</TabsTrigger>
+            <TabsTrigger value="contacts" className="gap-1.5"><Building2 className="h-3.5 w-3.5" /> Contacts</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-card border rounded-xl p-5">
+                <h4 className="font-semibold text-foreground flex items-center gap-2 mb-4">
+                  <Globe className="h-4 w-4 text-primary" /> Export Destinations
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">{c.destinationCountry}</span><span className="font-medium text-foreground">{c.shipmentCount} shipments</span></div>
+                </div>
+              </div>
+              <div className="bg-card border rounded-xl p-5">
+                <h4 className="font-semibold text-foreground flex items-center gap-2 mb-4">
+                  <Package className="h-4 w-4 text-primary" /> Top Products
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">{c.product}</span><span className="font-medium text-foreground">HSN: {c.hsn}</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-card border rounded-xl p-5 mt-4">
+              <h4 className="font-semibold text-foreground mb-3">Company Details</h4>
+              <div className="grid grid-cols-2 gap-y-3 gap-x-8 text-sm">
+                <div><span className="text-muted-foreground">Type:</span> <span className="font-medium text-foreground ml-2">{c.type}</span></div>
+                <div><span className="text-muted-foreground">Industry:</span> <span className="font-medium text-foreground ml-2">{c.industry}</span></div>
+                <div><span className="text-muted-foreground">Volume:</span> <span className="font-medium text-foreground ml-2">{c.volume}</span></div>
+                <div><span className="text-muted-foreground">Port of Loading:</span> <span className="font-medium text-foreground ml-2">{c.portOfLoading}</span></div>
+                <div><span className="text-muted-foreground">Port of Discharge:</span> <span className="font-medium text-foreground ml-2">{c.portOfDischarge}</span></div>
+                <div><span className="text-muted-foreground">Last Shipment:</span> <span className="font-medium text-foreground ml-2">{c.lastShipmentDate}</span></div>
+                <div className="col-span-2"><span className="text-muted-foreground">Product Description:</span> <span className="font-medium text-foreground ml-2">{c.productDescription}</span></div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="shipments">
+            <div className="bg-card border rounded-xl p-5">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2 font-medium text-muted-foreground">Date</th>
+                    <th className="text-left p-2 font-medium text-muted-foreground">Port Loading</th>
+                    <th className="text-left p-2 font-medium text-muted-foreground">Port Discharge</th>
+                    <th className="text-left p-2 font-medium text-muted-foreground">Destination</th>
+                    <th className="text-right p-2 font-medium text-muted-foreground">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="p-2 text-foreground">{c.lastShipmentDate}</td>
+                    <td className="p-2 text-foreground">{c.portOfLoading}</td>
+                    <td className="p-2 text-foreground">{c.portOfDischarge}</td>
+                    <td className="p-2 text-foreground">{c.destinationCountry}</td>
+                    <td className="p-2 text-right text-foreground">{c.totalValue}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="products">
+            <div className="bg-card border rounded-xl p-5">
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="font-medium text-foreground">{c.product}</span>
+                <span className="text-muted-foreground text-sm">HSN: {c.hsn}</span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-3">{c.productDescription}</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="contacts">
+            <div className="bg-card border rounded-xl p-5 space-y-3">
+              {c.contacts.map(ct => (
+                <div key={ct.id} className="flex items-center gap-6 text-sm py-2 border-b last:border-0">
+                  <span className="font-medium text-foreground w-40">{ct.name}</span>
+                  <span className="text-muted-foreground w-40">{ct.role}</span>
+                  <span className="text-primary w-48">{ct.email}</span>
+                  <span className="text-muted-foreground">{ct.phone}</span>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ icon, value, label, color }: { icon: React.ReactNode; value: string; label: string; color: string }) {
+  return (
+    <div className="bg-card border rounded-xl p-4 flex items-center gap-3">
+      <div className="shrink-0">{icon}</div>
+      <div>
+        <p className={`text-lg font-bold ${color}`}>{value}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
     </div>
   );
 }
