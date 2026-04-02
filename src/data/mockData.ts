@@ -81,6 +81,9 @@ const hsnCodes: Record<string, string> = {
   Fertilizers: '3105', Plastics: '3901', 'Green Tea': '0902',
 };
 
+const ports = ['Mumbai Port', 'Chennai Sea (INMAA1)', 'Nhava Sheva', 'Kandla Port', 'Kolkata Port', 'Petrapole Road', 'Vizag Port', 'Cochin Port', 'Tuticorin Port', 'Mundra Port'];
+const dischargePorts = ['Port Kelang', 'Benapole', 'Jebel Ali', 'Singapore Port', 'Colombo', 'Felixstowe', 'Hamburg', 'Rotterdam', 'Shanghai', 'Yokohama'];
+
 const roles = ['CEO', 'Purchase Manager', 'Director', 'VP Sales', 'Import Manager', 'Procurement Head', 'Trade Manager', 'Business Development Manager'];
 const departments = ['Management', 'Purchasing', 'Sales', 'Operations', 'Trade', 'Procurement', 'Business Development'];
 
