@@ -24,6 +24,7 @@ export default function SearchPage() {
   const [page, setPage] = useState(0);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [detailCompany, setDetailCompany] = useState<Company | null>(null);
+  const [previewCompany, setPreviewCompany] = useState<Company | null>(null);
   const perPage = viewMode === 'cards' ? 12 : 50;
 
   const products = useMemo(() => [...new Set(allCompanies.map(c => c.product))].sort(), []);
@@ -193,17 +194,34 @@ export default function SearchPage() {
 
       {/* CARDS VIEW */}
       {viewMode === 'cards' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {paginated.map((c, idx) => (
-            <CompanyCard
-              key={c.id}
-              company={c}
-              index={page * perPage + idx + 1}
-              onViewDetails={() => setDetailCompany(c)}
+        <>
+          <div className="flex items-center gap-3 mb-4">
+            <Checkbox
+              checked={selected.size === paginated.length && paginated.length > 0}
+              onCheckedChange={selectAll}
             />
-          ))}
-        </div>
+            <span className="text-sm text-muted-foreground">Select All</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {paginated.map(c => (
+              <CompanyCard
+                key={c.id}
+                company={c}
+                selected={selected.has(c.id)}
+                onToggleSelect={() => toggleSelect(c.id)}
+                onClick={() => setPreviewCompany(c)}
+              />
+            ))}
+          </div>
+        </>
       )}
+
+      {/* CARD PREVIEW POPUP */}
+      <Dialog open={!!previewCompany} onOpenChange={open => !open && setPreviewCompany(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0">
+          {previewCompany && <CompanyCardPreview company={previewCompany} onViewDetails={() => { setPreviewCompany(null); setDetailCompany(previewCompany); }} />}
+        </DialogContent>
+      </Dialog>
 
       {/* COMPANY DETAIL MODAL */}
       <Dialog open={!!detailCompany} onOpenChange={open => !open && setDetailCompany(null)}>
@@ -264,47 +282,75 @@ function CompanyTableRow({ company: c, expanded, selected, onToggleExpand, onTog
   );
 }
 
-/* ─── COMPANY CARD (Image 1 style) ─── */
-function CompanyCard({ company: c, index, onViewDetails }: { company: Company; index: number; onViewDetails: () => void }) {
+/* ─── SIMPLE COMPANY CARD ─── */
+function CompanyCard({ company: c, selected, onToggleSelect, onClick }: {
+  company: Company; selected: boolean; onToggleSelect: () => void; onClick: () => void;
+}) {
   return (
-    <div className="bg-card rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-      {/* Header */}
-      <div className="bg-[hsl(var(--primary)/0.9)] text-primary-foreground p-4 relative">
-        <span className="absolute top-3 left-3 text-xs font-mono bg-background/20 px-2 py-0.5 rounded">
-          #{String(index).padStart(3, '0')}
-        </span>
-        <div className="text-center pt-3">
-          <h3 className="font-bold text-sm uppercase tracking-wide">{c.name}</h3>
-          <p className="text-xs opacity-80 flex items-center justify-center gap-1 mt-1">
-            <MapPin className="h-3 w-3" /> {c.address}
-          </p>
+    <div
+      className={`bg-card rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${selected ? 'ring-2 ring-primary' : ''}`}
+      onClick={onClick}
+    >
+      <div className="p-4 space-y-3">
+        <div className="flex items-center gap-3">
+          <div onClick={e => { e.stopPropagation(); onToggleSelect(); }}>
+            <Checkbox checked={selected} onCheckedChange={onToggleSelect} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-foreground text-sm truncate">{c.name}</h3>
+          </div>
+          <StatusBadge status={c.type} />
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="truncate">{c.country}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Package className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="truncate">{c.product}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span>HSN: {c.hsn}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Ship className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span>{c.volume}</span>
+          </div>
         </div>
       </div>
-      <div className="h-1 bg-emerald-400" />
+    </div>
+  );
+}
 
-      {/* Body */}
+/* ─── CARD PREVIEW POPUP (Image 1 detailed style) ─── */
+function CompanyCardPreview({ company: c, onViewDetails }: { company: Company; onViewDetails: () => void }) {
+  return (
+    <div>
+      <div className="bg-primary text-primary-foreground p-4 text-center">
+        <h3 className="font-bold text-sm uppercase tracking-wide">{c.name}</h3>
+        <p className="text-xs opacity-80 flex items-center justify-center gap-1 mt-1">
+          <MapPin className="h-3 w-3" /> {c.address}
+        </p>
+      </div>
+      <div className="h-1 bg-emerald-400" />
       <div className="p-4 space-y-4 text-sm">
         <InfoRow icon={<Building2 className="h-4 w-4 text-primary" />} label="EXPORTER ADDRESS" value={c.address} />
-
         <div className="grid grid-cols-2 gap-3">
           <InfoRow icon={<Anchor className="h-4 w-4 text-primary" />} label="PORT OF LOADING" value={c.portOfLoading} />
-          <InfoRow icon={<Ship className="h-4 w-4 text-primary" />} label={`${c.type === 'Buyer' ? 'IMPORTER' : 'EXPORTER'}/BUYER`} value={c.contacts[0]?.name || 'N/A'} />
+          <InfoRow icon={<Ship className="h-4 w-4 text-primary" />} label="IMPORTER/BUYER" value={c.contacts[0]?.name || 'N/A'} />
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           <InfoRow icon={<MapPin className="h-4 w-4 text-primary" />} label="BUYER ADDRESS" value={c.buyerAddress} />
           <InfoRow icon={<Anchor className="h-4 w-4 text-primary" />} label="PORT OF DISCHARGE" value={c.portOfDischarge} />
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           <InfoRow icon={<Globe className="h-4 w-4 text-primary" />} label="DESTINATION COUNTRY" value={c.destinationCountry} />
           <InfoRow icon={<Package className="h-4 w-4 text-primary" />} label="HSN CODE" value={c.hsn} />
         </div>
-
         <InfoRow icon={<FileText className="h-4 w-4 text-primary" />} label="PRODUCT DESCRIPTION" value={c.productDescription} />
       </div>
-
-      {/* Footer */}
       <div className="px-4 pb-4">
         <Button onClick={onViewDetails} className="w-full gap-2" variant="default">
           <Eye className="h-4 w-4" /> View Details
