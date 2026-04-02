@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusBadge } from '@/components/StatusBadge';
 import { EmailModal } from '@/components/EmailModal';
@@ -11,7 +12,7 @@ import { allCompanies, Company } from '@/data/mockData';
 import {
   Search, ChevronDown, ChevronRight, Mail, LayoutGrid, List, MapPin,
   Ship, Globe, Package, FileText, Eye, BadgeCheck, Zap, Building2,
-  Anchor, IndianRupee, ChevronLeft
+  Anchor, IndianRupee, ChevronLeft, X
 } from 'lucide-react';
 
 export default function SearchPage() {
@@ -58,10 +59,10 @@ export default function SearchPage() {
   };
 
   const selectAll = () => {
-    if (selected.size === paginated.length) {
+    if (selected.size === filtered.length) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(paginated.map(c => c.id)));
+      setSelected(new Set(filtered.map(c => c.id)));
     }
   };
 
@@ -165,7 +166,7 @@ export default function SearchPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/30">
-                <th className="p-3 w-10"><Checkbox checked={selected.size === paginated.length && paginated.length > 0} onCheckedChange={selectAll} /></th>
+                <th className="p-3 w-10"><Checkbox checked={selected.size === filtered.length && filtered.length > 0} onCheckedChange={selectAll} /></th>
                 <th className="p-3 w-10"></th>
                 <th className="p-3 text-left font-medium text-foreground">Company</th>
                 <th className="p-3 text-left font-medium text-foreground">Country</th>
@@ -184,7 +185,7 @@ export default function SearchPage() {
                   selected={selected.has(c.id)}
                   onToggleExpand={() => toggleExpand(c.id)}
                   onToggleSelect={() => toggleSelect(c.id)}
-                  onViewDetails={() => setDetailCompany(c)}
+                  onViewDetails={() => setPreviewCompany(c)}
                 />
               ))}
             </tbody>
@@ -197,7 +198,7 @@ export default function SearchPage() {
         <>
           <div className="flex items-center gap-3 mb-4">
             <Checkbox
-              checked={selected.size === paginated.length && paginated.length > 0}
+              checked={selected.size === filtered.length && filtered.length > 0}
               onCheckedChange={selectAll}
             />
             <span className="text-sm text-muted-foreground">Select All</span>
@@ -351,7 +352,7 @@ function CompanyCardPreview({ company: c, onViewDetails }: { company: Company; o
         </div>
         <InfoRow icon={<FileText className="h-4 w-4 text-primary" />} label="PRODUCT DESCRIPTION" value={c.productDescription} />
       </div>
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-4 space-y-2">
         <Button onClick={onViewDetails} className="w-full gap-2" variant="default">
           <Eye className="h-4 w-4" /> View Details
         </Button>
@@ -512,6 +513,15 @@ function CompanyDetail({ company: c }: { company: Company }) {
             </div>
           </TabsContent>
         </Tabs>
+      </div>
+
+      {/* Close button at bottom center */}
+      <div className="flex justify-center pb-6">
+        <DialogPrimitive.Close asChild>
+          <Button variant="outline" className="gap-2 px-8">
+            <X className="h-4 w-4" /> Close
+          </Button>
+        </DialogPrimitive.Close>
       </div>
     </div>
   );
