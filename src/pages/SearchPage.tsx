@@ -58,10 +58,10 @@ export default function SearchPage() {
   };
 
   const selectAll = () => {
-    if (selected.size === paginated.length) {
+    if (selected.size === filtered.length) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(paginated.map(c => c.id)));
+      setSelected(new Set(filtered.map(c => c.id)));
     }
   };
 
