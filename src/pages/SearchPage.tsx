@@ -165,7 +165,7 @@ export default function SearchPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/30">
-                <th className="p-3 w-10"><Checkbox checked={selected.size === paginated.length && paginated.length > 0} onCheckedChange={selectAll} /></th>
+                <th className="p-3 w-10"><Checkbox checked={selected.size === filtered.length && filtered.length > 0} onCheckedChange={selectAll} /></th>
                 <th className="p-3 w-10"></th>
                 <th className="p-3 text-left font-medium text-foreground">Company</th>
                 <th className="p-3 text-left font-medium text-foreground">Country</th>
