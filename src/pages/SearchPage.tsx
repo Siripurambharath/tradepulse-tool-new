@@ -194,17 +194,34 @@ export default function SearchPage() {
 
       {/* CARDS VIEW */}
       {viewMode === 'cards' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {paginated.map((c, idx) => (
-            <CompanyCard
-              key={c.id}
-              company={c}
-              index={page * perPage + idx + 1}
-              onViewDetails={() => setDetailCompany(c)}
+        <>
+          <div className="flex items-center gap-3 mb-4">
+            <Checkbox
+              checked={selected.size === paginated.length && paginated.length > 0}
+              onCheckedChange={selectAll}
             />
-          ))}
-        </div>
+            <span className="text-sm text-muted-foreground">Select All</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {paginated.map(c => (
+              <CompanyCard
+                key={c.id}
+                company={c}
+                selected={selected.has(c.id)}
+                onToggleSelect={() => toggleSelect(c.id)}
+                onClick={() => setPreviewCompany(c)}
+              />
+            ))}
+          </div>
+        </>
       )}
+
+      {/* CARD PREVIEW POPUP */}
+      <Dialog open={!!previewCompany} onOpenChange={open => !open && setPreviewCompany(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0">
+          {previewCompany && <CompanyCardPreview company={previewCompany} onViewDetails={() => { setPreviewCompany(null); setDetailCompany(previewCompany); }} />}
+        </DialogContent>
+      </Dialog>
 
       {/* COMPANY DETAIL MODAL */}
       <Dialog open={!!detailCompany} onOpenChange={open => !open && setDetailCompany(null)}>
