@@ -197,7 +197,7 @@ export default function SearchPage() {
         <>
           <div className="flex items-center gap-3 mb-4">
             <Checkbox
-              checked={selected.size === paginated.length && paginated.length > 0}
+              checked={selected.size === filtered.length && filtered.length > 0}
               onCheckedChange={selectAll}
             />
             <span className="text-sm text-muted-foreground">Select All</span>
