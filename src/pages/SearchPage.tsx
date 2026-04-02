@@ -184,7 +184,7 @@ export default function SearchPage() {
                   selected={selected.has(c.id)}
                   onToggleExpand={() => toggleExpand(c.id)}
                   onToggleSelect={() => toggleSelect(c.id)}
-                  onViewDetails={() => setDetailCompany(c)}
+                  onViewDetails={() => setPreviewCompany(c)}
                 />
               ))}
             </tbody>
