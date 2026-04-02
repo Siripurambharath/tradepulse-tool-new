@@ -514,6 +514,15 @@ function CompanyDetail({ company: c }: { company: Company }) {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Close button at bottom center */}
+      <div className="flex justify-center pb-6">
+        <DialogPrimitive.Close asChild>
+          <Button variant="outline" className="gap-2 px-8">
+            <X className="h-4 w-4" /> Close
+          </Button>
+        </DialogPrimitive.Close>
+      </div>
     </div>
   );
 }
