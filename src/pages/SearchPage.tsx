@@ -351,7 +351,7 @@ function CompanyCardPreview({ company: c, onViewDetails }: { company: Company; o
         </div>
         <InfoRow icon={<FileText className="h-4 w-4 text-primary" />} label="PRODUCT DESCRIPTION" value={c.productDescription} />
       </div>
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-4 space-y-2">
         <Button onClick={onViewDetails} className="w-full gap-2" variant="default">
           <Eye className="h-4 w-4" /> View Details
         </Button>
