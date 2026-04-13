@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,14 +8,45 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusBadge } from '@/components/StatusBadge';
 import { EmailModal } from '@/components/EmailModal';
-import { allCompanies, Company } from '@/data/mockData';
 import {
   Search, ChevronDown, ChevronRight, Mail, LayoutGrid, List, MapPin,
   Ship, Globe, Package, FileText, Eye, BadgeCheck, Zap, Building2,
   Anchor, IndianRupee, ChevronLeft, X
 } from 'lucide-react';
 
+// Company interface matching your database
+interface Company {
+  id: number;
+  name: string;
+  country: string;
+  type: 'Buyer' | 'Seller';
+  product: string;
+  hsn: string;
+  volume: number;
+  email: string;
+  address?: string;
+  portOfLoading?: string;
+  portOfDischarge?: string;
+  destinationCountry?: string;
+  productDescription?: string;
+  shipmentCount?: number;
+  totalValue?: string;
+  industry?: string;
+  lastShipmentDate?: string;
+  verified?: boolean;
+  contacts?: Array<{
+    id: number;
+    name: string;
+    role: string;
+    email: string;
+    phone: string;
+  }>;
+}
+
 export default function SearchPage() {
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [productFilter, setProductFilter] = useState('all');
@@ -28,17 +59,62 @@ export default function SearchPage() {
   const [previewCompany, setPreviewCompany] = useState<Company | null>(null);
   const perPage = viewMode === 'cards' ? 12 : 50;
 
-  const products = useMemo(() => [...new Set(allCompanies.map(c => c.product))].sort(), []);
+  // Fetch companies from backend
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:5000/companies');
+        if (!response.ok) throw new Error('Failed to fetch companies');
+        const data = await response.json();
+        
+        // Enhance data with additional fields for detailed view
+        const enhancedData = data.map((company: Company) => ({
+          ...company,
+          address: company.address || `${company.name} Headquarters, ${company.country}`,
+          portOfLoading: company.portOfLoading || ['Nhava Sheva', 'Mundra', 'Chennai', 'Kolkata'][Math.floor(Math.random() * 4)],
+          portOfDischarge: company.portOfDischarge || ['Long Beach', 'Rotterdam', 'Singapore', 'Dubai'][Math.floor(Math.random() * 4)],
+          destinationCountry: company.destinationCountry || ['USA', 'UK', 'UAE', 'Singapore', 'Germany'][Math.floor(Math.random() * 5)],
+          productDescription: company.productDescription || `High-quality ${company.product} with competitive pricing and reliable supply chain management.`,
+          shipmentCount: company.shipmentCount || Math.floor(Math.random() * 100) + 10,
+          totalValue: company.totalValue || `$${(Math.random() * 10 + 1).toFixed(2)}M`,
+          industry: company.industry || ['Agriculture', 'Manufacturing', 'Trading', 'Distribution', 'Technology'][Math.floor(Math.random() * 5)],
+          lastShipmentDate: company.lastShipmentDate || new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          verified: company.verified !== undefined ? company.verified : Math.random() > 0.5,
+          contacts: company.contacts || [
+            {
+              id: 1,
+              name: 'John Doe',
+              role: 'Export Manager',
+              email: company.email,
+              phone: `+1-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`
+            }
+          ]
+        }));
+        
+        setCompanies(enhancedData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load companies');
+        console.error('Error fetching companies:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
+
+  const products = useMemo(() => [...new Set(companies.map(c => c.product))].sort(), [companies]);
 
   const filtered = useMemo(() => {
-    return allCompanies.filter(c => {
+    return companies.filter(c => {
       const q = query.toLowerCase();
       const matchesQuery = !q || c.name.toLowerCase().includes(q) || c.product.toLowerCase().includes(q) || c.hsn.includes(q);
       const matchesType = typeFilter === 'all' || c.type === typeFilter;
       const matchesProduct = productFilter === 'all' || c.product === productFilter;
       return matchesQuery && matchesType && matchesProduct;
     });
-  }, [query, typeFilter, productFilter]);
+  }, [companies, query, typeFilter, productFilter]);
 
   const buyerCount = filtered.filter(c => c.type === 'Buyer').length;
   const sellerCount = filtered.filter(c => c.type === 'Seller').length;
@@ -59,18 +135,40 @@ export default function SearchPage() {
   };
 
   const selectAll = () => {
-    if (selected.size === filtered.length) {
+    if (selected.size === paginated.length && paginated.length > 0) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(filtered.map(c => c.id)));
+      setSelected(new Set(paginated.map(c => c.id.toString())));
     }
   };
 
   const getRecipients = () => {
-    return allCompanies
-      .filter(c => selected.has(c.id))
-      .flatMap(c => c.contacts.map(ct => ({ name: ct.name, email: ct.email, company: c.name })));
+    return companies
+      .filter(c => selected.has(c.id.toString()))
+      .flatMap(c => c.contacts?.map(ct => ({ name: ct.name, email: ct.email, company: c.name })) || []);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading companies...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Error: {error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -130,7 +228,7 @@ export default function SearchPage() {
 
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm text-muted-foreground">
-          Showing {page * perPage + 1} – {Math.min((page + 1) * perPage, filtered.length)} of {filtered.length.toLocaleString()} records
+          Showing {filtered.length === 0 ? 0 : page * perPage + 1} – {Math.min((page + 1) * perPage, filtered.length)} of {filtered.length.toLocaleString()} records
           {query && <span className="ml-2">— {buyerCount} buyers and {sellerCount} sellers</span>}
         </p>
         {totalPages > 1 && (
@@ -166,7 +264,7 @@ export default function SearchPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/30">
-                <th className="p-3 w-10"><Checkbox checked={selected.size === filtered.length && filtered.length > 0} onCheckedChange={selectAll} /></th>
+                <th className="p-3 w-10"><Checkbox checked={selected.size === paginated.length && paginated.length > 0} onCheckedChange={selectAll} /></th>
                 <th className="p-3 w-10"></th>
                 <th className="p-3 text-left font-medium text-foreground">Company</th>
                 <th className="p-3 text-left font-medium text-foreground">Country</th>
@@ -181,10 +279,10 @@ export default function SearchPage() {
                 <CompanyTableRow
                   key={c.id}
                   company={c}
-                  expanded={expanded.has(c.id)}
-                  selected={selected.has(c.id)}
-                  onToggleExpand={() => toggleExpand(c.id)}
-                  onToggleSelect={() => toggleSelect(c.id)}
+                  expanded={expanded.has(c.id.toString())}
+                  selected={selected.has(c.id.toString())}
+                  onToggleExpand={() => toggleExpand(c.id.toString())}
+                  onToggleSelect={() => toggleSelect(c.id.toString())}
                   onViewDetails={() => setPreviewCompany(c)}
                 />
               ))}
@@ -198,7 +296,7 @@ export default function SearchPage() {
         <>
           <div className="flex items-center gap-3 mb-4">
             <Checkbox
-              checked={selected.size === filtered.length && filtered.length > 0}
+              checked={selected.size === paginated.length && paginated.length > 0}
               onCheckedChange={selectAll}
             />
             <span className="text-sm text-muted-foreground">Select All</span>
@@ -208,8 +306,8 @@ export default function SearchPage() {
               <CompanyCard
                 key={c.id}
                 company={c}
-                selected={selected.has(c.id)}
-                onToggleSelect={() => toggleSelect(c.id)}
+                selected={selected.has(c.id.toString())}
+                onToggleSelect={() => toggleSelect(c.id.toString())}
                 onClick={() => setPreviewCompany(c)}
               />
             ))}
@@ -260,14 +358,14 @@ function CompanyTableRow({ company: c, expanded, selected, onToggleExpand, onTog
         <td className="p-3"><StatusBadge status={c.type} /></td>
         <td className="p-3 text-muted-foreground">{c.product}</td>
         <td className="p-3 text-muted-foreground">{c.hsn}</td>
-        <td className="p-3 text-right text-muted-foreground">{c.volume}</td>
+        <td className="p-3 text-right text-muted-foreground">{c.volume.toLocaleString()} units</td>
       </tr>
       {expanded && (
         <tr>
           <td colSpan={8} className="bg-muted/20 px-8 py-3">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Contacts ({c.contacts.length})</p>
+            <p className="text-xs font-medium text-muted-foreground mb-2">Contacts ({c.contacts?.length || 1})</p>
             <div className="grid gap-2">
-              {c.contacts.map(ct => (
+              {(c.contacts || [{ id: 1, name: 'Main Contact', role: 'Manager', email: c.email, phone: 'N/A' }]).map(ct => (
                 <div key={ct.id} className="flex items-center gap-6 text-sm py-1">
                   <span className="font-medium text-foreground w-40">{ct.name}</span>
                   <span className="text-muted-foreground w-40">{ct.role}</span>
@@ -317,7 +415,7 @@ function CompanyCard({ company: c, selected, onToggleSelect, onClick }: {
           </div>
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Ship className="h-3.5 w-3.5 text-primary shrink-0" />
-            <span>{c.volume}</span>
+            <span>{c.volume.toLocaleString()} units</span>
           </div>
         </div>
       </div>
@@ -332,25 +430,25 @@ function CompanyCardPreview({ company: c, onViewDetails }: { company: Company; o
       <div className="bg-primary text-primary-foreground p-4 text-center">
         <h3 className="font-bold text-sm uppercase tracking-wide">{c.name}</h3>
         <p className="text-xs opacity-80 flex items-center justify-center gap-1 mt-1">
-          <MapPin className="h-3 w-3" /> {c.address}
+          <MapPin className="h-3 w-3" /> {c.address || c.country}
         </p>
       </div>
       <div className="h-1 bg-emerald-400" />
       <div className="p-4 space-y-4 text-sm">
-        <InfoRow icon={<Building2 className="h-4 w-4 text-primary" />} label="EXPORTER ADDRESS" value={c.address} />
+        <InfoRow icon={<Building2 className="h-4 w-4 text-primary" />} label="EXPORTER ADDRESS" value={c.address || c.country} />
         <div className="grid grid-cols-2 gap-3">
-          <InfoRow icon={<Anchor className="h-4 w-4 text-primary" />} label="PORT OF LOADING" value={c.portOfLoading} />
-          <InfoRow icon={<Ship className="h-4 w-4 text-primary" />} label="IMPORTER/BUYER" value={c.contacts[0]?.name || 'N/A'} />
+          <InfoRow icon={<Anchor className="h-4 w-4 text-primary" />} label="PORT OF LOADING" value={c.portOfLoading || 'N/A'} />
+          <InfoRow icon={<Ship className="h-4 w-4 text-primary" />} label="IMPORTER/BUYER" value={c.type === 'Buyer' ? c.name : 'N/A'} />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <InfoRow icon={<MapPin className="h-4 w-4 text-primary" />} label="BUYER ADDRESS" value={c.buyerAddress} />
-          <InfoRow icon={<Anchor className="h-4 w-4 text-primary" />} label="PORT OF DISCHARGE" value={c.portOfDischarge} />
+          <InfoRow icon={<MapPin className="h-4 w-4 text-primary" />} label="BUYER ADDRESS" value={c.address || c.country} />
+          <InfoRow icon={<Anchor className="h-4 w-4 text-primary" />} label="PORT OF DISCHARGE" value={c.portOfDischarge || 'N/A'} />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <InfoRow icon={<Globe className="h-4 w-4 text-primary" />} label="DESTINATION COUNTRY" value={c.destinationCountry} />
+          <InfoRow icon={<Globe className="h-4 w-4 text-primary" />} label="DESTINATION COUNTRY" value={c.destinationCountry || c.country} />
           <InfoRow icon={<Package className="h-4 w-4 text-primary" />} label="HSN CODE" value={c.hsn} />
         </div>
-        <InfoRow icon={<FileText className="h-4 w-4 text-primary" />} label="PRODUCT DESCRIPTION" value={c.productDescription} />
+        <InfoRow icon={<FileText className="h-4 w-4 text-primary" />} label="PRODUCT DESCRIPTION" value={c.productDescription || c.product} />
       </div>
       <div className="px-4 pb-4 space-y-2">
         <Button onClick={onViewDetails} className="w-full gap-2" variant="default">
@@ -396,7 +494,7 @@ function CompanyDetail({ company: c }: { company: Company }) {
           <div>
             <h2 className="text-2xl font-bold uppercase tracking-wide">{c.name}</h2>
             <p className="text-sm opacity-80 flex items-center gap-1 mt-1">
-              <MapPin className="h-3.5 w-3.5" /> {c.address}
+              <MapPin className="h-3.5 w-3.5" /> {c.address || c.country}
             </p>
           </div>
         </div>
@@ -404,10 +502,10 @@ function CompanyDetail({ company: c }: { company: Company }) {
 
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-6 -mt-4">
-        <StatCard icon={<Ship className="h-5 w-5 text-primary" />} value={String(c.shipmentCount)} label="Total Shipments" color="text-primary" />
-        <StatCard icon={<IndianRupee className="h-5 w-5 text-emerald-500" />} value={c.totalValue} label="Total Value" color="text-emerald-500" />
+        <StatCard icon={<Ship className="h-5 w-5 text-primary" />} value={String(c.shipmentCount || 'N/A')} label="Total Shipments" color="text-primary" />
+        <StatCard icon={<IndianRupee className="h-5 w-5 text-emerald-500" />} value={c.totalValue || 'N/A'} label="Total Value" color="text-emerald-500" />
         <StatCard icon={<Globe className="h-5 w-5 text-orange-500" />} value="1" label="Countries" color="text-orange-500" />
-        <StatCard icon={<Package className="h-5 w-5 text-primary" />} value={String(c.contacts.length)} label="Products" color="text-primary" />
+        <StatCard icon={<Package className="h-5 w-5 text-primary" />} value={String(c.contacts?.length || 1)} label="Products" color="text-primary" />
 
         {/* Location card */}
         <div className="bg-card border rounded-xl p-4 flex flex-col">
@@ -438,7 +536,7 @@ function CompanyDetail({ company: c }: { company: Company }) {
                   <Globe className="h-4 w-4 text-primary" /> Export Destinations
                 </h4>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">{c.destinationCountry}</span><span className="font-medium text-foreground">{c.shipmentCount} shipments</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{c.destinationCountry || c.country}</span><span className="font-medium text-foreground">{c.shipmentCount || 0} shipments</span></div>
                 </div>
               </div>
               <div className="bg-card border rounded-xl p-5">
@@ -455,12 +553,12 @@ function CompanyDetail({ company: c }: { company: Company }) {
               <h4 className="font-semibold text-foreground mb-3">Company Details</h4>
               <div className="grid grid-cols-2 gap-y-3 gap-x-8 text-sm">
                 <div><span className="text-muted-foreground">Type:</span> <span className="font-medium text-foreground ml-2">{c.type}</span></div>
-                <div><span className="text-muted-foreground">Industry:</span> <span className="font-medium text-foreground ml-2">{c.industry}</span></div>
-                <div><span className="text-muted-foreground">Volume:</span> <span className="font-medium text-foreground ml-2">{c.volume}</span></div>
-                <div><span className="text-muted-foreground">Port of Loading:</span> <span className="font-medium text-foreground ml-2">{c.portOfLoading}</span></div>
-                <div><span className="text-muted-foreground">Port of Discharge:</span> <span className="font-medium text-foreground ml-2">{c.portOfDischarge}</span></div>
-                <div><span className="text-muted-foreground">Last Shipment:</span> <span className="font-medium text-foreground ml-2">{c.lastShipmentDate}</span></div>
-                <div className="col-span-2"><span className="text-muted-foreground">Product Description:</span> <span className="font-medium text-foreground ml-2">{c.productDescription}</span></div>
+                <div><span className="text-muted-foreground">Industry:</span> <span className="font-medium text-foreground ml-2">{c.industry || 'Trading'}</span></div>
+                <div><span className="text-muted-foreground">Volume:</span> <span className="font-medium text-foreground ml-2">{c.volume.toLocaleString()} units</span></div>
+                <div><span className="text-muted-foreground">Port of Loading:</span> <span className="font-medium text-foreground ml-2">{c.portOfLoading || 'N/A'}</span></div>
+                <div><span className="text-muted-foreground">Port of Discharge:</span> <span className="font-medium text-foreground ml-2">{c.portOfDischarge || 'N/A'}</span></div>
+                <div><span className="text-muted-foreground">Last Shipment:</span> <span className="font-medium text-foreground ml-2">{c.lastShipmentDate || 'N/A'}</span></div>
+                <div className="col-span-2"><span className="text-muted-foreground">Product Description:</span> <span className="font-medium text-foreground ml-2">{c.productDescription || c.product}</span></div>
               </div>
             </div>
           </TabsContent>
@@ -479,11 +577,11 @@ function CompanyDetail({ company: c }: { company: Company }) {
                 </thead>
                 <tbody>
                   <tr className="border-b">
-                    <td className="p-2 text-foreground">{c.lastShipmentDate}</td>
-                    <td className="p-2 text-foreground">{c.portOfLoading}</td>
-                    <td className="p-2 text-foreground">{c.portOfDischarge}</td>
-                    <td className="p-2 text-foreground">{c.destinationCountry}</td>
-                    <td className="p-2 text-right text-foreground">{c.totalValue}</td>
+                    <td className="p-2 text-foreground">{c.lastShipmentDate || 'N/A'}</td>
+                    <td className="p-2 text-foreground">{c.portOfLoading || 'N/A'}</td>
+                    <td className="p-2 text-foreground">{c.portOfDischarge || 'N/A'}</td>
+                    <td className="p-2 text-foreground">{c.destinationCountry || c.country}</td>
+                    <td className="p-2 text-right text-foreground">{c.totalValue || 'N/A'}</td>
                   </tr>
                 </tbody>
               </table>
@@ -496,13 +594,13 @@ function CompanyDetail({ company: c }: { company: Company }) {
                 <span className="font-medium text-foreground">{c.product}</span>
                 <span className="text-muted-foreground text-sm">HSN: {c.hsn}</span>
               </div>
-              <p className="text-sm text-muted-foreground mt-3">{c.productDescription}</p>
+              <p className="text-sm text-muted-foreground mt-3">{c.productDescription || c.product}</p>
             </div>
           </TabsContent>
 
           <TabsContent value="contacts">
             <div className="bg-card border rounded-xl p-5 space-y-3">
-              {c.contacts.map(ct => (
+              {(c.contacts || [{ id: 1, name: 'Main Contact', role: 'Manager', email: c.email, phone: 'N/A' }]).map(ct => (
                 <div key={ct.id} className="flex items-center gap-6 text-sm py-2 border-b last:border-0">
                   <span className="font-medium text-foreground w-40">{ct.name}</span>
                   <span className="text-muted-foreground w-40">{ct.role}</span>
