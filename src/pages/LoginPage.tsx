@@ -2,17 +2,26 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Globe, Mail, Lock } from 'lucide-react';
+import { Globe, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+const [showPassword, setShowPassword] = useState(false);
+const handleLogin = (e: React.FormEvent) => {
+  e.preventDefault();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate('/search');
-  };
+  if (
+    email === "globpulse@globpulse.com" &&
+    password === "Globpluse@123"
+  ) {
+    localStorage.setItem("token", "dummy-token");
+    navigate("/search");
+  } else {
+    alert("Invalid Email or Password");
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -45,25 +54,41 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="pl-10 bg-card"
-                  required
-                />
-              </div>
-            </div>
+           <div>
+  <label className="text-sm font-medium text-foreground mb-1 block">
+    Password
+  </label>
+
+  <div className="relative">
+    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+
+    <Input
+      type={showPassword ? "text" : "password"}
+      placeholder="••••••••"
+      value={password}
+      onChange={e => setPassword(e.target.value)}
+      className="pl-10 pr-10 bg-card"
+      required
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+    >
+      {showPassword ? (
+        <EyeOff className="h-4 w-4" />
+      ) : (
+        <Eye className="h-4 w-4" />
+      )}
+    </button>
+  </div>
+</div>
 
             <Button type="submit" className="w-full">Sign In</Button>
           </form>
 
-          <p className="text-xs text-center text-muted-foreground mt-4">Demo: use any email & password</p>
+          {/* <p className="text-xs text-center text-muted-foreground mt-4">Demo: use any email & password</p> */}
         </div>
       </div>
     </div>

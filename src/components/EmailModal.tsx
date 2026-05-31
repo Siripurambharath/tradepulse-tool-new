@@ -1,15 +1,52 @@
 import { useState, useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
 import { Button } from '@/components/ui/button';
+
 import { Input } from '@/components/ui/input';
+
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Mail, Eye, Send, Loader2, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
-import { getTemplates, addHistoryEntry } from '@/data/store';
+import API_URL from '@/components/api';
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
+import {
+  Mail,
+  Eye,
+  Send,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+} from 'lucide-react';
+
+import { addHistoryEntry } from '@/data/store';
+
 import { toast } from 'sonner';
 
-type Recipient = { name: string; email: string; company: string };
+type Recipient = {
+  name: string;
+  email: string;
+  company: string;
+};
 
 interface EmailModalProps {
   open: boolean;
@@ -37,18 +74,104 @@ interface BatchStatus {
   }>;
 }
 
-export function EmailModal({ open, onClose, recipients, product = '' }: EmailModalProps) {
-  const templates = getTemplates();
-  const [selectedTemplateId, setSelectedTemplateId] = useState(templates[0]?.id || '');
-  const selectedTemplate = templates.find((t) => t.id === selectedTemplateId);
-  const [subject, setSubject] = useState(selectedTemplate?.subject || '');
-  const [body, setBody] = useState(selectedTemplate?.body || '');
+export function EmailModal({
+  open,
+  onClose,
+  recipients,
+  product = '',
+}: EmailModalProps) {
+  /*
+  ==========================================
+  TEMPLATE STATES
+  ==========================================
+  */
+
+  const [templates, setTemplates] = useState<any[]>([]);
+
+  const [selectedTemplateId, setSelectedTemplateId] =
+    useState('');
+
+  const [subject, setSubject] = useState('');
+
+  const [body, setBody] = useState('');
+
+  const selectedTemplate = templates.find(
+    (t) => t.id.toString() === selectedTemplateId
+  );
+
+  /*
+  ==========================================
+  EMAIL STATUS STATES
+  ==========================================
+  */
 
   const [stage, setStage] = useState<SendStage>('compose');
-  const [batchStatus, setBatchStatus] = useState<BatchStatus | null>(null);
+
+  const [batchStatus, setBatchStatus] =
+    useState<BatchStatus | null>(null);
+
   const [batchId, setBatchId] = useState('');
+
   const [jobIds, setJobIds] = useState<string[]>([]);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const pollRef =
+    useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /*
+  ==========================================
+  FETCH TEMPLATES
+  ==========================================
+  */
+
+  const fetchTemplates = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/email-templates`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch templates');
+      }
+
+      const data = await response.json();
+
+      setTemplates(data.data || []);
+
+      if (data.data?.length > 0) {
+        const first = data.data[0];
+
+        setSelectedTemplateId(first.id.toString());
+
+        setSubject(
+          first.subject.replace(/\{\{product\}\}/g, product)
+        );
+
+        setBody(
+          first.body
+            .replace(/\{\{product\}\}/g, product)
+            .replace(
+              /\{\{contact_name\}\}/g,
+              recipients[0]?.name || 'Sir/Madam'
+            )
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      toast.error('Failed to load email templates');
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      fetchTemplates();
+    }
+  }, [open]);
+
+  /*
+  ==========================================
+  RESET WHEN MODAL CLOSES
+  ==========================================
+  */
 
   useEffect(() => {
     if (!open) {
@@ -58,6 +181,12 @@ export function EmailModal({ open, onClose, recipients, product = '' }: EmailMod
     }
   }, [open]);
 
+  /*
+  ==========================================
+  STOP POLLING
+  ==========================================
+  */
+
   function stopPolling() {
     if (pollRef.current) {
       clearInterval(pollRef.current);
@@ -65,26 +194,50 @@ export function EmailModal({ open, onClose, recipients, product = '' }: EmailMod
     }
   }
 
+  /*
+  ==========================================
+  TEMPLATE CHANGE
+  ==========================================
+  */
+
   const handleTemplateChange = (id: string) => {
     setSelectedTemplateId(id);
-    const t = templates.find((t) => t.id === id);
+
+    const t = templates.find((t) => t.id.toString() === id);
+
     if (t) {
-      setSubject(t.subject.replace('{{product}}', product));
+      setSubject(t.subject.replace(/\{\{product\}\}/g, product));
+
       setBody(
         t.body
           .replace(/\{\{product\}\}/g, product)
-          .replace(/\{\{contact_name\}\}/g, recipients[0]?.name || 'Sir/Madam')
+          .replace(
+            /\{\{contact_name\}\}/g,
+            recipients[0]?.name || 'Sir/Madam'
+          )
       );
     }
   };
+
+  /*
+  ==========================================
+  POLLING
+  ==========================================
+  */
 
   function startPolling(bid: string, jids: string[]) {
     pollRef.current = setInterval(async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/batch-status/${bid}?jobIds=${jids.join(',')}`
+          `${API_URL}/batch-status/${bid}?jobIds=${jids.join(',')}`
         );
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch batch status');
+        }
+
         const data: BatchStatus = await res.json();
+
         setBatchStatus(data);
 
         if (data.allDone) {
@@ -92,18 +245,31 @@ export function EmailModal({ open, onClose, recipients, product = '' }: EmailMod
           setStage('done');
 
           if (data.failed === 0) {
-            toast.success(`All ${data.completed} emails sent successfully!`);
+            toast.success(
+              `All ${data.completed} emails sent successfully!`
+            );
           } else if (data.completed === 0) {
-            toast.error(`All ${data.failed} emails failed. Check Bull Board.`);
+            toast.error(`All ${data.failed} emails failed`);
           } else {
-            toast.warning(`${data.completed} sent, ${data.failed} failed.`);
+            toast.warning(
+              `${data.completed} sent, ${data.failed} failed`
+            );
           }
         }
-      } catch {
-        // network hiccup — keep polling
+      } catch (error) {
+        console.error('Error polling batch status:', error);
+        stopPolling();
+        setStage('done');
+        toast.error('Error checking email status');
       }
     }, 2000);
   }
+
+  /*
+  ==========================================
+  SEND EMAIL
+  ==========================================
+  */
 
   const handleSend = async () => {
     if (recipients.length === 0) {
@@ -111,7 +277,18 @@ export function EmailModal({ open, onClose, recipients, product = '' }: EmailMod
       return;
     }
 
+    if (!subject.trim()) {
+      toast.error('Subject cannot be empty');
+      return;
+    }
+
+    if (!body.trim()) {
+      toast.error('Message body cannot be empty');
+      return;
+    }
+
     const newBatchId = crypto.randomUUID();
+
     const batchDate = new Date().toISOString();
 
     const historyPayload = {
@@ -129,6 +306,7 @@ export function EmailModal({ open, onClose, recipients, product = '' }: EmailMod
     };
 
     setStage('processing');
+
     setBatchStatus({
       total: recipients.length,
       completed: 0,
@@ -141,55 +319,105 @@ export function EmailModal({ open, onClose, recipients, product = '' }: EmailMod
     });
 
     try {
-      const response = await fetch('http://localhost:5000/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product: product || 'General',
-          subject,
-          message: body,
-          historyPayload,
-        }),
-      });
+      const response = await fetch(
+        `${API_URL}/send-email`,
+        {
+          method: 'POST',
 
-      if (!response.ok) throw new Error('Failed to enqueue jobs');
+          headers: {
+            'Content-Type': 'application/json',
+          },
 
-      const { batchId: bid, jobIds: jids, total } = await response.json();
+          body: JSON.stringify({
+            product: product || 'General',
+            subject,
+            message: body,
+            historyPayload,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to enqueue jobs');
+      }
+
+      const { batchId: bid, jobIds: jids } = await response.json();
+
       setBatchId(bid);
+
       setJobIds(jids);
 
-      // Add to local store (status will update as jobs complete)
       addHistoryEntry(historyPayload as any);
 
-      console.log(`Batch ${bid}: ${total} jobs enqueued`);
       startPolling(bid, jids);
+    } catch (error) {
+      console.error('Error sending emails:', error);
 
-    } catch (err) {
-      console.error(err);
       setStage('compose');
-      toast.error('Failed to connect to server.');
+
+      setBatchStatus(null);
+
+      toast.error('Failed to connect to server');
     }
   };
 
+  /*
+  ==========================================
+  CLOSE MODAL
+  ==========================================
+  */
+
   const handleClose = () => {
     stopPolling();
+
     setStage('compose');
+
     setBatchStatus(null);
+
     setBatchId('');
+
     setJobIds([]);
+
     setSubject('');
+
     setBody('');
-    setSelectedTemplateId(templates[0]?.id || '');
+
+    setSelectedTemplateId('');
+
     onClose();
   };
 
-  // Determine overall result for done stage
-  const allSuccess = batchStatus && batchStatus.failed === 0;
-  const allFailed = batchStatus && batchStatus.completed === 0;
-  const partial = batchStatus && batchStatus.failed > 0 && batchStatus.completed > 0;
+  /*
+  ==========================================
+  RESULTS
+  ==========================================
+  */
+
+  const allSuccess =
+    batchStatus && batchStatus.failed === 0;
+
+  const allFailed =
+    batchStatus && batchStatus.completed === 0;
+
+  const partial =
+    batchStatus &&
+    batchStatus.failed > 0 &&
+    batchStatus.completed > 0;
+
+  const progressPercentage =
+    batchStatus?.total && batchStatus.total > 0
+      ? Math.round(
+          ((batchStatus.completed + batchStatus.failed) /
+            batchStatus.total) *
+            100
+        )
+      : 0;
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => !o && handleClose()}
+    >
       <DialogContent className="sm:max-w-[600px] bg-card">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -198,24 +426,50 @@ export function EmailModal({ open, onClose, recipients, product = '' }: EmailMod
           </DialogTitle>
         </DialogHeader>
 
-        {/* ── COMPOSE ── */}
+        {/* ======================================
+            COMPOSE STAGE
+        ====================================== */}
+
         {stage === 'compose' && (
           <div className="space-y-4">
+            {/* TEMPLATE */}
+
             <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Email Template</label>
-              <Select value={selectedTemplateId} onValueChange={handleTemplateChange}>
-                <SelectTrigger className="bg-card"><SelectValue placeholder="Select template" /></SelectTrigger>
+              <label className="text-sm font-medium text-foreground mb-1 block">
+                Email Template
+              </label>
+
+              <Select
+                value={selectedTemplateId}
+                onValueChange={handleTemplateChange}
+              >
+                <SelectTrigger className="bg-card">
+                  <SelectValue placeholder="Select template" />
+                </SelectTrigger>
+
                 <SelectContent>
                   {templates.map((t) => (
                     <Tooltip key={t.id}>
                       <TooltipTrigger asChild>
-                        <SelectItem value={t.id}>
-                          <span className="flex items-center gap-2">{t.name}<Eye className="h-3 w-3 text-muted-foreground" /></span>
+                        <SelectItem value={t.id.toString()}>
+                          <span className="flex items-center gap-2">
+                            {t.name}
+                            <Eye className="h-3 w-3 text-muted-foreground" />
+                          </span>
                         </SelectItem>
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-xs">
-                        <p className="font-medium text-xs mb-1">{t.subject}</p>
-                        <p className="text-xs text-muted-foreground whitespace-pre-line">{t.body.substring(0, 200)}...</p>
+
+                      <TooltipContent
+                        side="right"
+                        className="max-w-xs"
+                      >
+                        <p className="font-medium text-xs mb-1">
+                          {t.subject}
+                        </p>
+
+                        <p className="text-xs text-muted-foreground whitespace-pre-line">
+                          {t.body.substring(0, 200)}...
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   ))}
@@ -223,159 +477,278 @@ export function EmailModal({ open, onClose, recipients, product = '' }: EmailMod
               </Select>
             </div>
 
+            {/* RECIPIENTS */}
+
             <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">To</label>
+              <label className="text-sm font-medium text-foreground mb-1 block">
+                To
+              </label>
+
               <div className="flex flex-wrap gap-1 p-2 border rounded-md bg-muted/50 max-h-20 overflow-auto">
                 {recipients.map((r, i) => (
-                  <span key={i} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">{r.email}</span>
+                  <span
+                    key={i}
+                    className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full"
+                  >
+                    {r.email}
+                  </span>
                 ))}
               </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Subject</label>
-              <Input value={subject} onChange={(e) => setSubject(e.target.value)} className="bg-card" placeholder="Enter email subject" />
-            </div>
+            {/* SUBJECT */}
 
             <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Message</label>
-              <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={8} className="bg-card font-mono text-sm" placeholder="Write your email message here..." />
+              <label className="text-sm font-medium text-foreground mb-1 block">
+                Subject
+              </label>
+
+              <Input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="bg-card"
+                placeholder="Enter email subject"
+              />
             </div>
+
+            {/* BODY */}
+
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1 block">
+                Message
+              </label>
+
+              <Textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={8}
+                className="bg-card font-mono text-sm"
+                placeholder="Enter email message"
+              />
+            </div>
+
+            {/* ACTIONS */}
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={handleClose}>Cancel</Button>
-              <Button onClick={handleSend} className="gap-2">
-                <Send className="h-4 w-4" /> Send Email
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+
+              <Button
+                onClick={handleSend}
+                className="gap-2"
+                disabled={recipients.length === 0}
+              >
+                <Send className="h-4 w-4" />
+                Send Email
               </Button>
             </div>
           </div>
         )}
 
-        {/* ── PROCESSING ── */}
+        {/* ======================================
+            PROCESSING STAGE
+        ====================================== */}
+
         {stage === 'processing' && batchStatus && (
-          <div className="space-y-5 py-4">
-
-            {/* Overall progress ring + counts */}
-            <div className="flex items-center gap-6">
-              <div className="relative w-20 h-20 shrink-0">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
-                  <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="5" className="text-muted/30" />
-                  <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="5"
-                    strokeLinecap="round" className="text-primary transition-all duration-700"
-                    strokeDasharray={`${2 * Math.PI * 34}`}
-                    strokeDashoffset={`${2 * Math.PI * 34 * (1 - batchStatus.overallProgress / 100)}`}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-medium text-foreground">{batchStatus.overallProgress}%</span>
-                </div>
-              </div>
-
-              <div className="flex-1 space-y-2">
-                <p className="font-medium text-foreground">Processing {batchStatus.total} emails</p>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-                  <span className="text-muted-foreground">Waiting</span>
-                  <span className="font-medium text-foreground">{batchStatus.waiting}</span>
-                  <span className="text-muted-foreground">Active</span>
-                  <span className="font-medium text-primary">{batchStatus.active}</span>
-                  <span className="text-muted-foreground">Sent</span>
-                  <span className="font-medium text-emerald-600">{batchStatus.completed}</span>
-                  <span className="text-muted-foreground">Failed</span>
-                  <span className="font-medium text-red-500">{batchStatus.failed}</span>
-                </div>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <div>
+                <p className="font-medium">Sending emails...</p>
+                <p className="text-sm text-muted-foreground">
+                  {batchStatus.completed + batchStatus.failed} of{' '}
+                  {batchStatus.total} completed
+                </p>
               </div>
             </div>
 
-            {/* Per-job live list (last 8 visible) */}
-            {batchStatus.jobs.length > 0 && (
-              <div className="border rounded-lg overflow-hidden">
-                <div className="bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground">
-                  Live job status — {batchStatus.jobs.length} of {batchStatus.total} tracked
-                </div>
-                <div className="max-h-48 overflow-y-auto divide-y divide-border">
-                  {batchStatus.jobs.slice(-8).reverse().map((j) => (
-                    <div key={j.jobId} className="flex items-center gap-3 px-3 py-2 text-xs">
-                      {j.state === 'completed' && <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />}
-                      {j.state === 'failed'    && <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />}
-                      {j.state === 'active'    && <Loader2 className="w-3 h-3 text-primary animate-spin shrink-0" />}
-                      {(j.state === 'waiting' || j.state === 'delayed') && <div className="w-2 h-2 rounded-full bg-muted-foreground/40 shrink-0" />}
-                      <span className="text-muted-foreground truncate flex-1">{j.email}</span>
-                      <span className={`font-medium capitalize ${
-                        j.state === 'completed' ? 'text-emerald-600' :
-                        j.state === 'failed'    ? 'text-red-500' :
-                        j.state === 'active'    ? 'text-primary' : 'text-muted-foreground'
-                      }`}>{j.state}</span>
+            {/* PROGRESS BAR */}
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Progress</span>
+                <span>{progressPercentage}%</span>
+              </div>
+
+              <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-primary h-full transition-all duration-300"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+            </div>
+
+            {/* STATUS BREAKDOWN */}
+
+            <div className="grid grid-cols-3 gap-3 text-sm">
+              <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-emerald-600">
+                  {batchStatus.completed}
+                </p>
+                <p className="text-xs text-muted-foreground">Sent</p>
+              </div>
+
+              <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-amber-600">
+                  {batchStatus.active + batchStatus.waiting}
+                </p>
+                <p className="text-xs text-muted-foreground">Processing</p>
+              </div>
+
+              <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-red-600">
+                  {batchStatus.failed}
+                </p>
+                <p className="text-xs text-muted-foreground">Failed</p>
+              </div>
+            </div>
+
+            {/* JOB STATUS LIST */}
+
+            {batchStatus.jobs && batchStatus.jobs.length > 0 && (
+              <div className="max-h-32 overflow-y-auto border rounded-lg bg-muted/30 p-2">
+                {batchStatus.jobs.map((job) => (
+                  <div
+                    key={job.jobId}
+                    className="text-xs py-1 px-2 flex items-center gap-2 border-b last:border-b-0"
+                  >
+                    {job.state === 'completed' && (
+                      <CheckCircle2 className="h-3 w-3 text-emerald-600 flex-shrink-0" />
+                    )}
+                    {job.state === 'failed' && (
+                      <XCircle className="h-3 w-3 text-red-600 flex-shrink-0" />
+                    )}
+                    {!['completed', 'failed'].includes(job.state) && (
+                      <Loader2 className="h-3 w-3 text-amber-600 animate-spin flex-shrink-0" />
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium">{job.email}</p>
+                      {job.reason && (
+                        <p className="text-xs text-muted-foreground">
+                          {job.reason}
+                        </p>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
 
-            <p className="text-xs text-muted-foreground text-center">
-              Track all jobs at{' '}
-              <a href="http://localhost:5000/admin/queues" target="_blank" rel="noopener noreferrer"
-                className="text-primary underline underline-offset-2">
-                Bull Board →
-              </a>
-            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                disabled={!batchStatus.allDone}
+              >
+                {batchStatus.allDone ? 'Close' : 'Cancel'}
+              </Button>
+            </div>
           </div>
         )}
 
-        {/* ── DONE ── */}
+        {/* ======================================
+            DONE STAGE
+        ====================================== */}
+
         {stage === 'done' && batchStatus && (
-          <div className="flex flex-col items-center py-8 gap-5">
+          <div className="space-y-4">
+            {/* RESULT ICON & HEADER */}
 
-            {/* Icon based on result */}
-            {allSuccess && (
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                <CheckCircle2 className="h-9 w-9 text-emerald-500" />
-              </div>
-            )}
-            {allFailed && (
-              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
-                <XCircle className="h-9 w-9 text-red-500" />
-              </div>
-            )}
-            {partial && (
-              <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <AlertTriangle className="h-9 w-9 text-amber-500" />
-              </div>
-            )}
+            <div className="flex flex-col items-center justify-center py-6">
+              {allSuccess && (
+                <>
+                  <CheckCircle2 className="h-12 w-12 text-emerald-600 mb-3" />
+                  <h3 className="text-lg font-semibold text-center">
+                    All emails sent successfully!
+                  </h3>
+                  <p className="text-sm text-muted-foreground text-center mt-1">
+                    {batchStatus.completed} emails delivered
+                  </p>
+                </>
+              )}
 
-            {/* Accurate counts */}
-            <div className="text-center space-y-1">
-              <p className="font-semibold text-foreground text-lg">
-                {allSuccess ? 'All emails sent!' : allFailed ? 'All emails failed' : 'Partially sent'}
-              </p>
-              <div className="flex gap-6 justify-center text-sm mt-2">
-                <div className="text-center">
-                  <p className="text-2xl font-semibold text-emerald-600">{batchStatus.completed}</p>
-                  <p className="text-xs text-muted-foreground">Sent</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-semibold text-red-500">{batchStatus.failed}</p>
-                  <p className="text-xs text-muted-foreground">Failed</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-semibold text-foreground">{batchStatus.total}</p>
-                  <p className="text-xs text-muted-foreground">Total</p>
-                </div>
-              </div>
-              {batchStatus.failed > 0 && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Failed jobs can be retried individually from{' '}
-                  <a href="http://localhost:5000/admin/queues" target="_blank" rel="noopener noreferrer"
-                    className="text-primary underline underline-offset-2">
-                    Bull Board
-                  </a>
-                </p>
+              {allFailed && (
+                <>
+                  <XCircle className="h-12 w-12 text-red-600 mb-3" />
+                  <h3 className="text-lg font-semibold text-center">
+                    All emails failed
+                  </h3>
+                  <p className="text-sm text-muted-foreground text-center mt-1">
+                    {batchStatus.failed} emails could not be sent
+                  </p>
+                </>
+              )}
+
+              {partial && (
+                <>
+                  <AlertTriangle className="h-12 w-12 text-amber-600 mb-3" />
+                  <h3 className="text-lg font-semibold text-center">
+                    Completed with errors
+                  </h3>
+                  <p className="text-sm text-muted-foreground text-center mt-1">
+                    {batchStatus.completed} sent, {batchStatus.failed} failed
+                  </p>
+                </>
               )}
             </div>
 
-            <Button onClick={handleClose} className="px-10 mt-2">Done</Button>
+            {/* SUMMARY */}
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-3 border border-emerald-200 dark:border-emerald-900">
+                <p className="text-2xl font-bold text-emerald-600">
+                  {batchStatus.completed}
+                </p>
+                <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                  Successfully Sent
+                </p>
+              </div>
+
+              <div className="bg-red-50 dark:bg-red-950/20 rounded-lg p-3 border border-red-200 dark:border-red-900">
+                <p className="text-2xl font-bold text-red-600">
+                  {batchStatus.failed}
+                </p>
+                <p className="text-xs text-red-700 dark:text-red-300">
+                  Failed
+                </p>
+              </div>
+            </div>
+
+            {/* FAILED JOBS */}
+
+            {batchStatus.failed > 0 && (
+              <div className="bg-muted/50 rounded-lg p-3">
+                <p className="text-sm font-medium mb-2">Failed Emails:</p>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {batchStatus.jobs
+                    .filter((j) => j.state === 'failed')
+                    .map((job) => (
+                      <div key={job.jobId} className="text-xs text-muted-foreground">
+                        <p className="font-mono">{job.email}</p>
+                        {job.reason && (
+                          <p className="text-red-600 dark:text-red-400">
+                            {job.reason}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* ACTIONS */}
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={handleClose}>
+                Close
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>
     </Dialog>
   );
 }
+
+export default EmailModal;

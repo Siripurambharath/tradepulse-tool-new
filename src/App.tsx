@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/AppLayout";
+import ProtectedRoute from "./pages/ProtectedRoute";
+
 import LoginPage from "./pages/LoginPage";
 import SearchPage from "./pages/SearchPage";
 import BuyersPage from "./pages/BuyersPage";
@@ -26,18 +28,23 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route element={<AppLayout />}>
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/buyers" element={<BuyersPage />} />
-            <Route path="/contacts" element={<ContactsPage />} />
-            <Route path="/tracking" element={<TrackingPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/history/:id" element={<HistoryDetailPage />} />
-            <Route path="/templates" element={<TemplatesPage />} />
-            <Route path="/campaigns" element={<CampaignsPage />} />
+
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/buyers" element={<BuyersPage />} />
+              <Route path="/contacts" element={<ContactsPage />} />
+              <Route path="/tracking" element={<TrackingPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/history/:id" element={<HistoryDetailPage />} />
+              <Route path="/templates" element={<TemplatesPage />} />
+              <Route path="/campaigns" element={<CampaignsPage />} />
+            </Route>
           </Route>
+
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

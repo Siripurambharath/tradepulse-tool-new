@@ -15,13 +15,13 @@ import {
 
 const navItems = [
   { title: 'Search Products', url: '/search', icon: Search },
-  { title: 'Buyers', url: '/buyers', icon: Users },
-  { title: 'Contacts', url: '/contacts', icon: Contact },
-  { title: 'Tracking', url: '/tracking', icon: Activity },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-  { title: 'History', url: '/history', icon: Clock },
-  { title: 'Templates', url: '/templates', icon: FileText },
-  { title: 'Campaigns', url: '/campaigns', icon: Megaphone },
+  // { title: 'Buyers', url: '/buyers', icon: Users },
+  // { title: 'Contacts', url: '/contacts', icon: Contact },
+  // { title: 'Tracking', url: '/tracking', icon: Activity },
+  // { title: 'Analytics', url: '/analytics', icon: BarChart3 },
+  // { title: 'History', url: '/history', icon: Clock },
+  // { title: 'Templates', url: '/templates', icon: FileText },
+  // { title: 'Campaigns', url: '/campaigns', icon: Megaphone },
 ];
 
 export function AppSidebar() {
@@ -67,13 +67,16 @@ export function AppSidebar() {
       </SidebarContent>
 
       <div className="mt-auto p-3 border-t border-sidebar-border">
-        <button
-          onClick={() => navigate('/login')}
-          className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors text-sm"
-        >
-          <LogOut className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>Sign Out</span>}
-        </button>
+      <button
+  onClick={() => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  }}
+  className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors text-sm"
+>
+  <LogOut className="h-4 w-4 shrink-0" />
+  {!collapsed && <span>Sign Out</span>}
+</button>
       </div>
     </Sidebar>
   );

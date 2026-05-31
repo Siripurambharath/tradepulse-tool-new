@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { ArrowLeft, Clock, Users, Eye, MessageSquare } from 'lucide-react';
+import API_URL from '@/components/api';
 
 export default function HistoryDetailPage() {
   const { id } = useParams();
@@ -12,7 +13,7 @@ export default function HistoryDetailPage() {
 
   // ✅ Fetch history
   useEffect(() => {
-    fetch('http://localhost:5000/history')
+    fetch(`${API_URL}/history`)
       .then(res => res.json())
       .then(data => setHistory(data))
       .catch(err => console.error(err));

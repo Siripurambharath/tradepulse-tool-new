@@ -9,83 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Loader2, ChevronLeft, ChevronRight, Mail, X, Sparkles } from 'lucide-react';
+import { Search, Loader2, ChevronLeft, ChevronRight, Mail, X } from 'lucide-react';
 import EmailModal from '@/components/EmailModal';
-import API_URL from '@/components/api';
 
-/* ─── Coming Soon Modal ──────────────────────────────────────────── */
-function ComingSoonModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  if (!visible) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="relative bg-background border rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Gradient background glow */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-violet-50 to-pink-50 dark:from-blue-950/30 dark:via-violet-950/20 dark:to-pink-950/30 pointer-events-none" />
-
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 z-10 rounded-full p-1.5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors text-muted-foreground hover:text-foreground"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        {/* Content */}
-        <div className="relative px-6 pt-8 pb-6 text-center">
-          {/* Animated icon */}
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 shadow-lg mb-4">
-            <Mail className="h-7 w-7 text-white" />
-          </div>
-
-          {/* Badge */}
-          <div className="inline-flex items-center gap-1.5 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-            <Sparkles className="h-3 w-3" />
-            Coming Soon
-          </div>
-
-          <h2 className="text-lg font-bold text-foreground mb-2">
-            Bulk Email is Almost Here!
-          </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-            We're putting the finishing touches on tool.
-            Soon you'll be able to reach all your selected buyers in one click — right from here.
-          </p>
-
-          {/* Feature highlights */}
-          <div className="text-left space-y-2 mb-6">
-            {[
-              'Send to multiple buyers at once',
-              'Personalised email templates',
-              // 'Track opens & replies',
-            ].map((feat) => (
-              <div key={feat} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-100 dark:bg-green-500/20 shrink-0">
-                  <svg className="w-3 h-3 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </span>
-                {feat}
-              </div>
-            ))}
-          </div>
-
-          <Button className="w-full" onClick={onClose}>
-            Can't Wait! 🚀
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const API = API_URL;
+const API = 'http://localhost:5000';
 
 interface Buyer {
   buyer_id: number;
@@ -202,7 +129,6 @@ export default function SearchPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [emailOpen, setEmailOpen] = useState(false);
   const [detailBuyer, setDetailBuyer] = useState<Buyer | null>(null);
-  const [toastVisible, setToastVisible] = useState(false);
 
   const perPage = 50;
 
@@ -289,7 +215,7 @@ export default function SearchPage() {
       {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Search Buyers</h1>
-        <Button onClick={() => setToastVisible(true)} disabled={selected.size === 0} className="gap-2">
+        <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
           <Mail className="h-4 w-4" />
           Send Email ({selected.size})
         </Button>
@@ -472,9 +398,6 @@ export default function SearchPage() {
           </div>
         )}
       </div>
-
-      {/* COMING SOON MODAL */}
-      <ComingSoonModal visible={toastVisible} onClose={() => setToastVisible(false)} />
 
       {/* BUYER DETAIL MODAL */}
       <BuyerDetailModal buyer={detailBuyer} onClose={() => setDetailBuyer(null)} />

@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Search, Clock, Users } from 'lucide-react';
+import API_URL from '@/components/api';
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<any[]>([]);
@@ -13,7 +14,7 @@ export default function HistoryPage() {
 
   // ✅ Fetch history from backend
   useEffect(() => {
-    fetch('http://localhost:5000/history')
+    fetch(`${API_URL}/history`)
       .then(res => res.json())
       .then(data => setHistory(data))
       .catch(err => console.error(err));
