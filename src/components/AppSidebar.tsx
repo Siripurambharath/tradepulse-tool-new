@@ -16,11 +16,11 @@ import {
 const navItems = [
   { title: 'Search Products', url: '/search', icon: Search },
   // { title: 'Buyers', url: '/buyers', icon: Users },
-  // { title: 'Contacts', url: '/contacts', icon: Contact },
-  // { title: 'Tracking', url: '/tracking', icon: Activity },
-  // { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-  // { title: 'History', url: '/history', icon: Clock },
-  // { title: 'Templates', url: '/templates', icon: FileText },
+  { title: 'Contacts', url: '/contacts', icon: Contact },
+  { title: 'Tracking', url: '/tracking', icon: Activity },
+  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
+  { title: 'History', url: '/history', icon: Clock },
+  { title: 'Templates', url: '/templates', icon: FileText },
   // { title: 'Campaigns', url: '/campaigns', icon: Megaphone },
 ];
 
