@@ -27,6 +27,18 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Root redirect based on token */}
+          <Route
+            path="/"
+            element={
+              <Navigate
+                to={localStorage.getItem("token") ? "/search" : "/login"}
+                replace
+              />
+            }
+          />
+
+          {/* Login - redirects to /search if token exists */}
           <Route path="/login" element={<LoginPage />} />
 
           {/* Protected Routes */}
@@ -44,7 +56,6 @@ const App = () => (
             </Route>
           </Route>
 
-          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

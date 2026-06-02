@@ -1,27 +1,55 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Globe, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
+const BASE_URL = "https://globpulsebita.gfeworldwide.com/api"; // replace with your actual base URL
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-const [showPassword, setShowPassword] = useState(false);
-const handleLogin = (e: React.FormEvent) => {
-  e.preventDefault();
 
-  if (
-    email === "globpulse@globpulse.com" &&
-    password === "Globpluse@123"
-  ) {
-    localStorage.setItem("token", "dummy-token");
-    navigate("/search");
-  } else {
-    alert("Invalid Email or Password");
-  }
-};
+  // If token already exists, redirect to search
+  // If token already exists, redirect to search
+const token = localStorage.getItem("token");
+if (token) {
+  return <Navigate to="/search" replace />;
+}
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${BASE_URL}/seller/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === true && data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("seller", JSON.stringify(data.seller));
+        navigate("/search");
+      } else {
+        setError(data.message || "Invalid Email or Password");
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -54,41 +82,41 @@ const handleLogin = (e: React.FormEvent) => {
               </div>
             </div>
 
-           <div>
-  <label className="text-sm font-medium text-foreground mb-1 block">
-    Password
-  </label>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1 block">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="pl-10 pr-10 bg-card"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
 
-  <div className="relative">
-    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            {/* Error Message */}
+            {error && (
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            )}
 
-    <Input
-      type={showPassword ? "text" : "password"}
-      placeholder="••••••••"
-      value={password}
-      onChange={e => setPassword(e.target.value)}
-      className="pl-10 pr-10 bg-card"
-      required
-    />
-
-    <button
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-    >
-      {showPassword ? (
-        <EyeOff className="h-4 w-4" />
-      ) : (
-        <Eye className="h-4 w-4" />
-      )}
-    </button>
-  </div>
-</div>
-
-            <Button type="submit" className="w-full">Sign In</Button>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in..." : "Sign In"}
+            </Button>
           </form>
-
-          {/* <p className="text-xs text-center text-muted-foreground mt-4">Demo: use any email & password</p> */}
         </div>
       </div>
     </div>
