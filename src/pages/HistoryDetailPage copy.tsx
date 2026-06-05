@@ -9,41 +9,19 @@ export default function HistoryDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [entry, setEntry] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<any[]>([]);
 
-  // ✅ Fetch single history entry by ID
+  // ✅ Fetch history
   useEffect(() => {
-    if (!id) return;
-    
-    fetch(`${API_URL}/history/${id}`)
-      .then(res => {
-        if (!res.ok) {
-          throw new Error('Entry not found');
-        }
-        return res.json();
-      })
-      .then(data => {
-        setEntry(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [id]);
+    fetch(`${API_URL}/history`)
+      .then(res => res.json())
+      .then(data => setHistory(data))
+      .catch(err => console.error(err));
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
-  }
+  const entry = history.find(h => h.id === id);
 
-  if (error || !entry) {
+  if (!entry) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">Entry not found</p>

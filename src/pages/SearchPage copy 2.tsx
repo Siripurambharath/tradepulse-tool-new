@@ -193,49 +193,20 @@ export default function SearchPage() {
     }
   };
 
-  /* ========== CHANGED: NEW FUNCTIONS FOR PRODUCT HANDLING ========== */
-  
-  // Get selected buyers
-  const getSelectedBuyers = () => {
-    return rows.filter(r => selected.has(r.buyer_id));
-  };
-
-  // Get unique products from selected buyers
-  const getUniqueProducts = () => {
-    const selectedBuyers = getSelectedBuyers();
-    const uniqueProducts = [...new Set(selectedBuyers.map(b => b.product).filter(Boolean))];
-    return uniqueProducts;
-  };
-
-  // Determine what product to send
-  const getProductToSend = () => {
-    const uniqueProducts = getUniqueProducts();
-    
-    // If no products selected or multiple products, send "General Products"
-    if (uniqueProducts.length === 0 || uniqueProducts.length > 1) {
-      return "General Products";
-    }
-    
-    // If exactly one product, send that product name
-    return uniqueProducts[0];
-  };
-
-const getRecipients = () => {
-  return getSelectedBuyers().flatMap((r) =>
-    (r.emails || '')
-      .split(',')
-      .map((email) => ({
-        name: r.contacts || r.company_name,     // ✅ Keep as 'name'
-        company: r.company_name,                 // ✅ Keep as 'company'
-        email: email.trim(),
-        country: r.country,                      // ✅ Add country here
-        product: r.product,
-        templateUsed: 'Welcome Template',
-      }))
-      .filter((recipient) => recipient.email)
-  );
-};
-  /* ========== END OF CHANGED FUNCTIONS ========== */
+  /* RECIPIENTS */
+  const getRecipients = () =>
+    rows
+      .filter((r) => selected.has(r.buyer_id))
+      .flatMap((r) =>
+        (r.emails || '')
+          .split(',')
+          .map((email) => ({
+            name: r.company_name,
+            company: r.company_name,
+            email: email.trim(),
+          }))
+      )
+      .filter((r) => r.email);
 
   const totalPages = Math.ceil(totalCount / perPage);
 
@@ -431,14 +402,13 @@ const getRecipients = () => {
       {/* BUYER DETAIL MODAL */}
       <BuyerDetailModal buyer={detailBuyer} onClose={() => setDetailBuyer(null)} />
 
-      {/* ========== CHANGED: EMAIL MODAL PROPS ========== */}
+      {/* EMAIL MODAL */}
       <EmailModal
         open={emailOpen}
         recipients={getRecipients()}
-        product={getProductToSend()}  // This will be either specific product or "General Products"
+        product={query || 'Shipment Products'}
         onClose={() => setEmailOpen(false)}
       />
-      {/* ========== END OF CHANGED ========== */}
     </div>
   );
 }

@@ -1,36 +1,60 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EmailModal } from '@/components/EmailModal';
-import { allCompanies } from '@/data/mockData';
 import { Search, Mail } from 'lucide-react';
+import axios from 'axios';
 
 export default function ContactsPage() {
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState(new Set());
   const [emailOpen, setEmailOpen] = useState(false);
+  const [replies, setReplies] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const allContacts = useMemo(() => {
-    return allCompanies.slice(0, 200).flatMap(c =>
-      c.contacts.map(ct => ({ ...ct, companyName: c.name, product: c.product }))
-    );
+  // Fetch data from API
+  useEffect(() => {
+    const fetchReplies = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/replyhistory');
+        if (response.data.success) {
+          setReplies(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching replies:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReplies();
   }, []);
 
-  const roles = useMemo(() => [...new Set(allContacts.map(c => c.role))].sort(), [allContacts]);
+  // Get unique roles from template_used
+  const roles = useMemo(() => {
+    const roleSet = new Set();
+    replies.forEach(reply => {
+      if (reply.template_used) roleSet.add(reply.template_used);
+    });
+    return [...roleSet].sort();
+  }, [replies]);
 
+  // Filter contacts based on search and role
   const filtered = useMemo(() => {
-    return allContacts.filter(ct => {
+    return replies.filter(reply => {
       const q = query.toLowerCase();
-      const matchesQuery = !q || ct.name.toLowerCase().includes(q) || ct.email.toLowerCase().includes(q) || ct.companyName.toLowerCase().includes(q);
-      const matchesRole = roleFilter === 'all' || ct.role === roleFilter;
+      const matchesQuery = !q || 
+        reply.contact_name?.toLowerCase().includes(q) || 
+        reply.to_email?.toLowerCase().includes(q) || 
+        reply.company_name?.toLowerCase().includes(q);
+      const matchesRole = roleFilter === 'all' || reply.template_used === roleFilter;
       return matchesQuery && matchesRole;
     });
-  }, [query, roleFilter, allContacts]);
+  }, [query, roleFilter, replies]);
 
-  const toggleSelect = (id: string) => {
+  const toggleSelect = (id) => {
     const next = new Set(selected);
     next.has(id) ? next.delete(id) : next.add(id);
     setSelected(next);
@@ -38,15 +62,32 @@ export default function ContactsPage() {
 
   const selectAll = () => {
     if (selected.size === filtered.length) setSelected(new Set());
-    else setSelected(new Set(filtered.map(c => c.id)));
+    else setSelected(new Set(filtered.map(reply => reply.id)));
   };
 
-  const getRecipients = () => filtered.filter(c => selected.has(c.id)).map(c => ({ name: c.name, email: c.email, company: c.companyName }));
+  const getRecipients = () => filtered
+    .filter(reply => selected.has(reply.id))
+    .map(reply => ({ 
+      name: reply.contact_name, 
+      email: reply.to_email, 
+      company: reply.company_name 
+    }));
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading replies...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Contacts</h1>
+        <h1 className="text-2xl font-bold text-foreground">Email Replies</h1>
         <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
           <Mail className="h-4 w-4" /> Send Email ({selected.size})
         </Button>
@@ -55,10 +96,17 @@ export default function ContactsPage() {
       <div className="flex gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search contacts..." value={query} onChange={e => setQuery(e.target.value)} className="pl-10 bg-card" />
+          <Input 
+            placeholder="Search contacts..." 
+            value={query} 
+            onChange={e => setQuery(e.target.value)} 
+            className="pl-10 bg-card" 
+          />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-48 bg-card"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-48 bg-card">
+            <SelectValue placeholder="All Roles" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
             {roles.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
@@ -72,7 +120,12 @@ export default function ContactsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/30">
-              <th className="p-3 w-10"><Checkbox checked={selected.size === filtered.length && filtered.length > 0} onCheckedChange={selectAll} /></th>
+              <th className="p-3 w-10">
+                <Checkbox 
+                  checked={selected.size === filtered.length && filtered.length > 0} 
+                  onCheckedChange={selectAll} 
+                />
+              </th>
               <th className="p-3 text-left font-medium text-foreground">Name</th>
               <th className="p-3 text-left font-medium text-foreground">Company</th>
               <th className="p-3 text-left font-medium text-foreground">Role</th>
@@ -82,22 +135,43 @@ export default function ContactsPage() {
             </tr>
           </thead>
           <tbody>
-            {filtered.slice(0, 100).map(ct => (
-              <tr key={ct.id} className="border-b hover:bg-muted/20 transition-colors">
-                <td className="p-3"><Checkbox checked={selected.has(ct.id)} onCheckedChange={() => toggleSelect(ct.id)} /></td>
-                <td className="p-3 font-medium text-foreground">{ct.name}</td>
-                <td className="p-3 text-muted-foreground">{ct.companyName}</td>
-                <td className="p-3 text-muted-foreground">{ct.role}</td>
-                <td className="p-3 text-muted-foreground">{ct.department}</td>
-                <td className="p-3 text-primary">{ct.email}</td>
-                <td className="p-3 text-muted-foreground">{ct.phone}</td>
+            {filtered.slice(0, 100).map(reply => (
+              <tr key={reply.id} className="border-b hover:bg-muted/20 transition-colors">
+                <td className="p-3">
+                  <Checkbox 
+                    checked={selected.has(reply.id)} 
+                    onCheckedChange={() => toggleSelect(reply.id)} 
+                  />
+                </td>
+                <td className="p-3 font-medium text-foreground">
+                  {reply.contact_name || ''}
+                </td>
+                <td className="p-3 text-muted-foreground">
+                  {reply.company_name || ''}
+                </td>
+                <td className="p-3 text-muted-foreground">
+                  {/* {reply.template_used || ''} */}
+                </td>
+                <td className="p-3 text-muted-foreground">
+                  {/* {reply.status || ''} */}
+                </td>
+                <td className="p-3 text-primary">
+                  {reply.to_email || ''}
+                </td>
+                <td className="p-3 text-muted-foreground">
+                  {reply.contact_number || ''}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <EmailModal open={emailOpen} onClose={() => setEmailOpen(false)} recipients={getRecipients()} />
+      <EmailModal 
+        open={emailOpen} 
+        onClose={() => setEmailOpen(false)} 
+        recipients={getRecipients()} 
+      />
     </div>
   );
 }

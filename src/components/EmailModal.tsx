@@ -46,6 +46,7 @@ type Recipient = {
   name: string;
   email: string;
   company: string;
+    country?: string;  
 };
 
 interface EmailModalProps {
@@ -298,6 +299,7 @@ export function EmailModal({
       companies: recipients.map((r) => ({
         companyName: r.company,
         contactName: r.name,
+         country: (r as any).country, 
         email: r.email,
         sentAt: batchDate,
         status: 'Pending',

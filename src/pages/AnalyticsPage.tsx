@@ -1,52 +1,121 @@
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
-import { allCompanies } from '@/data/mockData';
-import { useStore } from '@/data/store';
 import { Mail, Eye, MessageSquare, TrendingUp } from 'lucide-react';
 
 const COLORS = ['hsl(217,91%,60%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)', 'hsl(0,84%,60%)', 'hsl(199,89%,48%)', 'hsl(280,60%,50%)'];
 
 export default function AnalyticsPage() {
-  const { history } = useStore();
+  const [trackingData, setTrackingData] = useState<any>({
+    sent: [],
+    replied: [],
+    notContacted: []
+  });
+  const [loading, setLoading] = useState(true);
 
-  const statusData = useMemo(() => {
-    const counts: Record<string, number> = {};
-    allCompanies.slice(0, 500).forEach(c => { counts[c.status] = (counts[c.status] || 0) + 1; });
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  // Fetch real data from API
+  useEffect(() => {
+    fetch('http://localhost:5000/api/tracking/all') // Change port to your backend port
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setTrackingData(data.data);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching analytics data:', err);
+        setLoading(false);
+      });
   }, []);
 
-  const totalSent = history.reduce((sum, h) => sum + h.companies.length, 0);
-  const totalOpened = history.reduce((sum, h) => sum + h.companies.filter(c => c.status === 'Opened' || c.status === 'Replied').length, 0);
-  const totalReplied = history.reduce((sum, h) => sum + h.companies.filter(c => c.status === 'Replied').length, 0);
+  // Status distribution from actual data
+  const statusData = useMemo(() => {
+    const counts: Record<string, number> = {
+      'Not Contacted': trackingData.notContacted?.length || 0,
+      'Email Sent': trackingData.sent?.length || 0,
+      'Replied': trackingData.replied?.length || 0,
+    };
+    
+    return Object.entries(counts)
+      .filter(([_, value]) => value > 0)
+      .map(([name, value]) => ({ name, value }));
+  }, [trackingData]);
 
+  // Calculate real metrics
+  const totalSent = trackingData.sent?.length || 0;
+  const totalReplied = trackingData.replied?.length || 0;
+  const totalNotContacted = trackingData.notContacted?.length || 0;
+  const totalOpened = trackingData.sent?.filter((s: any) => s.status === 'Opened').length || 0;
+
+  // Funnel data based on real numbers
   const funnelData = [
-    { stage: 'Sent', count: totalSent || 150 },
-    { stage: 'Opened', count: totalOpened || 89 },
-    { stage: 'Replied', count: totalReplied || 34 },
-    { stage: 'Interested', count: Math.floor((totalReplied || 34) * 0.6) },
-    { stage: 'Converted', count: Math.floor((totalReplied || 34) * 0.3) },
+    { stage: 'Not Contacted', count: totalNotContacted },
+    { stage: 'Sent', count: totalSent },
+    { stage: 'Opened', count: totalOpened },
+    { stage: 'Replied', count: totalReplied },
   ];
 
-  const weeklyData = [
-    { week: 'Week 1', sent: 42, opened: 28, replied: 12 },
-    { week: 'Week 2', sent: 35, opened: 22, replied: 8 },
-    { week: 'Week 3', sent: 51, opened: 38, replied: 15 },
-    { week: 'Week 4', sent: 28, opened: 19, replied: 11 },
-  ];
+  // Weekly data (group sent emails by week)
+  const weeklyData = useMemo(() => {
+    const weeks: Record<string, { sent: number; opened: number; replied: number }> = {};
+    
+    // Process sent emails
+    trackingData.sent?.forEach((email: any) => {
+      const date = new Date(email.sent_at);
+      const weekKey = `Week ${Math.ceil(date.getDate() / 7)}`;
+      
+      if (!weeks[weekKey]) {
+        weeks[weekKey] = { sent: 0, opened: 0, replied: 0 };
+      }
+      weeks[weekKey].sent++;
+    });
+    
+    // Process replied emails
+    trackingData.replied?.forEach((reply: any) => {
+      const date = new Date(reply.replied_at);
+      const weekKey = `Week ${Math.ceil(date.getDate() / 7)}`;
+      
+      if (weeks[weekKey]) {
+        weeks[weekKey].replied++;
+      }
+    });
+    
+    return Object.entries(weeks).map(([week, data]) => ({
+      week,
+      sent: data.sent,
+      opened: data.opened,
+      replied: data.replied,
+    }));
+  }, [trackingData]);
 
+  // Stats cards data
   const stats = [
-    { label: 'Emails Sent', value: totalSent || 150, icon: Mail, color: 'text-primary' },
-    { label: 'Opened', value: totalOpened || 89, icon: Eye, color: 'text-info' },
-    { label: 'Replied', value: totalReplied || 34, icon: MessageSquare, color: 'text-success' },
-    { label: 'Response Rate', value: `${totalSent ? Math.round((totalReplied / totalSent) * 100) : 23}%`, icon: TrendingUp, color: 'text-warning' },
+    { label: 'Total Companies', value: totalNotContacted + totalSent + totalReplied, icon: Mail, color: 'text-primary' },
+    { label: 'Emails Sent', value: totalSent, icon: Mail, color: 'text-primary' },
+    { label: 'Opened', value: totalOpened, icon: Eye, color: 'text-info' },
+    { label: 'Replied', value: totalReplied, icon: MessageSquare, color: 'text-success' },
+    { label: 'Response Rate', value: `${totalSent ? Math.round((totalReplied / totalSent) * 100) : 0}%`, icon: TrendingUp, color: 'text-warning' },
+    { label: 'Not Contacted', value: totalNotContacted, icon: Mail, color: 'text-muted' },
   ];
+
+  if (loading) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold text-foreground mb-6">Analytics</h1>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-muted-foreground">Loading analytics data...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-foreground mb-6">Analytics</h1>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         {stats.map(s => (
           <Card key={s.label}>
             <CardContent className="p-4">
@@ -62,9 +131,13 @@ export default function AnalyticsPage() {
         ))}
       </div>
 
+      {/* Charts */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
+        {/* Conversion Funnel */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Conversion Funnel</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">Conversion Funnel</CardTitle>
+          </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={funnelData}>
@@ -78,13 +151,26 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
+        {/* Status Distribution */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Status Distribution</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">Status Distribution</CardTitle>
+          </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
-                <Pie data={statusData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {statusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                <Pie 
+                  data={statusData} 
+                  cx="50%" 
+                  cy="50%" 
+                  outerRadius={90} 
+                  dataKey="value" 
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} 
+                  labelLine={false}
+                >
+                  {statusData.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
@@ -93,11 +179,16 @@ export default function AnalyticsPage() {
         </Card>
       </div>
 
+      {/* Weekly Outreach Trend */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Weekly Outreach</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base">Weekly Outreach Trend</CardTitle>
+        </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={weeklyData}>
+            <LineChart data={weeklyData.length ? weeklyData : [
+              { week: 'No Data', sent: 0, opened: 0, replied: 0 }
+            ]}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="week" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
