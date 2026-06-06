@@ -112,10 +112,10 @@ export default function HistoryPage() {
                     <span>{(entry.companies || []).length} companies</span>
                   </div>
 
-                  <div className="flex gap-2">
+                  {/* <div className="flex gap-2">
                     <StatusBadge status={`${opened} Opened`} />
                     <StatusBadge status={`${replied} Replied`} />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

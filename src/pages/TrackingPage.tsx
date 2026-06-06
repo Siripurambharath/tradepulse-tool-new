@@ -10,20 +10,46 @@ export default function TrackingPage() {
   const [allData, setAllData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const statuses = ['Not Contacted', 'Email Sent', 'Opened', 'Replied', 'Interested', 'Not Interested'];
+  const statuses = ['Not Contacted', 'Email Sent', 'Replied', 'Interested', 'Not Interested'];
 
-  // Fetch data
   useEffect(() => {
-    fetch('http://localhost:5000/api/tracking/all') // Change port to your backend port
+    fetch('http://localhost:5000/api/tracking/all')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          // Combine all data into one array
+
+          // ✅ Helper: map DB response field → displayStatus
+          const resolveStatus = (item: any) => {
+            if (item.response === 'interested') return 'Interested';
+            if (item.response === 'not_interested') return 'Not Interested';
+            return 'Email Sent';
+          };
+
           const combined = [
-            ...data.data.sent.map((item: any) => ({ ...item, displayStatus: 'Email Sent', volume: null })),
-            ...data.data.replied.map((item: any) => ({ ...item, displayStatus: 'Replied', volume: null })),
-            ...data.data.notContacted.map((item: any) => ({ ...item, displayStatus: 'Not Contacted', volume: null, product_name: item.product }))
+            // ✅ Sent emails — check response column to override status
+            ...data.data.sent.map((item: any) => ({
+              ...item,
+              displayStatus: resolveStatus(item),
+            })),
+
+            // ✅ Replied
+            ...data.data.replied.map((item: any) => ({
+              ...item,
+              displayStatus: item.response === 'interested'
+                ? 'Interested'
+                : item.response === 'not_interested'
+                ? 'Not Interested'
+                : 'Replied',
+            })),
+
+            // ✅ Not contacted
+            ...data.data.notContacted.map((item: any) => ({
+              ...item,
+              displayStatus: 'Not Contacted',
+              product_name: item.product,
+            })),
           ];
+
           setAllData(combined);
         }
         setLoading(false);
@@ -34,10 +60,9 @@ export default function TrackingPage() {
       });
   }, []);
 
-  // Filter data
   const filtered = useMemo(() => {
     return allData.filter(item => {
-      const matchesQuery = !query || 
+      const matchesQuery = !query ||
         item.company_name?.toLowerCase().includes(query.toLowerCase()) ||
         item.product_name?.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = statusFilter === 'all' || item.displayStatus === statusFilter;
@@ -45,11 +70,14 @@ export default function TrackingPage() {
     });
   }, [query, statusFilter, allData]);
 
-  // Status counts
   const statusCounts = useMemo(() => {
-    const counts: any = {};
+    const counts: Record<string, number> = {};
     statuses.forEach(s => counts[s] = 0);
-    allData.forEach(item => counts[item.displayStatus]++);
+    allData.forEach(item => {
+      if (counts[item.displayStatus] !== undefined) {
+        counts[item.displayStatus]++;
+      }
+    });
     return counts;
   }, [allData]);
 
@@ -60,11 +88,12 @@ export default function TrackingPage() {
       <h1 className="text-2xl font-bold mb-6">Tracking</h1>
 
       {/* Status Cards */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
+      <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mb-6">
         {statuses.map(s => (
-          <div 
-            key={s} 
-            className="bg-white rounded-lg border p-3 text-center cursor-pointer hover:border-blue-500"
+          <div
+            key={s}
+            className={`bg-white rounded-lg border p-3 text-center cursor-pointer transition-all
+              ${statusFilter === s ? 'border-blue-500 ring-2 ring-blue-200' : 'hover:border-blue-400'}`}
             onClick={() => setStatusFilter(s === statusFilter ? 'all' : s)}
           >
             <p className="text-2xl font-bold">{statusCounts[s] || 0}</p>
@@ -77,10 +106,10 @@ export default function TrackingPage() {
       <div className="flex gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input 
-            placeholder="Search company or product..." 
-            value={query} 
-            onChange={e => setQuery(e.target.value)} 
+          <Input
+            placeholder="Search company or product..."
+            value={query}
+            onChange={e => setQuery(e.target.value)}
             className="pl-10"
           />
         </div>
@@ -102,7 +131,8 @@ export default function TrackingPage() {
               <th className="p-3 text-left">Country</th>
               <th className="p-3 text-left">Product</th>
               <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-right">Volume</th>
+              {/* <th className="p-3 text-left">Responded At</th>  
+              <th className="p-3 text-right">Volume</th> */}
             </tr>
           </thead>
           <tbody>
@@ -112,7 +142,13 @@ export default function TrackingPage() {
                 <td className="p-3 text-gray-600">{item.country || 'N/A'}</td>
                 <td className="p-3 text-gray-600">{item.product_name || 'N/A'}</td>
                 <td className="p-3"><StatusBadge status={item.displayStatus} /></td>
-                <td className="p-3 text-right text-gray-500">{item.volume || 'N/A'}</td>
+                {/* ✅ Show responded_at if available */}
+                {/* <td className="p-3 text-gray-500 text-xs">
+                  {item.responded_at
+                    ? new Date(item.responded_at).toLocaleString()
+                    : '—'}
+                </td> */}
+                {/* <td className="p-3 text-right text-gray-500">{item.volume || 'N/A'}</td> */}
               </tr>
             ))}
           </tbody>

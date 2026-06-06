@@ -87,10 +87,11 @@ export default function ContactsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Email Replies</h1>
-        <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
+        {/* <h1 className="text-2xl font-bold text-foreground">Email Replies</h1> */}
+          <h1 className="text-2xl font-bold text-foreground">Contacts</h1>
+        {/* <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
           <Mail className="h-4 w-4" /> Send Email ({selected.size})
-        </Button>
+        </Button> */}
       </div>
 
       <div className="flex gap-3 mb-4">
@@ -120,16 +121,17 @@ export default function ContactsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/30">
-              <th className="p-3 w-10">
+              {/* <th className="p-3 w-10">
                 <Checkbox 
                   checked={selected.size === filtered.length && filtered.length > 0} 
                   onCheckedChange={selectAll} 
                 />
-              </th>
+              </th> */}
               <th className="p-3 text-left font-medium text-foreground">Name</th>
+                <th className="p-3 text-left font-medium text-foreground">Product</th>
               <th className="p-3 text-left font-medium text-foreground">Company</th>
-              <th className="p-3 text-left font-medium text-foreground">Role</th>
-              <th className="p-3 text-left font-medium text-foreground">Department</th>
+              {/* <th className="p-3 text-left font-medium text-foreground">Role</th>
+              <th className="p-3 text-left font-medium text-foreground">Department</th> */}
               <th className="p-3 text-left font-medium text-foreground">Email</th>
               <th className="p-3 text-left font-medium text-foreground">Phone</th>
             </tr>
@@ -137,24 +139,27 @@ export default function ContactsPage() {
           <tbody>
             {filtered.slice(0, 100).map(reply => (
               <tr key={reply.id} className="border-b hover:bg-muted/20 transition-colors">
-                <td className="p-3">
+                {/* <td className="p-3">
                   <Checkbox 
                     checked={selected.has(reply.id)} 
                     onCheckedChange={() => toggleSelect(reply.id)} 
                   />
-                </td>
+                </td> */}
                 <td className="p-3 font-medium text-foreground">
                   {reply.contact_name || ''}
                 </td>
                 <td className="p-3 text-muted-foreground">
+                  {reply.product_name || ''}
+                </td>
+                <td className="p-3 text-muted-foreground">
                   {reply.company_name || ''}
                 </td>
-                <td className="p-3 text-muted-foreground">
-                  {/* {reply.template_used || ''} */}
+                {/* <td className="p-3 text-muted-foreground">
+                  {reply.template_used || ''}
                 </td>
                 <td className="p-3 text-muted-foreground">
-                  {/* {reply.status || ''} */}
-                </td>
+                  {reply.status || ''}
+                </td> */}
                 <td className="p-3 text-primary">
                   {reply.to_email || ''}
                 </td>

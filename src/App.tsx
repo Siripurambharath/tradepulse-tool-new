@@ -17,6 +17,7 @@ import HistoryDetailPage from "./pages/HistoryDetailPage";
 import TemplatesPage from "./pages/TemplatesPage";
 import CampaignsPage from "./pages/CampaignsPage";
 import NotFound from "./pages/NotFound";
+import EmailConfiguration from "./pages/Emailconfig";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/history/:id" element={<HistoryDetailPage />} />
               <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/campaigns" element={<CampaignsPage />} />
+                 <Route path="/emailconfig" element={<EmailConfiguration />} />
             </Route>
           </Route>
 
