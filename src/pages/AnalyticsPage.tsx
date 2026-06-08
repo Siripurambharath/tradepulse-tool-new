@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
-import { Mail, MessageSquare, TrendingUp, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Mail, MessageSquare, TrendingUp, ThumbsUp, ThumbsDown, Building } from 'lucide-react';
 
 const COLORS = ['hsl(217,91%,60%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)', 'hsl(0,84%,60%)', 'hsl(199,89%,48%)', 'hsl(280,60%,50%)'];
 
@@ -9,7 +9,9 @@ export default function AnalyticsPage() {
   const [trackingData, setTrackingData] = useState<any>({
     sent: [],
     replied: [],
-    notContacted: []
+    notContacted: [],
+    interested: [],
+    not_interested: []
   });
   const [loading, setLoading] = useState(true);
 
@@ -28,73 +30,102 @@ export default function AnalyticsPage() {
       });
   }, []);
 
-  // ✅ Derive interested / not interested from response column
-  const totalSent          = trackingData.sent?.length || 0;
-  const totalReplied       = trackingData.replied?.length || 0;
-  const totalNotContacted  = trackingData.notContacted?.length || 0;
-  const totalInterested    = trackingData.sent?.filter((s: any) => s.response === 'interested').length || 0;
-  const totalNotInterested = trackingData.sent?.filter((s: any) => s.response === 'not_interested').length || 0;
+  // Calculate unique companies from all sources
+  const uniqueCompanies = useMemo(() => {
+    const companyNames = new Set();
+    
+    // Add companies from notContacted
+    trackingData.notContacted?.forEach((item: any) => {
+      if (item.company_name) companyNames.add(item.company_name);
+    });
+    
+    // Add companies from sent
+    trackingData.sent?.forEach((item: any) => {
+      if (item.company_name) companyNames.add(item.company_name);
+    });
+    
+    // Add companies from replied
+    trackingData.replied?.forEach((item: any) => {
+      if (item.company_name) companyNames.add(item.company_name);
+    });
+    
+    return companyNames.size;
+  }, [trackingData]);
 
-  // ✅ Status distribution pie
+  // Calculate metrics
+  const totalSent = trackingData.sent?.length || 0;
+  const totalReplied = trackingData.replied?.length || 0;
+  const totalNotContacted = trackingData.notContacted?.length || 0;
+  const totalInterested = trackingData.sent?.filter((s: any) => s.response === 'interested').length || 0;
+  const totalNotInterested = trackingData.sent?.filter((s: any) => s.response === 'not_interested').length || 0;
+  
+  // Email Sent without response
+  const emailSentNoResponse = totalSent - totalInterested - totalNotInterested;
+
+  // Status distribution pie
   const statusData = useMemo(() => {
     const counts: Record<string, number> = {
       'Not Contacted': totalNotContacted,
-      'Email Sent':    totalSent - totalInterested - totalNotInterested,
-      'Replied':       totalReplied,
-      'Interested':    totalInterested,
-      'Not Interested':totalNotInterested,
+      'Email Sent': emailSentNoResponse,
+      'Replied': totalReplied,
+      'Interested': totalInterested,
+      'Not Interested': totalNotInterested,
     };
     return Object.entries(counts)
       .filter(([_, value]) => value > 0)
       .map(([name, value]) => ({ name, value }));
   }, [trackingData]);
 
-  // ✅ Funnel with interested / not interested stages
+  // Funnel data
   const funnelData = [
     { stage: 'Not Contacted', count: totalNotContacted },
-    { stage: 'Sent',          count: totalSent },
-    { stage: 'Replied',       count: totalReplied },
-    { stage: 'Interested',    count: totalInterested },
-    { stage: 'Not Interested',count: totalNotInterested },
+    { stage: 'Email Sent', count: totalSent },
+    { stage: 'Replied', count: totalReplied },
+    { stage: 'Interested', count: totalInterested },
+    { stage: 'Not Interested', count: totalNotInterested },
   ];
 
-  // ✅ Weekly trend including interested / not interested
+  // Weekly trend
   const weeklyData = useMemo(() => {
     const weeks: Record<string, { sent: number; replied: number; interested: number; not_interested: number }> = {};
 
     trackingData.sent?.forEach((email: any) => {
-      const date = new Date(email.sent_at);
-      const weekKey = `Week ${Math.ceil(date.getDate() / 7)}`;
-      if (!weeks[weekKey]) weeks[weekKey] = { sent: 0, replied: 0, interested: 0, not_interested: 0 };
-      weeks[weekKey].sent++;
-      if (email.response === 'interested')     weeks[weekKey].interested++;
-      if (email.response === 'not_interested') weeks[weekKey].not_interested++;
+      if (email.sent_at) {
+        const date = new Date(email.sent_at);
+        const weekKey = `Week ${Math.ceil(date.getDate() / 7)}`;
+        if (!weeks[weekKey]) weeks[weekKey] = { sent: 0, replied: 0, interested: 0, not_interested: 0 };
+        weeks[weekKey].sent++;
+        if (email.response === 'interested') weeks[weekKey].interested++;
+        if (email.response === 'not_interested') weeks[weekKey].not_interested++;
+      }
     });
 
     trackingData.replied?.forEach((reply: any) => {
-      const date = new Date(reply.replied_at);
-      const weekKey = `Week ${Math.ceil(date.getDate() / 7)}`;
-      if (weeks[weekKey]) weeks[weekKey].replied++;
+      if (reply.reply_date) {
+        const date = new Date(reply.reply_date);
+        const weekKey = `Week ${Math.ceil(date.getDate() / 7)}`;
+        if (weeks[weekKey]) weeks[weekKey].replied++;
+      }
     });
 
     return Object.entries(weeks).map(([week, data]) => ({
       week,
-      sent:         data.sent,
-      replied:      data.replied,
-      interested:   data.interested,
-      notInterested:data.not_interested,
+      sent: data.sent,
+      replied: data.replied,
+      interested: data.interested,
+      notInterested: data.not_interested,
     }));
   }, [trackingData]);
 
-  // ✅ Stats cards
+  // Stats cards with correct Total Companies
   const stats = [
-    { label: 'Total Companies', value: totalNotContacted + totalSent + totalReplied, icon: Mail,         color: 'text-primary' },
-    { label: 'Emails Sent',     value: totalSent,                                    icon: Mail,         color: 'text-primary' },
-    { label: 'Replied',         value: totalReplied,                                 icon: MessageSquare,color: 'text-success' },
-    { label: 'Response Rate',   value: `${totalSent ? Math.round((totalReplied / totalSent) * 100) : 0}%`, icon: TrendingUp, color: 'text-warning' },
-    { label: 'Interested',      value: totalInterested,                              icon: ThumbsUp,     color: 'text-green-500' },
-    { label: 'Not Interested',  value: totalNotInterested,                           icon: ThumbsDown,   color: 'text-red-500' },
-    { label: 'Not Contacted',   value: totalNotContacted,                            icon: Mail,         color: 'text-muted-foreground' },
+    { label: 'Total Companies', value: uniqueCompanies, icon: Building, color: 'text-primary' },
+    { label: 'Not Contacted', value: totalNotContacted, icon: Mail, color: 'text-muted-foreground' },
+    { label: 'Emails Sent', value: totalSent, icon: Mail, color: 'text-primary' },
+    { label: 'Replied', value: totalReplied, icon: MessageSquare, color: 'text-success' },
+    { label: 'Response Rate', value: `${totalSent ? Math.round((totalReplied / totalSent) * 100) : 0}%`, icon: TrendingUp, color: 'text-warning' },
+    { label: 'Interested', value: totalInterested, icon: ThumbsUp, color: 'text-green-500' },
+    { label: 'Not Interested', value: totalNotInterested, icon: ThumbsDown, color: 'text-red-500' },
   ];
 
   if (loading) {
@@ -112,13 +143,13 @@ export default function AnalyticsPage() {
     <div>
       <h1 className="text-2xl font-bold text-foreground mb-6">Analytics</h1>
 
-      {/* ✅ Stats Cards */}
-      <div className="flex flex-wrap gap-4 mb-6 w-full justify-between">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
         {stats.map(s => (
-          <Card key={s.label} className="flex-1 min-w-[140px]">
+          <Card key={s.label} className="hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <s.icon className={`h-7 w-7 shrink-0 ${s.color}`} />
+                <s.icon className={`h-5 w-5 shrink-0 ${s.color}`} />
                 <div>
                   <p className="text-xl font-bold text-foreground">{s.value}</p>
                   <p className="text-xs text-muted-foreground whitespace-nowrap">{s.label}</p>
@@ -131,8 +162,7 @@ export default function AnalyticsPage() {
 
       {/* Charts */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-
-        {/* ✅ Conversion Funnel */}
+        {/* Conversion Funnel */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Conversion Funnel</CardTitle>
@@ -149,8 +179,8 @@ export default function AnalyticsPage() {
                     <Cell
                       key={i}
                       fill={
-                        entry.stage === 'Interested'     ? 'hsl(142,71%,45%)' :
-                        entry.stage === 'Not Interested' ? 'hsl(0,84%,60%)'   :
+                        entry.stage === 'Interested' ? 'hsl(142,71%,45%)' :
+                        entry.stage === 'Not Interested' ? 'hsl(0,84%,60%)' :
                         'hsl(217,91%,60%)'
                       }
                     />
@@ -161,7 +191,7 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        {/* ✅ Status Distribution Pie */}
+        {/* Status Distribution Pie */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Status Distribution</CardTitle>
@@ -188,25 +218,23 @@ export default function AnalyticsPage() {
         </Card>
       </div>
 
-      {/* ✅ Weekly Outreach Trend */}
+      {/* Weekly Outreach Trend */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Weekly Outreach Trend</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={weeklyData.length ? weeklyData : [
-              { week: 'No Data', sent: 0, replied: 0, interested: 0, notInterested: 0 }
-            ]}>
+            <LineChart data={weeklyData.length ? weeklyData : [{ week: 'No Data', sent: 0, replied: 0, interested: 0, notInterested: 0 }]}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="week" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="sent"         stroke="hsl(217,91%,60%)" strokeWidth={2} />
-              <Line type="monotone" dataKey="replied"      stroke="hsl(38,92%,50%)"  strokeWidth={2} />
-              <Line type="monotone" dataKey="interested"   stroke="hsl(142,71%,45%)" strokeWidth={2} />
-              <Line type="monotone" dataKey="notInterested"stroke="hsl(0,84%,60%)"   strokeWidth={2} />
+              <Line type="monotone" dataKey="sent" stroke="hsl(217,91%,60%)" strokeWidth={2} name="Sent" />
+              <Line type="monotone" dataKey="replied" stroke="hsl(38,92%,50%)" strokeWidth={2} name="Replied" />
+              <Line type="monotone" dataKey="interested" stroke="hsl(142,71%,45%)" strokeWidth={2} name="Interested" />
+              <Line type="monotone" dataKey="notInterested" stroke="hsl(0,84%,60%)" strokeWidth={2} name="Not Interested" />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>

@@ -161,10 +161,10 @@ export default function ContactsPage() {
                   {reply.status || ''}
                 </td> */}
                 <td className="p-3 text-primary">
-                  {reply.to_email || ''}
+                  {reply.from_email || ''}
                 </td>
                 <td className="p-3 text-muted-foreground">
-                  {reply.contact_number || ''}
+                   {reply.contact_name || ''}
                 </td>
               </tr>
             ))}

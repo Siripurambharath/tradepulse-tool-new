@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   Clock,
   Users,
-  Eye,
   MessageSquare,
 } from 'lucide-react';
 import API_URL from '@/components/api';
@@ -52,7 +51,6 @@ export default function HistoryDetailPage() {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">Entry not found</p>
-
         <Button
           variant="outline"
           className="mt-4"
@@ -65,31 +63,8 @@ export default function HistoryDetailPage() {
   }
 
   const date = new Date(entry.date);
-
   const companies = entry.companies || [];
-
-  const replied = companies.filter(
-    (c: any) =>
-      c.status === 'Replied' ||
-      c.status === 'Interested' ||
-      c.status === 'Not Interested'
-  ).length;
-
-  const opened = companies.filter(
-    (c: any) =>
-      c.status === 'Opened' ||
-      c.status === 'Replied' ||
-      c.status === 'Interested' ||
-      c.status === 'Not Interested'
-  ).length;
-
-  const interested = companies.filter(
-  (c: any) => c.status === 'Interested'
-).length;
-
-const notInterested = companies.filter(
-  (c: any) => c.status === 'Not Interested'
-).length;
+  const counts = entry.counts || { total: 0, replied: 0, interested: 0, notInterested: 0, emailSent: 0 };
 
   return (
     <div>
@@ -117,33 +92,39 @@ const notInterested = companies.filter(
           })}
         </p>
 
-       <div className="flex flex-wrap gap-6 mt-4">
-  <div className="flex items-center gap-2">
-    <Users className="h-4 w-4 text-primary" />
-    <span className="text-sm font-medium">
-      {companies.length} companies
-    </span>
-  </div>
+        <div className="flex flex-wrap gap-6 mt-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">
+              {counts.total} companies
+            </span>
+          </div>
 
-  <div className="flex items-center gap-2">
-    <MessageSquare className="h-4 w-4 text-success" />
-    <span className="text-sm font-medium">
-      {replied} replied
-    </span>
-  </div>
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-success" />
+            <span className="text-sm font-medium">
+              {counts.replied} replied
+            </span>
+          </div>
 
-  <div className="flex items-center gap-2">
-    <span className="text-sm font-medium text-green-600">
-      {interested} Interested
-    </span>
-  </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-green-600">
+              {counts.interested} Interested
+            </span>
+          </div>
 
-  <div className="flex items-center gap-2">
-    <span className="text-sm font-medium text-red-600">
-      {notInterested} Not Interested
-    </span>
-  </div>
-</div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-red-600">
+              {counts.notInterested} Not Interested
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-blue-600">
+              {counts.emailSent} Email Sent
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Table */}
@@ -160,49 +141,17 @@ const notInterested = companies.filter(
                 <th className="p-3 text-left">Status</th>
               </tr>
             </thead>
-
             <tbody>
               {companies.length > 0 ? (
                 companies.map((c: any, i: number) => (
-                  <tr
-                    key={i}
-                    className="border-b hover:bg-muted/20"
-                  >
-                    <td className="p-3">
-                      <div className="font-medium">
-                        {c.companyName}
-                      </div>
-
-                      {/* {c.response && (
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {c.response.length > 100
-                            ? `${c.response.substring(
-                                0,
-                                100
-                              )}...`
-                            : c.response}
-                        </div>
-                      )} */}
-                    </td>
-
+                  <tr key={i} className="border-b hover:bg-muted/20">
+                    <td className="p-3 font-medium">{c.companyName}</td>
+                    <td className="p-3 text-muted-foreground">{c.contactName}</td>
+                    <td className="p-3 text-primary">{c.email}</td>
                     <td className="p-3 text-muted-foreground">
-                      {c.contactName}
+                      {c.sentAt ? new Date(c.sentAt).toLocaleString() : '-'}
                     </td>
-
-                    <td className="p-3 text-primary">
-                      {c.email}
-                    </td>
-
-                    <td className="p-3 text-muted-foreground">
-                      {c.sentAt
-                        ? new Date(c.sentAt).toLocaleString()
-                        : '-'}
-                    </td>
-
-                    <td className="p-3 text-muted-foreground">
-                      {c.templateUsed || '-'}
-                    </td>
-
+                    <td className="p-3 text-muted-foreground">{c.templateUsed || '-'}</td>
                     <td className="p-3">
                       <StatusBadge status={c.status} />
                     </td>
@@ -210,10 +159,7 @@ const notInterested = companies.filter(
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="text-center py-6 text-muted-foreground"
-                  >
+                  <td colSpan={6} className="text-center py-6 text-muted-foreground">
                     No companies found
                   </td>
                 </tr>
