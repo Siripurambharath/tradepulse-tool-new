@@ -3,20 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 import { Mail, MessageSquare, TrendingUp, ThumbsUp, ThumbsDown, Building } from 'lucide-react';
 
-const COLORS = ['hsl(217,91%,60%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)', 'hsl(0,84%,60%)', 'hsl(199,89%,48%)', 'hsl(280,60%,50%)'];
+const COLORS = ['hsl(217,91%,60%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)', 'hsl(0,84%,60%)', 'hsl(199,89%,48%)'];
 
 export default function AnalyticsPage() {
-  const [trackingData, setTrackingData] = useState<any>({
-    sent: [],
-    replied: [],
-    notContacted: [],
-    interested: [],
-    not_interested: []
+  const [trackingData, setTrackingData] = useState({
+    sent: 0,
+    replied: 0,
+    interested: 0,
+    not_interested: 0,
+    not_contacted: 0
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/tracking/all')
+    fetch('http://localhost:5000/api/tracking/counts')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -30,41 +30,20 @@ export default function AnalyticsPage() {
       });
   }, []);
 
-  // Calculate unique companies from all sources
-  const uniqueCompanies = useMemo(() => {
-    const companyNames = new Set();
-    
-    // Add companies from notContacted
-    trackingData.notContacted?.forEach((item: any) => {
-      if (item.company_name) companyNames.add(item.company_name);
-    });
-    
-    // Add companies from sent
-    trackingData.sent?.forEach((item: any) => {
-      if (item.company_name) companyNames.add(item.company_name);
-    });
-    
-    // Add companies from replied
-    trackingData.replied?.forEach((item: any) => {
-      if (item.company_name) companyNames.add(item.company_name);
-    });
-    
-    return companyNames.size;
-  }, [trackingData]);
-
-  // Calculate metrics
-  const totalSent = trackingData.sent?.length || 0;
-  const totalReplied = trackingData.replied?.length || 0;
-  const totalNotContacted = trackingData.notContacted?.length || 0;
-  const totalInterested = trackingData.sent?.filter((s: any) => s.response === 'interested').length || 0;
-  const totalNotInterested = trackingData.sent?.filter((s: any) => s.response === 'not_interested').length || 0;
+  // Calculate metrics from the API response
+  const totalSent = trackingData.sent;
+  const totalReplied = trackingData.replied;
+  const totalInterested = trackingData.interested;
+  const totalNotInterested = trackingData.not_interested;
+  const totalNotContacted = trackingData.not_contacted;
+  const totalCompanies = totalSent + totalNotContacted;
   
   // Email Sent without response
-  const emailSentNoResponse = totalSent - totalInterested - totalNotInterested;
+  const emailSentNoResponse = totalSent - totalReplied;
 
-  // Status distribution pie
+  // Status distribution pie data
   const statusData = useMemo(() => {
-    const counts: Record<string, number> = {
+    const counts = {
       'Not Contacted': totalNotContacted,
       'Email Sent': emailSentNoResponse,
       'Replied': totalReplied,
@@ -78,51 +57,27 @@ export default function AnalyticsPage() {
 
   // Funnel data
   const funnelData = [
-    { stage: 'Not Contacted', count: totalNotContacted },
-    { stage: 'Email Sent', count: totalSent },
+    { stage: 'Total Companies', count: totalCompanies },
+    { stage: 'Emails Sent', count: totalSent },
     { stage: 'Replied', count: totalReplied },
     { stage: 'Interested', count: totalInterested },
-    { stage: 'Not Interested', count: totalNotInterested },
   ];
 
-  // Weekly trend
-  const weeklyData = useMemo(() => {
-    const weeks: Record<string, { sent: number; replied: number; interested: number; not_interested: number }> = {};
+  const weeklyData = [
+    { 
+      week: 'Current Week', 
+      sent: totalSent, 
+      replied: totalReplied, 
+      interested: totalInterested, 
+      notInterested: totalNotInterested 
+    }
+  ];
 
-    trackingData.sent?.forEach((email: any) => {
-      if (email.sent_at) {
-        const date = new Date(email.sent_at);
-        const weekKey = `Week ${Math.ceil(date.getDate() / 7)}`;
-        if (!weeks[weekKey]) weeks[weekKey] = { sent: 0, replied: 0, interested: 0, not_interested: 0 };
-        weeks[weekKey].sent++;
-        if (email.response === 'interested') weeks[weekKey].interested++;
-        if (email.response === 'not_interested') weeks[weekKey].not_interested++;
-      }
-    });
-
-    trackingData.replied?.forEach((reply: any) => {
-      if (reply.reply_date) {
-        const date = new Date(reply.reply_date);
-        const weekKey = `Week ${Math.ceil(date.getDate() / 7)}`;
-        if (weeks[weekKey]) weeks[weekKey].replied++;
-      }
-    });
-
-    return Object.entries(weeks).map(([week, data]) => ({
-      week,
-      sent: data.sent,
-      replied: data.replied,
-      interested: data.interested,
-      notInterested: data.not_interested,
-    }));
-  }, [trackingData]);
-
-  // Stats cards with correct Total Companies
+  // Stats cards - Removed Not Contacted
   const stats = [
-    { label: 'Total Companies', value: uniqueCompanies, icon: Building, color: 'text-primary' },
-    { label: 'Not Contacted', value: totalNotContacted, icon: Mail, color: 'text-muted-foreground' },
+    { label: 'Total Companies', value: totalCompanies, icon: Building, color: 'text-primary' },
     { label: 'Emails Sent', value: totalSent, icon: Mail, color: 'text-primary' },
-    { label: 'Replied', value: totalReplied, icon: MessageSquare, color: 'text-success' },
+    { label: 'Replied', value: totalReplied, icon: MessageSquare, color: 'text-green-500' },
     { label: 'Response Rate', value: `${totalSent ? Math.round((totalReplied / totalSent) * 100) : 0}%`, icon: TrendingUp, color: 'text-warning' },
     { label: 'Interested', value: totalInterested, icon: ThumbsUp, color: 'text-green-500' },
     { label: 'Not Interested', value: totalNotInterested, icon: ThumbsDown, color: 'text-red-500' },
@@ -143,17 +98,15 @@ export default function AnalyticsPage() {
     <div>
       <h1 className="text-2xl font-bold text-foreground mb-6">Analytics</h1>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
+      {/* Stats Cards - One Row with 6 cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         {stats.map(s => (
           <Card key={s.label} className="hover:shadow-md transition-shadow">
             <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <s.icon className={`h-5 w-5 shrink-0 ${s.color}`} />
-                <div>
-                  <p className="text-xl font-bold text-foreground">{s.value}</p>
-                  <p className="text-xs text-muted-foreground whitespace-nowrap">{s.label}</p>
-                </div>
+              <div className="flex flex-col items-center text-center">
+                <s.icon className={`h-5 w-5 mb-2 ${s.color}`} />
+                <p className="text-xl font-bold text-foreground">{s.value}</p>
+                <p className="text-xs text-muted-foreground whitespace-nowrap">{s.label}</p>
               </div>
             </CardContent>
           </Card>

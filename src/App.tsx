@@ -18,6 +18,9 @@ import TemplatesPage from "./pages/TemplatesPage";
 import CampaignsPage from "./pages/CampaignsPage";
 import NotFound from "./pages/NotFound";
 import EmailConfiguration from "./pages/Emailconfig";
+import TrackingPageIndetail from "./pages/TrackingPage";
+import ContactDetailPage from "./pages/ContactDetailPage";
+import TrackingPagIndetail from "./pages/TrackingPagIndetail";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +58,9 @@ const App = () => (
               <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/campaigns" element={<CampaignsPage />} />
                  <Route path="/emailconfig" element={<EmailConfiguration />} />
+                  <Route path="/trackingindetail/:id" element={<TrackingPagIndetail />} />
+                  <Route path="/contactsindetail/:id" element={<ContactDetailPage />} />
+
             </Route>
           </Route>
 

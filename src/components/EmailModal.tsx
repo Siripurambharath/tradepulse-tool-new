@@ -46,6 +46,7 @@ type Recipient = {
   name: string;
   email: string;
   company: string;
+   buyer_id?: number;
     country?: string;  
 };
 
@@ -53,6 +54,7 @@ interface EmailModalProps {
   open: boolean;
   onClose: () => void;
   recipients: Recipient[];
+   multipleProducts?: boolean; 
   product?: string;
 }
 
@@ -80,6 +82,7 @@ export function EmailModal({
   onClose,
   recipients,
   product = '',
+    multipleProducts = false,  
 }: EmailModalProps) {
   /*
   ==========================================
@@ -292,20 +295,25 @@ export function EmailModal({
 
     const batchDate = new Date().toISOString();
 
-    const historyPayload = {
-      id: newBatchId,
-      product: product || 'General',
-      date: batchDate,
-      companies: recipients.map((r) => ({
-        companyName: r.company,
-        contactName: r.name,
-         country: (r as any).country, 
-        email: r.email,
-        sentAt: batchDate,
-        status: 'Pending',
-        templateUsed: selectedTemplate?.name || 'Custom',
-      })),
-    };
+const historyPayload = {
+  id: newBatchId,
+  product: product || 'General',
+  date: batchDate,
+  companies: recipients.map((r) => ({
+    companyName: r.company,
+    contactName: r.name,
+    buyer_id: r.buyer_id,  
+    country: (r as any).country, 
+    email: r.email,
+    product: (r as any).product,  
+    sentAt: batchDate,
+    status: 'Pending',
+    templateUsed: selectedTemplate?.name || 'Custom',
+     templateId: selectedTemplate?.id || null,  
+  })),
+};
+
+
 
     setStage('processing');
 
@@ -335,6 +343,7 @@ export function EmailModal({
             subject,
             message: body,
             historyPayload,
+             multipleProducts: multipleProducts,  
           }),
         }
       );

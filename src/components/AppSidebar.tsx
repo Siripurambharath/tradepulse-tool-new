@@ -1,4 +1,4 @@
-import { Search, Users, Contact, Activity, BarChart3, Clock, FileText, Megaphone, LogOut, Globe } from 'lucide-react';
+import { Search, Users, Contact, Activity, BarChart3, Clock, FileText, Megaphone, LogOut } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -21,7 +21,7 @@ const navItems = [
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'History', url: '/history', icon: Clock },
   { title: 'Templates', url: '/templates', icon: FileText },
-   // { title: 'EmailConfig', url: '/emailconfig', icon: FileText },
+  // { title: 'EmailConfig', url: '/emailconfig', icon: FileText },
   // { title: 'Campaigns', url: '/campaigns', icon: Megaphone },
 ];
 
@@ -33,7 +33,11 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
-        <Globe className="h-8 w-8 text-sidebar-primary shrink-0" />
+        <img 
+          src="/logo.png" 
+          alt="Logo" 
+          className="h-8 w-8 object-contain shrink-0"
+        />
         {!collapsed && (
           <div>
             <div className="font-bold text-sidebar-primary-foreground text-sm">Global Trade</div>
@@ -68,16 +72,16 @@ export function AppSidebar() {
       </SidebarContent>
 
       <div className="mt-auto p-3 border-t border-sidebar-border">
-      <button
-  onClick={() => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  }}
-  className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors text-sm"
->
-  <LogOut className="h-4 w-4 shrink-0" />
-  {!collapsed && <span>Sign Out</span>}
-</button>
+        <button
+          onClick={() => {
+            localStorage.removeItem("token");
+            navigate("/login");
+          }}
+          className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors text-sm"
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Sign Out</span>}
+        </button>
       </div>
     </Sidebar>
   );
