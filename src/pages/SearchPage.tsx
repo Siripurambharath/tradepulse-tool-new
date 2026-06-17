@@ -383,7 +383,7 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
         <th className="p-3 text-left font-medium whitespace-nowrap">Company Name</th>
         <th className="p-3 text-left font-medium whitespace-nowrap">Contacts</th>
         <th className="p-3 text-left font-medium whitespace-nowrap">Emails</th>
-        <th className="p-3 text-left font-medium whitespace-nowrap">Actions</th>
+        {/* <th className="p-3 text-left font-medium whitespace-nowrap">Actions</th> */}
       </tr>
     </thead>
 
@@ -435,7 +435,7 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
           </td>
 
           {/* Actions */}
-          <td className="p-3 whitespace-nowrap">
+          {/* <td className="p-3 whitespace-nowrap">
             <div className="flex gap-2">
               <Button
                 size="sm"
@@ -466,7 +466,7 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
                 Not Interested
               </Button>
             </div>
-          </td>
+          </td> */}
         </tr>
       ))}
     </tbody>

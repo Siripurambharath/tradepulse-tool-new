@@ -14,18 +14,43 @@ export default function AnalyticsPage() {
     not_contacted: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const getSellerId = () => {
+    const sellerStr = localStorage.getItem('seller');
+    if (!sellerStr) return null;
+    try {
+      const seller = JSON.parse(sellerStr);
+      return seller?.id;
+    } catch (e) {
+      console.error('Failed to parse seller from localStorage:', e);
+      return null;
+    }
+  };
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/tracking/counts')
+    const sellerId = getSellerId();
+
+    if (!sellerId) {
+      console.error('No seller found in localStorage');
+      setError('No seller found — please log in again');
+      setLoading(false);
+      return;
+    }
+
+    fetch(`http://localhost:5000/api/tracking/counts?seller_id=${sellerId}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           setTrackingData(data.data);
+        } else {
+          setError('Failed to load analytics data');
         }
         setLoading(false);
       })
       .catch(err => {
         console.error('Error fetching analytics data:', err);
+        setError('Error loading analytics data');
         setLoading(false);
       });
   }, []);
@@ -89,6 +114,17 @@ export default function AnalyticsPage() {
         <h1 className="text-2xl font-bold text-foreground mb-6">Analytics</h1>
         <div className="flex justify-center items-center h-64">
           <div className="text-muted-foreground">Loading analytics data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold text-foreground mb-6">Analytics</h1>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-red-500">{error}</div>
         </div>
       </div>
     );

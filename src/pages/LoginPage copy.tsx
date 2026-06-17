@@ -3,10 +3,9 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Globe, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import API_URL from '@/components/api';
 
-// const BASE_URL = "https://globpulsebita.gfeworldwide.com/api"; // replace with your actual base URL
-const BASE_URL = API_URL; // replace with your actual base URL
+const BASE_URL = "https://globpulsebita.gfeworldwide.com/api"; // replace with your actual base URL
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +27,7 @@ if (token) {
     setError('');
 
     try {
-      const response = await fetch(`${BASE_URL}/api/seller/login`, {
+      const response = await fetch(`${BASE_URL}/seller/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

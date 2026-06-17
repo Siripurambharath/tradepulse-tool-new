@@ -74,10 +74,28 @@ export default function TrackingPage() {
     fetchCounts();
   }, []);
 
+  const getSellerId = () => {
+    const sellerStr = localStorage.getItem('seller');
+    if (!sellerStr) return null;
+    try {
+      const seller = JSON.parse(sellerStr);
+      return seller?.id;
+    } catch (e) {
+      console.error('Failed to parse seller from localStorage:', e);
+      return null;
+    }
+  };
+
   // Fetch counts from the counts API
   const fetchCounts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/tracking/counts');
+      const sellerId = getSellerId();
+      if (!sellerId) {
+        console.error('No seller found in localStorage');
+        return;
+      }
+
+      const response = await axios.get(`http://localhost:5000/api/tracking/counts?seller_id=${sellerId}`);
       if (response.data.success) {
         setCounts({
           sent: response.data.data.sent,
@@ -97,7 +115,15 @@ export default function TrackingPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get('http://localhost:5000/api/tracking/all');
+
+      const sellerId = getSellerId();
+      if (!sellerId) {
+        setError('No seller found — please log in again');
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(`http://localhost:5000/api/tracking/all?seller_id=${sellerId}`);
       
       if (response.data.success) {
         setTrackingData(response.data.data);

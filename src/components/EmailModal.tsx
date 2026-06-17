@@ -98,7 +98,9 @@ export function EmailModal({
   const [subject, setSubject] = useState('');
 
   const [body, setBody] = useState('');
-
+const seller = JSON.parse(
+  localStorage.getItem("seller")
+);
   const selectedTemplate = templates.find(
     (t) => t.id.toString() === selectedTemplateId
   );
@@ -339,6 +341,7 @@ const historyPayload = {
           },
 
           body: JSON.stringify({
+              seller_id: seller.id,
             product: product || 'General',
             subject,
             message: body,

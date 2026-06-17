@@ -240,10 +240,10 @@ export default function ContactDetailPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button onClick={() => setEmailOpen(true)} className="gap-2">
+          {/* <Button onClick={() => setEmailOpen(true)} className="gap-2">
             <Mail className="h-4 w-4" />
             Send Email
-          </Button>
+          </Button> */}
         </div>
       </div>
 

@@ -21,7 +21,7 @@ const navItems = [
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'History', url: '/history', icon: Clock },
   { title: 'Templates', url: '/templates', icon: FileText },
-  // { title: 'EmailConfig', url: '/emailconfig', icon: FileText },
+  { title: 'EmailConfig', url: '/emailconfig', icon: FileText },
   // { title: 'Campaigns', url: '/campaigns', icon: Megaphone },
 ];
 

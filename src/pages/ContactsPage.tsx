@@ -38,19 +38,30 @@ export default function ContactsPage() {
     fetchContacts();
   }, []);
 
-  const fetchContacts = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/replyhistory');
-      if (response.data.success) {
-        setContacts(response.data.data);
-        console.log('Fetched contacts:', response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching contacts:', error);
-    } finally {
+const fetchContacts = async () => {
+  try {
+    const seller = JSON.parse(
+  localStorage.getItem("seller")
+);
+    const sellerId = seller.id;
+
+    if (!sellerId) {
+      console.error('No sellerId found — user may not be logged in');
       setLoading(false);
+      return;
     }
-  };
+
+    const response = await axios.get(`http://localhost:5000/api/replyhistory?seller_id=${sellerId}`);
+    if (response.data.success) {
+      setContacts(response.data.data);
+      console.log('Fetched contacts:', response.data.data);
+    }
+  } catch (error) {
+    console.error('Error fetching contacts:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Get unique roles from template_used
   const roles = useMemo(() => {
@@ -161,9 +172,9 @@ export default function ContactsPage() {
             Manage and communicate with your contacts
           </p>
         </div>
-        <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
+        {/* <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
           <Mail className="h-4 w-4" /> Send Email ({selected.size})
-        </Button>
+        </Button> */}
       </div>
 
       <div className="flex gap-3 mb-4">
@@ -198,12 +209,12 @@ export default function ContactsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/30">
-              <th className="p-3 w-10">
+              {/* <th className="p-3 w-10">
                 <Checkbox 
                   checked={selected.size === filtered.length && filtered.length > 0} 
                   onCheckedChange={selectAll} 
                 />
-              </th>
+              </th> */}
               <th className="p-3 text-left font-medium text-foreground">Contact</th>
               <th className="p-3 text-left font-medium text-foreground">Company</th>
               <th className="p-3 text-left font-medium text-foreground">Product</th>
@@ -219,12 +230,12 @@ export default function ContactsPage() {
           <tbody>
             {filtered.map(contact => (
               <tr key={contact.buyer_id} className="border-b hover:bg-muted/20 transition-colors">
-                <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                {/* <td className="p-3" onClick={(e) => e.stopPropagation()}>
                   <Checkbox 
                     checked={selected.has(contact.buyer_id)} 
                     onCheckedChange={() => toggleSelect(contact.buyer_id)} 
                   />
-                </td>
+                </td> */}
                 <td className="p-3">
                   <div>
                     <p className="font-medium text-foreground">{contact.contact_name || 'Unknown'}</p>

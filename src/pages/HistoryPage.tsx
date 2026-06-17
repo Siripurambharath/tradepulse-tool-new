@@ -11,14 +11,17 @@ export default function HistoryPage() {
   const [query, setQuery] = useState('');
   const [productFilter, setProductFilter] = useState('all');
   const navigate = useNavigate();
-
+const seller = JSON.parse(
+  localStorage.getItem("seller")
+);
   // ✅ Fetch history from backend
-  useEffect(() => {
-    fetch(`${API_URL}/history`)
-      .then(res => res.json())
-      .then(data => setHistory(data))
-      .catch(err => console.error(err));
-  }, []);
+ useEffect(() => {
+  const sellerId = seller.id; // or however you're storing it after login
+  fetch(`${API_URL}/history?seller_id=${sellerId}`)
+    .then(res => res.json())
+    .then(data => setHistory(data))
+    .catch(err => console.error(err));
+}, []);
 
   // ✅ Products list
   const products = useMemo(() => {
