@@ -1,6 +1,65 @@
 import React, { useState, useEffect } from "react";
 import API_URL from "@/components/api";
 
+// Activity Log Helper Functions
+const getDeviceInfo = () => {
+  const userAgent = navigator.userAgent;
+  if (userAgent.includes('Chrome')) return 'Chrome';
+  if (userAgent.includes('Firefox')) return 'Firefox';
+  if (userAgent.includes('Safari')) return 'Safari';
+  if (userAgent.includes('Edge')) return 'Edge';
+  return 'Unknown Browser';
+};
+
+const getIPAddress = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Error fetching IP:', error);
+    return '127.0.0.1';
+  }
+};
+
+const createActivityLog = async (actionId: number, moduleId: number, description: string, additionalData?: any) => {
+  try {
+    const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+    const ipAddress = await getIPAddress();
+    const device = getDeviceInfo();
+
+    const logData = {
+      userId: seller.id || 1,
+      userName: seller.name || seller.email || 'Unknown',
+      role: seller.role || 'seller',
+      action_id: actionId,
+      module_id: moduleId,
+      description: description,
+      ipAddress,
+      device,
+      status: 'SUCCESS',
+      ...additionalData
+    };
+
+    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(logData),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error('Failed to create activity log:', result.message);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error creating activity log:', error);
+    return null;
+  }
+};
+
 export default function EmailConfiguration() {
   const [formData, setFormData] = useState({
     profileName: "",
@@ -20,6 +79,8 @@ export default function EmailConfiguration() {
 
   useEffect(() => {
     fetchConfig();
+    // Log page view (action_id: 38, module_id: 12)
+    createActivityLog(39, 12, 'Viewed email configuration page');
   }, []);
 
   const handleChange = (e) => {
@@ -66,6 +127,13 @@ export default function EmailConfiguration() {
       setLoading(true);
 
       const seller = JSON.parse(localStorage.getItem("seller"));
+
+      // Log save attempt (action_id: 39, module_id: 12)
+      await createActivityLog(38, 12, `Saved email configuration for: ${seller.email || seller.id}`, {
+        profile_name: formData.profileName,
+        provider: formData.provider,
+        sender_email: formData.senderEmail
+      });
 
       const response = await fetch(
         `${API_URL}/api/email-configurations/${seller.id}`,

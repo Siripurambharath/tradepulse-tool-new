@@ -27,6 +27,65 @@ interface Buyer {
   emails: string;
 }
 
+// Activity Log Helper Functions
+const getDeviceInfo = () => {
+  const userAgent = navigator.userAgent;
+  if (userAgent.includes('Chrome')) return 'Chrome';
+  if (userAgent.includes('Firefox')) return 'Firefox';
+  if (userAgent.includes('Safari')) return 'Safari';
+  if (userAgent.includes('Edge')) return 'Edge';
+  return 'Unknown Browser';
+};
+
+const getIPAddress = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Error fetching IP:', error);
+    return '127.0.0.1';
+  }
+};
+
+const createActivityLog = async (actionId: number, moduleId: number, description: string, additionalData?: any) => {
+  try {
+    const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+    const ipAddress = await getIPAddress();
+    const device = getDeviceInfo();
+
+    const logData = {
+      userId: seller.id || 1,
+      userName: seller.name || seller.email || 'Unknown',
+      role: seller.role || 'seller',
+      action_id: actionId,
+      module_id: moduleId,
+      description: description,
+      ipAddress,
+      device,
+      status: 'SUCCESS',
+      ...additionalData
+    };
+
+    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(logData),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error('Failed to create activity log:', result.message);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error creating activity log:', error);
+    return null;
+  }
+};
+
 /* Buyer Detail Modal */
 function BuyerDetailModal({
   buyer,
@@ -132,6 +191,8 @@ export default function SearchPage() {
   /* Load Filters */
   useEffect(() => {
     loadFilters();
+    // Log search page visit (module_id: 3)
+    createActivityLog(16, 1, 'Viewed search page');
   }, []);
 
   const loadFilters = async () => {
@@ -152,27 +213,54 @@ export default function SearchPage() {
     fetchData();
   }, [page, query, countryFilter, productFilter]);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      params.set('limit', String(perPage));
-      params.set('offset', String(page * perPage));
-      if (query) params.set('search', query);
-      if (countryFilter !== 'all') params.set('country', countryFilter);
-      if (productFilter !== 'all') params.set('product', productFilter);
-      const res = await fetch(`${API}/buyers?${params.toString()}`);
-      const json = await res.json();
-      setRows(json.data || []);
-      setTotalCount(json.total || 0);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to fetch buyers');
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchData = async () => {
+  try {
+    setLoading(true);
+    const params = new URLSearchParams();
+    params.set('limit', String(perPage));
+    params.set('offset', String(page * perPage));
+    if (query) params.set('search', query);
+    if (countryFilter !== 'all') params.set('country', countryFilter);
+    if (productFilter !== 'all') params.set('product', productFilter);
+    const res = await fetch(`${API}/buyers?${params.toString()}`);
+    const json = await res.json();
+    setRows(json.data || []);
+    setTotalCount(json.total || 0);
 
+    // Log search activity with separate actions
+    if (query) {
+      await createActivityLog(
+        12, // Action ID: 16 for text search
+        1, // Module ID: 1
+        `Searched buyers with text: ${query}`,
+        { searchQuery: query }
+      );
+    }
+    
+    if (countryFilter !== 'all') {
+      await createActivityLog(
+        17, // Action ID: 17 for country filter
+        1, // Module ID: 1
+        `Filtered buyers by country: ${countryFilter}`,
+        { country: countryFilter }
+      );
+    }
+    
+    if (productFilter !== 'all') {
+      await createActivityLog(
+        18, // Action ID: 18 for product filter
+        1, // Module ID: 1
+        `Filtered buyers by product: ${productFilter}`,
+        { product: productFilter }
+      );
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error('Failed to fetch buyers');
+  } finally {
+    setLoading(false);
+  }
+};
   /* Select / Deselect */
   const toggleSelect = (buyerId: number) => {
     setSelected((prev) => {
@@ -202,6 +290,9 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
       return;
     }
 
+    // Get seller data from localStorage
+    const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+
     const payload = {
       email: firstEmail,
       response: responseType,
@@ -210,7 +301,8 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
       contactName: buyer.contacts || buyer.company_name,
       productName: buyer.product,
       templateUsed: 'Manual Entry',
-      buyer_id: buyer.buyer_id  // ✅ Add buyer_id
+      buyer_id: buyer.buyer_id,
+      seller_id: seller.id || null  // Add seller_id here
     };
 
     const response = await fetch(`${API}/api/store-response`, {
@@ -225,6 +317,20 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
 
     if (data.success) {
       toast.success(`${responseType === 'interested' ? '✓ Interested' : '✗ Not Interested'} response recorded!`);
+      
+      const actionId = responseType === 'interested' ? 6 : 7;
+      await createActivityLog(
+        actionId,
+        1,
+        `${responseType === 'interested' ? 'Marked as Interested' : 'Marked as Not Interested'} for buyer: ${buyer.company_name} (${buyer.emails})`,
+        {
+          buyer_id: buyer.buyer_id,
+          company_name: buyer.company_name,
+          email: buyer.emails,
+          product: buyer.product,
+          response: responseType
+        }
+      );
     } else {
       toast.error(data.error || 'Failed to record response');
     }
@@ -234,8 +340,7 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
   } finally {
     setSubmittingId(null);
   }
-};  
-
+};
   const getSelectedBuyers = () => {
     return rows.filter(r => selected.has(r.buyer_id));
   };
@@ -255,26 +360,29 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
   };
 
   const isMultipleProductsSelected = () => {
-  const selectedBuyers = getSelectedBuyers();
-  const uniqueProducts = [...new Set(selectedBuyers.map(b => b.product).filter(Boolean))];
-  return uniqueProducts.length > 1;
-};
-  const getRecipients = () => {
-    return getSelectedBuyers().flatMap((r) =>
-      (r.emails || '')
-        .split(',')
-        .map((email) => ({
-          name: r.contacts || r.company_name,
-          company: r.company_name,
-          email: email.trim(),
-          country: r.country,
-          product: r.product,
-            buyer_id: r.buyer_id,  
-          templateUsed: 'Welcome Template',
-        }))
-        .filter((recipient) => recipient.email)
-    );
+    const selectedBuyers = getSelectedBuyers();
+    const uniqueProducts = [...new Set(selectedBuyers.map(b => b.product).filter(Boolean))];
+    return uniqueProducts.length > 1;
   };
+
+const getRecipients = () => {
+  return getSelectedBuyers().flatMap((r) =>
+    (r.emails || '')
+      .split(',')
+      .map((email) => ({
+        name: r.company_name, // Use company_name instead of contacts
+        company: r.company_name,
+        company_name: r.company_name, // Add this explicitly
+        email: email.trim(),
+        country: r.country,
+        product: r.product,
+        buyer_id: r.buyer_id,  
+        templateUsed: 'Welcome Template',
+        contacts: r.contacts,
+      }))
+      .filter((recipient) => recipient.email)
+  );
+};
 
   const totalPages = Math.ceil(totalCount / perPage);
 
@@ -283,7 +391,17 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Search Buyers</h1>
-        <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
+        <Button 
+          onClick={() => {
+            setEmailOpen(true);
+            // Log email modal open action
+            createActivityLog(6, 3, 'Opened email modal', { 
+              selected_count: selected.size 
+            });
+          }} 
+          disabled={selected.size === 0} 
+          className="gap-2"
+        >
           <Mail className="h-4 w-4" />
           Send Email ({selected.size})
         </Button>
@@ -353,138 +471,146 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
             <p className="text-muted-foreground">No Buyers found. Try adjusting your filters.</p>
           </div>
         ) : (
-  <div className="overflow-x-auto">
-  <table
-    className="text-sm border-collapse"
-    style={{ minWidth: '1050px', width: '100%', tableLayout: 'fixed' }}
-  >
-    <colgroup>
-      <col style={{ width: '40px' }} />    {/* Checkbox */}
-      <col style={{ width: '80px' }} />    {/* Product */}
-      <col style={{ width: '100px' }} />   {/* HSN Code */}
-      <col style={{ width: '100px' }} />   {/* Country */}
-      <col style={{ width: '200px' }} />   {/* Company Name */}
-      <col style={{ width: '150px' }} />   {/* Contacts */}
-      <col style={{ width: '200px' }} />   {/* Emails */}
-      <col style={{ width: '180px' }} />   {/* Actions */}
-    </colgroup>
-
-    <thead>
-      <tr className="border-b bg-muted/30">
-        <th className="p-3 text-center">
-          <Checkbox
-            checked={selected.size === rows.length && rows.length > 0}
-            onCheckedChange={selectAll}
-          />
-        </th>
-        <th className="p-3 text-left font-medium whitespace-nowrap">Product</th>
-        <th className="p-3 text-left font-medium whitespace-nowrap">HSN Code</th>
-        <th className="p-3 text-left font-medium whitespace-nowrap">Country</th>
-        <th className="p-3 text-left font-medium whitespace-nowrap">Company Name</th>
-        <th className="p-3 text-left font-medium whitespace-nowrap">Contacts</th>
-        <th className="p-3 text-left font-medium whitespace-nowrap">Emails</th>
-        {/* <th className="p-3 text-left font-medium whitespace-nowrap">Actions</th> */}
-      </tr>
-    </thead>
-
-    <tbody>
-      {rows.map((r) => (
-        <tr key={r.buyer_id} className="border-b hover:bg-muted/50">
-          {/* Checkbox */}
-          <td className="p-3 text-center">
-            <Checkbox
-              checked={selected.has(r.buyer_id)}
-              onCheckedChange={() => toggleSelect(r.buyer_id)}
-            />
-          </td>
-
-          {/* Product */}
-          <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis" title={r.product}>
-            {r.product}
-          </td>
-
-          {/* HSN Code */}
-          <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis">
-            <button
-              className="text-blue-600 underline underline-offset-2 hover:text-blue-800 font-medium transition-colors"
-              onClick={() => setDetailBuyer(r)}
-              title={`View details for HSN ${r.hsn_code}`}
+          <div className="overflow-x-auto">
+            <table
+              className="text-sm border-collapse"
+              style={{ minWidth: '1050px', width: '100%', tableLayout: 'fixed' }}
             >
-              {r.hsn_code}
-            </button>
-          </td>
+              <colgroup>
+                <col style={{ width: '40px' }} />
+                <col style={{ width: '80px' }} />
+                <col style={{ width: '100px' }} />
+                <col style={{ width: '100px' }} />
+                <col style={{ width: '200px' }} />
+                <col style={{ width: '150px' }} />
+                <col style={{ width: '200px' }} />
+                <col style={{ width: '180px' }} />
+              </colgroup>
 
-          {/* Country */}
-          <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis" title={r.country}>
-            {r.country}
-          </td>
+              <thead>
+                <tr className="border-b bg-muted/30">
+                  <th className="p-3 text-center">
+                    <Checkbox
+                      checked={selected.size === rows.length && rows.length > 0}
+                      onCheckedChange={selectAll}
+                    />
+                  </th>
+                  <th className="p-3 text-left font-medium whitespace-nowrap">Product</th>
+                  <th className="p-3 text-left font-medium whitespace-nowrap">HSN Code</th>
+                  <th className="p-3 text-left font-medium whitespace-nowrap">Country</th>
+                  <th className="p-3 text-left font-medium whitespace-nowrap">Company Name</th>
+                  <th className="p-3 text-left font-medium whitespace-nowrap">Contacts</th>
+                  <th className="p-3 text-left font-medium whitespace-nowrap">Emails</th>
+                  <th className="p-3 text-left font-medium whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
 
-          {/* Company Name */}
-          <td className="p-3 font-medium whitespace-nowrap overflow-hidden text-ellipsis" title={r.company_name}>
-            {r.company_name}
-          </td>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.buyer_id} className="border-b hover:bg-muted/50">
+                    {/* Checkbox */}
+                    <td className="p-3 text-center">
+                      <Checkbox
+                        checked={selected.has(r.buyer_id)}
+                        onCheckedChange={() => toggleSelect(r.buyer_id)}
+                      />
+                    </td>
 
-          {/* Contacts */}
-          <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis" title={r.contacts}>
-            {r.contacts}
-          </td>
+                    {/* Product */}
+                    <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis" title={r.product}>
+                      {r.product}
+                    </td>
 
-          {/* Emails */}
-          <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis" title={r.emails}>
-            {r.emails}
-          </td>
+                    {/* HSN Code */}
+                    <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis">
+                      <button
+                        className="text-blue-600 underline underline-offset-2 hover:text-blue-800 font-medium transition-colors"
+                        onClick={() => {
+                          setDetailBuyer(r);
+                          // Log detail view
+                          createActivityLog(7, 3, `Viewed buyer details: ${r.company_name} (HSN: ${r.hsn_code})`, {
+                            buyer_id: r.buyer_id,
+                            company_name: r.company_name,
+                            hsn_code: r.hsn_code
+                          });
+                        }}
+                        title={`View details for HSN ${r.hsn_code}`}
+                      >
+                        {r.hsn_code}
+                      </button>
+                    </td>
 
-          {/* Actions */}
-          {/* <td className="p-3 whitespace-nowrap">
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1 bg-green-50 hover:bg-green-100 border-green-300 text-green-700"
-                onClick={() => storeResponse(r, 'interested')}
-                disabled={submittingId === r.buyer_id}
-              >
-                {submittingId === r.buyer_id ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <ThumbsUp className="h-3 w-3" />
-                )}
-                Interested
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1 bg-red-50 hover:bg-red-100 border-red-300 text-red-700"
-                onClick={() => storeResponse(r, 'not_interested')}
-                disabled={submittingId === r.buyer_id}
-              >
-                {submittingId === r.buyer_id ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <ThumbsDown className="h-3 w-3" />
-                )}
-                Not Interested
-              </Button>
-            </div>
-          </td> */}
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+                    {/* Country */}
+                    <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis" title={r.country}>
+                      {r.country}
+                    </td>
+
+                    {/* Company Name */}
+                    <td className="p-3 font-medium whitespace-nowrap overflow-hidden text-ellipsis" title={r.company_name}>
+                      {r.company_name}
+                    </td>
+
+                    {/* Contacts */}
+                    <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis" title={r.contacts}>
+                      {r.contacts}
+                    </td>
+
+                    {/* Emails */}
+                    <td className="p-3 whitespace-nowrap overflow-hidden text-ellipsis" title={r.emails}>
+                      {r.emails}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="p-3 whitespace-nowrap">
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1 bg-green-50 hover:bg-green-100 border-green-300 text-green-700"
+                          onClick={() => storeResponse(r, 'interested')}
+                          disabled={submittingId === r.buyer_id}
+                        >
+                          {submittingId === r.buyer_id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <ThumbsUp className="h-3 w-3" />
+                          )}
+                          Interested
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1 bg-red-50 hover:bg-red-100 border-red-300 text-red-700"
+                          onClick={() => storeResponse(r, 'not_interested')}
+                          disabled={submittingId === r.buyer_id}
+                        >
+                          {submittingId === r.buyer_id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <ThumbsDown className="h-3 w-3" />
+                          )}
+                          Not Interested
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {/* Modals */}
       <BuyerDetailModal buyer={detailBuyer} onClose={() => setDetailBuyer(null)} />
       
-    <EmailModal
-  open={emailOpen}
-  recipients={getRecipients()}
-  product={getProductToSend()}
-  multipleProducts={isMultipleProductsSelected()}
-  onClose={() => setEmailOpen(false)}
-/>
+      <EmailModal
+        open={emailOpen}
+        recipients={getRecipients()}
+        product={getProductToSend()}
+        multipleProducts={isMultipleProductsSelected()}
+        onClose={() => setEmailOpen(false)}
+      />
     </div>
   );
 }

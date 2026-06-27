@@ -5,6 +5,65 @@ import { Mail, MessageSquare, TrendingUp, ThumbsUp, ThumbsDown, Building } from 
 
 const COLORS = ['hsl(217,91%,60%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)', 'hsl(0,84%,60%)', 'hsl(199,89%,48%)'];
 
+// Activity Log Helper Functions
+const getDeviceInfo = () => {
+  const userAgent = navigator.userAgent;
+  if (userAgent.includes('Chrome')) return 'Chrome';
+  if (userAgent.includes('Firefox')) return 'Firefox';
+  if (userAgent.includes('Safari')) return 'Safari';
+  if (userAgent.includes('Edge')) return 'Edge';
+  return 'Unknown Browser';
+};
+
+const getIPAddress = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Error fetching IP:', error);
+    return '127.0.0.1';
+  }
+};
+
+const createActivityLog = async (actionId: number, moduleId: number, description: string, additionalData?: any) => {
+  try {
+    const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+    const ipAddress = await getIPAddress();
+    const device = getDeviceInfo();
+
+    const logData = {
+      userId: seller.id || 1,
+      userName: seller.name || seller.email || 'Unknown',
+      role: seller.role || 'seller',
+      action_id: actionId,
+      module_id: moduleId,
+      description: description,
+      ipAddress,
+      device,
+      status: 'SUCCESS',
+      ...additionalData
+    };
+
+    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(logData),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error('Failed to create activity log:', result.message);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error creating activity log:', error);
+    return null;
+  }
+};
+
 export default function AnalyticsPage() {
   const [trackingData, setTrackingData] = useState({
     sent: 0,
@@ -37,6 +96,9 @@ export default function AnalyticsPage() {
       setLoading(false);
       return;
     }
+
+    // Log page view (action_id: 34, module_id: 9)
+    createActivityLog(34, 9, 'Viewed analytics dashboard page');
 
     fetch(`http://localhost:5000/api/tracking/counts?seller_id=${sellerId}`)
       .then(res => res.json())

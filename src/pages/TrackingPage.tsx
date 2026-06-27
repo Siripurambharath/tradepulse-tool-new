@@ -9,6 +9,65 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Eye, Send, Reply, ThumbsUp, ThumbsDown, AlertCircle, MessageSquare } from 'lucide-react';
 import axios from 'axios';
 
+// Activity Log Helper Functions
+const getDeviceInfo = () => {
+  const userAgent = navigator.userAgent;
+  if (userAgent.includes('Chrome')) return 'Chrome';
+  if (userAgent.includes('Firefox')) return 'Firefox';
+  if (userAgent.includes('Safari')) return 'Safari';
+  if (userAgent.includes('Edge')) return 'Edge';
+  return 'Unknown Browser';
+};
+
+const getIPAddress = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Error fetching IP:', error);
+    return '127.0.0.1';
+  }
+};
+
+const createActivityLog = async (actionId: number, moduleId: number, description: string, additionalData?: any) => {
+  try {
+    const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+    const ipAddress = await getIPAddress();
+    const device = getDeviceInfo();
+
+    const logData = {
+      userId: seller.id || 1,
+      userName: seller.name || seller.email || 'Unknown',
+      role: seller.role || 'seller',
+      action_id: actionId,
+      module_id: moduleId,
+      description: description,
+      ipAddress,
+      device,
+      status: 'SUCCESS',
+      ...additionalData
+    };
+
+    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(logData),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error('Failed to create activity log:', result.message);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error creating activity log:', error);
+    return null;
+  }
+};
+
 // Interface for tracking data
 interface TrackingItem {
   buyer_id: number;
@@ -67,11 +126,13 @@ export default function TrackingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const statuses = ['sent', 'replied', 'interested', 'not_interested'];
-
+  const statuses = ['sent', 'interested', 'not_contacted'];
+  
   useEffect(() => {
     fetchTrackingData();
     fetchCounts();
+    // Log page view (action_id: 26 for Tracking Page View)
+    createActivityLog(31, 5, 'Viewed tracking Table page');
   }, []);
 
   const getSellerId = () => {
@@ -155,12 +216,18 @@ export default function TrackingPage() {
     }
   };
 
-  // Filter data based on search query
   const filteredData = useMemo(() => {
-    const data = getCurrentData();
-    let filtered = data;
+    // Get ALL data from all tabs
+    let allData = [];
     
-    // Apply search filter
+    if (activeTab === 'sent') allData = trackingData.sent;
+    else if (activeTab === 'replied') allData = trackingData.replied;
+    else if (activeTab === 'interested') allData = trackingData.interested;
+    else if (activeTab === 'not_interested') allData = trackingData.not_interested;
+    
+    let filtered = allData;
+    
+    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(item => {
@@ -170,8 +237,35 @@ export default function TrackingPage() {
       });
     }
     
+    // Status filter - if not 'all', filter by current_status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(item => {
+        return item.current_status === statusFilter;
+      });
+    }
+    
     return filtered;
   }, [searchQuery, statusFilter, activeTab, trackingData]);
+
+  // Log search activity
+  useEffect(() => {
+    if (searchQuery) {
+      createActivityLog(28, 5, `Searched tracking data with query: ${searchQuery}`, {
+        searchQuery: searchQuery,
+        activeTab: activeTab
+      });
+    }
+  }, [searchQuery]);
+
+  // Log status filter activity
+  useEffect(() => {
+    if (statusFilter !== 'all') {
+      createActivityLog(29, 5, `Filtered tracking data by status: ${statusFilter}`, {
+        statusFilter: statusFilter,
+        activeTab: activeTab
+      });
+    }
+  }, [statusFilter]);
 
   const getTabIcon = (tab: string) => {
     switch (tab) {
@@ -210,7 +304,48 @@ export default function TrackingPage() {
   };
 
   const viewDetails = (item: TrackingItem) => {
+    // Log view details (action_id: 29)
+    createActivityLog(11, 5, `Viewed tracking details for: ${item.company_name}`, {
+      buyer_id: item.buyer_id,
+      company_name: item.company_name,
+      country: item.country,
+      product_name: item.product_name,
+      current_status: item.current_status,
+      interaction_count: item.interaction_count
+    });
     navigate(`/trackingindetail/${item.buyer_id}`);
+  };
+
+  const handleTabChange = (tab: string) => {
+    // Log tab change (action_id: 30)
+    const tabNames: Record<string, string> = {
+      sent: 'Sent',
+      replied: 'Replied',
+      interested: 'Interested',
+      not_interested: 'Not Interested'
+    };
+    createActivityLog(30, 5, `Switched to ${tabNames[tab] || tab} tab`, {
+      tab: tab,
+      tabName: tabNames[tab] || tab,
+      count: getCurrentData().length
+    });
+    setActiveTab(tab);
+  };
+
+  const handleCardClick = (tab: string) => {
+    // Log card click for filtering (action_id: 31)
+    const tabNames: Record<string, string> = {
+      sent: 'Sent',
+      replied: 'Replied',
+      interested: 'Interested',
+      not_interested: 'Not Interested'
+    };
+    createActivityLog(24, 5, `Clicked on ${tabNames[tab] || tab} card to filter`, {
+      tab: tab,
+      tabName: tabNames[tab] || tab,
+      count: counts[tab as keyof Counts] || 0
+    });
+    setActiveTab(tab);
   };
 
   if (loading) {
@@ -249,7 +384,7 @@ export default function TrackingPage() {
 
       {/* Summary Cards - Using counts from /api/tracking/counts */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('sent')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('sent')}>
           <CardContent className="pt-6">
             <div className="text-center">
               <Send className="h-6 w-6 text-blue-500 mx-auto mb-2" />
@@ -259,7 +394,7 @@ export default function TrackingPage() {
           </CardContent>
         </Card>
         
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('replied')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('replied')}>
           <CardContent className="pt-6">
             <div className="text-center">
               <Reply className="h-6 w-6 text-green-500 mx-auto mb-2" />
@@ -269,7 +404,7 @@ export default function TrackingPage() {
           </CardContent>
         </Card>
         
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('interested')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('interested')}>
           <CardContent className="pt-6">
             <div className="text-center">
               <ThumbsUp className="h-6 w-6 text-emerald-500 mx-auto mb-2" />
@@ -279,7 +414,7 @@ export default function TrackingPage() {
           </CardContent>
         </Card>
         
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('not_interested')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('not_interested')}>
           <CardContent className="pt-6">
             <div className="text-center">
               <ThumbsDown className="h-6 w-6 text-red-500 mx-auto mb-2" />
@@ -299,8 +434,6 @@ export default function TrackingPage() {
           </CardContent>
         </Card>
       </div>
-
-  
 
       {/* Search and Filter Bar */}
       <div className="flex gap-3 mb-4">
@@ -329,7 +462,25 @@ export default function TrackingPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        {/* <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="sent" className="gap-2">
+            <Send className="h-4 w-4" />
+            Sent
+          </TabsTrigger>
+          <TabsTrigger value="replied" className="gap-2">
+            <Reply className="h-4 w-4" />
+            Replied
+          </TabsTrigger>
+          <TabsTrigger value="interested" className="gap-2">
+            <ThumbsUp className="h-4 w-4" />
+            Interested
+          </TabsTrigger>
+          <TabsTrigger value="not_interested" className="gap-2">
+            <ThumbsDown className="h-4 w-4" />
+            Not Interested
+          </TabsTrigger>
+        </TabsList> */}
   
         {/* Sent Tab */}
         <TabsContent value="sent">

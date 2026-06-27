@@ -39,6 +39,65 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+// Activity Log Helper Functions
+const getDeviceInfo = () => {
+  const userAgent = navigator.userAgent;
+  if (userAgent.includes('Chrome')) return 'Chrome';
+  if (userAgent.includes('Firefox')) return 'Firefox';
+  if (userAgent.includes('Safari')) return 'Safari';
+  if (userAgent.includes('Edge')) return 'Edge';
+  return 'Unknown Browser';
+};
+
+const getIPAddress = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Error fetching IP:', error);
+    return '127.0.0.1';
+  }
+};
+
+const createActivityLog = async (actionId: number, moduleId: number, description: string, additionalData?: any) => {
+  try {
+    const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+    const ipAddress = await getIPAddress();
+    const device = getDeviceInfo();
+
+    const logData = {
+      userId: seller.id || 1,
+      userName: seller.name || seller.email || 'Unknown',
+      role: seller.role || 'seller',
+      action_id: actionId,
+      module_id: moduleId,
+      description: description,
+      ipAddress,
+      device,
+      status: 'SUCCESS',
+      ...additionalData
+    };
+
+    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(logData),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error('Failed to create activity log:', result.message);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error creating activity log:', error);
+    return null;
+  }
+};
+
 interface Reply {
   id: number;
   batch_id: string;
@@ -75,30 +134,62 @@ export default function ContactDetailPage() {
   const [selectedMessage, setSelectedMessage] = useState<Reply | null>(null);
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
 
-  // Fetch buyer details by ID
-  const fetchBuyerDetails = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.get(`http://localhost:5000/api/replyhistory/${id}`);
-      
-      if (response.data.success) {
-        setContact(response.data.data);
-        console.log('Fetched buyer details:', response.data.data);
-      } else {
-        setError(response.data.message || "Contact not found");
+const fetchBuyerDetails = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const sellerData = localStorage.getItem('seller');
+    let sellerId = '';
+    
+    if (sellerData) {
+      try {
+        const seller = JSON.parse(sellerData);
+        sellerId = seller.id;
+      } catch (e) {
+        console.error('Error parsing seller data:', e);
       }
-    } catch (error: any) {
-      console.error('Error fetching buyer details:', error);
-      if (error.response?.status === 404) {
-        setError("Contact not found");
-      } else {
-        setError("Error loading contact details");
-      }
-    } finally {
-      setLoading(false);
     }
-  };
+
+    if (!sellerId) {
+      console.warn('No sellerId found in localStorage');
+    }
+
+    const response = await axios.get(`http://localhost:5000/api/replyhistory/${id}`, {
+      params: { sellerId: sellerId }
+    });
+    
+    if (response.data.success) {
+      setContact(response.data.data);
+      console.log('Fetched buyer details:', response.data.data);
+      
+      // Log view contact detail page (action_id: 23, module_id: 2)
+      if (response.data.data && response.data.data.length > 0) {
+        const firstContact = response.data.data[0];
+        createActivityLog(23, 4, `Viewed contact detail page for: ${firstContact.contact_name || firstContact.company_name}`, {
+          buyer_id: id,
+          contact_name: firstContact.contact_name,
+          company_name: firstContact.company_name,
+          email: firstContact.from_email,
+          total_interactions: response.data.data.length
+        });
+      }
+    } else {
+      setError(response.data.message || "Contact not found");
+    }
+  } catch (error: any) {
+    console.error('Error fetching buyer details:', error);
+    if (error.response?.status === 404) {
+      setError("No replies found for this buyer");
+    } else if (error.response?.status === 400) {
+      setError("Seller ID is required");
+    } else {
+      setError("Error loading contact details");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (id) {
@@ -177,6 +268,14 @@ export default function ContactDetailPage() {
   };
 
   const viewMessage = (record: Reply) => {
+    // Log view message action (action_id: 25, module_id: 2)
+    createActivityLog(33, 4, `Viewed email message for contact: ${record.contact_name || record.company_name}`, {
+      buyer_id: record.buyer_id,
+      contact_name: record.contact_name,
+      company_name: record.company_name,
+      email_id: record.id,
+      subject: record.subject
+    });
     setSelectedMessage(record);
     setMessageDialogOpen(true);
   };
@@ -290,15 +389,7 @@ export default function ContactDetailPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Email History</CardTitle>
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search emails..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+       
           </div>
         </CardHeader>
         <CardContent>

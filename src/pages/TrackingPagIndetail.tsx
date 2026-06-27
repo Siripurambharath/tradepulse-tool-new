@@ -41,6 +41,65 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+// Activity Log Helper Functions
+const getDeviceInfo = () => {
+  const userAgent = navigator.userAgent;
+  if (userAgent.includes('Chrome')) return 'Chrome';
+  if (userAgent.includes('Firefox')) return 'Firefox';
+  if (userAgent.includes('Safari')) return 'Safari';
+  if (userAgent.includes('Edge')) return 'Edge';
+  return 'Unknown Browser';
+};
+
+const getIPAddress = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Error fetching IP:', error);
+    return '127.0.0.1';
+  }
+};
+
+const createActivityLog = async (actionId: number, moduleId: number, description: string, additionalData?: any) => {
+  try {
+    const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+    const ipAddress = await getIPAddress();
+    const device = getDeviceInfo();
+
+    const logData = {
+      userId: seller.id || 1,
+      userName: seller.name || seller.email || 'Unknown',
+      role: seller.role || 'seller',
+      action_id: actionId,
+      module_id: moduleId,
+      description: description,
+      ipAddress,
+      device,
+      status: 'SUCCESS',
+      ...additionalData
+    };
+
+    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(logData),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error('Failed to create activity log:', result.message);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error creating activity log:', error);
+    return null;
+  }
+};
+
 interface TrackingCommunication {
   id: number;
   buyer_id: number;
@@ -62,6 +121,7 @@ interface TrackingCommunication {
   display_status: string;
   record_type: string;
   date: string | null;
+  seller_id: string;
 }
 
 interface BuyerInfo {
@@ -73,6 +133,7 @@ interface BuyerInfo {
   email: string;
   all_emails: string;
   all_contacts: string;
+  seller_id: string;
 }
 
 interface Summary {
@@ -105,20 +166,54 @@ export default function TrackingDetailPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`http://localhost:5000/api/tracking/buyer/${id}`);
+      
+      const sellerData = localStorage.getItem('seller');
+      if (!sellerData) {
+        setError("Please login again");
+        setLoading(false);
+        return;
+      }
+
+      const seller = JSON.parse(sellerData);
+      const sellerId = seller.id;
+
+      if (!sellerId) {
+        setError("Seller information not found");
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(`http://localhost:5000/api/tracking/buyer/${id}`, {
+        params: { sellerId: sellerId }
+      });
       
       if (response.data.success) {
         setCommunications(response.data.data);
         setBuyerInfo(response.data.buyer_info);
         setSummary(response.data.summary);
-        console.log('Communications:', response.data.data);
+        console.log('Communications for seller:', sellerId, response.data.data);
+        
+        // Log view tracking detail page (action_id: 32, module_id: 13)
+        if (response.data.buyer_info) {
+          createActivityLog(30, 13, `Viewed tracking detail for: ${response.data.buyer_info.company_name}`, {
+            buyer_id: id,
+            company_name: response.data.buyer_info.company_name,
+            country: response.data.buyer_info.country,
+            product_name: response.data.buyer_info.product_name,
+            total_communications: response.data.data?.length || 0
+          });
+        }
       } else {
-        setError('Tracking data not found');
+        setError(response.data.message || 'Tracking data not found');
       }
     } catch (error: any) {
       console.error('Error:', error);
       if (error.response?.status === 404) {
         setError('Buyer not found');
+      } else if (error.response?.status === 400) {
+        setError('Seller ID is required');
+      } else if (error.response?.status === 401) {
+        setError('Unauthorized - Please login again');
       } else {
         setError('Failed to load tracking details');
       }
@@ -180,6 +275,14 @@ export default function TrackingDetailPage() {
   };
 
   const viewMessage = (communication: TrackingCommunication) => {
+    // Log view message (action_id: 33, module_id: 13)
+    createActivityLog(32, 13, `Viewed message for: ${communication.company_name}`, {
+      buyer_id: communication.buyer_id,
+      company_name: communication.company_name,
+      communication_id: communication.id,
+      display_status: communication.display_status,
+      subject: communication.subject
+    });
     setSelectedMessage(communication);
     setMessageDialogOpen(true);
   };
@@ -237,6 +340,11 @@ export default function TrackingDetailPage() {
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               Buyer ID: {id} | Total Communications: {summary?.total || 0}
+              {buyerInfo.seller_id && (
+                <span className="ml-2 text-xs bg-primary/10 px-2 py-0.5 rounded">
+                  Seller ID: {buyerInfo.seller_id}
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -251,7 +359,7 @@ export default function TrackingDetailPage() {
       {/* Buyer Information Card */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="flex items-center gap-2">
               <Building className="h-4 w-4 text-muted-foreground" />
               <div>
@@ -293,20 +401,6 @@ export default function TrackingDetailPage() {
 
       {/* All Communications History Table */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <CardTitle>Complete Communication History</CardTitle>
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search messages..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-        </CardHeader>
         <CardContent>
           <div className="rounded-lg border overflow-auto">
             <Table>
@@ -384,11 +478,6 @@ export default function TrackingDetailPage() {
                 )}
               </TableBody>
             </Table>
-          </div>
-          
-          {/* Footer summary */}
-          <div className="flex justify-between items-center mt-4 text-sm text-muted-foreground">
-            <p>Showing {filteredCommunications.length} of {communications.length} communications</p>
           </div>
         </CardContent>
       </Card>

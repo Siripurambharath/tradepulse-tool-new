@@ -8,6 +8,65 @@ import { EmailModal } from '@/components/EmailModal';
 import { Search, Mail, Eye } from 'lucide-react';
 import axios from 'axios';
 
+// Activity Log Helper Functions
+const getDeviceInfo = () => {
+  const userAgent = navigator.userAgent;
+  if (userAgent.includes('Chrome')) return 'Chrome';
+  if (userAgent.includes('Firefox')) return 'Firefox';
+  if (userAgent.includes('Safari')) return 'Safari';
+  if (userAgent.includes('Edge')) return 'Edge';
+  return 'Unknown Browser';
+};
+
+const getIPAddress = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Error fetching IP:', error);
+    return '127.0.0.1';
+  }
+};
+
+const createActivityLog = async (actionId: number, moduleId: number, description: string, additionalData?: any) => {
+  try {
+    const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+    const ipAddress = await getIPAddress();
+    const device = getDeviceInfo();
+
+    const logData = {
+      userId: seller.id || 1,
+      userName: seller.name || seller.email || 'Unknown',
+      role: seller.role || 'seller',
+      action_id: actionId,
+      module_id: moduleId,
+      description: description,
+      ipAddress,
+      device,
+      status: 'SUCCESS',
+      ...additionalData
+    };
+
+    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(logData),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error('Failed to create activity log:', result.message);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error creating activity log:', error);
+    return null;
+  }
+};
+
 // Update interface to match backend response
 interface Contact {
   buyer_id: number;
@@ -36,6 +95,8 @@ export default function ContactsPage() {
 
   useEffect(() => {
     fetchContacts();
+    // Log page view (action_id: 20 for Contacts Page View)
+    createActivityLog(19, 4, 'Viewed contacts page');
   }, []);
 
 const fetchContacts = async () => {
@@ -51,7 +112,7 @@ const fetchContacts = async () => {
       return;
     }
 
-    const response = await axios.get(`http://localhost:5000/api/replyhistory?seller_id=${sellerId}`);
+    const response = await axios.get(`http://localhost:5000/api/contacts?seller_id=${sellerId}`);
     if (response.data.success) {
       setContacts(response.data.data);
       console.log('Fetched contacts:', response.data.data);
@@ -87,6 +148,24 @@ const fetchContacts = async () => {
       return matchesQuery && matchesRole;
     });
   }, [query, roleFilter, contacts]);
+
+  // Log search activity when query changes
+  useEffect(() => {
+    if (query) {
+      createActivityLog(21, 4, `Searched contacts with text: ${query}`, {
+        searchQuery: query
+      });
+    }
+  }, [query]);
+
+  // Log filter activity when role filter changes
+  useEffect(() => {
+    if (roleFilter !== 'all') {
+      createActivityLog(22, 4, `Filtered contacts by template: ${roleFilter}`, {
+        template: roleFilter
+      });
+    }
+  }, [roleFilter]);
 
   const toggleSelect = (buyerId: number) => {
     const next = new Set(selected);
@@ -149,7 +228,22 @@ const fetchContacts = async () => {
   };
 
   const viewContactDetails = (buyerId: number) => {
+    // Log view contact details (action_id: 23)
+    const contact = contacts.find(c => c.buyer_id === buyerId);
+    createActivityLog(10, 4, `Viewed contact details for: ${contact?.contact_name || buyerId}`, {
+      buyer_id: buyerId,
+      contact_name: contact?.contact_name,
+      company_name: contact?.company_name
+    });
     navigate(`/contactsindetail/${buyerId}`);
+  };
+
+  const handleEmailModalOpen = () => {
+    // Log email modal open (action_id: 24)
+    createActivityLog(24, 4, 'Opened email modal from contacts page', {
+      selected_count: selected.size
+    });
+    setEmailOpen(true);
   };
 
   if (loading) {
@@ -172,9 +266,14 @@ const fetchContacts = async () => {
             Manage and communicate with your contacts
           </p>
         </div>
-        {/* <Button onClick={() => setEmailOpen(true)} disabled={selected.size === 0} className="gap-2">
-          <Mail className="h-4 w-4" /> Send Email ({selected.size})
-        </Button> */}
+        <Button 
+          onClick={handleEmailModalOpen} 
+          disabled={selected.size === 0} 
+          className="gap-2"
+        >
+          <Mail className="h-4 w-4" /> 
+          Send Email ({selected.size})
+        </Button>
       </div>
 
       <div className="flex gap-3 mb-4">
@@ -209,13 +308,12 @@ const fetchContacts = async () => {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/30">
-              {/* <th className="p-3 w-10">
+              <th className="p-3 w-10">
                 <Checkbox 
                   checked={selected.size === filtered.length && filtered.length > 0} 
                   onCheckedChange={selectAll} 
                 />
-              </th> */}
-              <th className="p-3 text-left font-medium text-foreground">Contact</th>
+              </th>
               <th className="p-3 text-left font-medium text-foreground">Company</th>
               <th className="p-3 text-left font-medium text-foreground">Product</th>
               <th className="p-3 text-left font-medium text-foreground">Template</th>
@@ -230,17 +328,11 @@ const fetchContacts = async () => {
           <tbody>
             {filtered.map(contact => (
               <tr key={contact.buyer_id} className="border-b hover:bg-muted/20 transition-colors">
-                {/* <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                <td className="p-3" onClick={(e) => e.stopPropagation()}>
                   <Checkbox 
                     checked={selected.has(contact.buyer_id)} 
                     onCheckedChange={() => toggleSelect(contact.buyer_id)} 
                   />
-                </td> */}
-                <td className="p-3">
-                  <div>
-                    <p className="font-medium text-foreground">{contact.contact_name || 'Unknown'}</p>
-                    <p className="text-xs text-muted-foreground">ID: {contact.buyer_id}</p>
-                  </div>
                 </td>
                 <td className="p-3">
                   <span className="text-muted-foreground">{contact.company_name || '-'}</span>

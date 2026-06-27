@@ -6,29 +6,100 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { Search, Clock, Users } from 'lucide-react';
 import API_URL from '@/components/api';
 
+// Activity Log Helper Functions
+const getDeviceInfo = () => {
+  const userAgent = navigator.userAgent;
+  if (userAgent.includes('Chrome')) return 'Chrome';
+  if (userAgent.includes('Firefox')) return 'Firefox';
+  if (userAgent.includes('Safari')) return 'Safari';
+  if (userAgent.includes('Edge')) return 'Edge';
+  return 'Unknown Browser';
+};
+
+const getIPAddress = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Error fetching IP:', error);
+    return '127.0.0.1';
+  }
+};
+
+const createActivityLog = async (actionId: number, moduleId: number, description: string, additionalData?: any) => {
+  try {
+    const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+    const ipAddress = await getIPAddress();
+    const device = getDeviceInfo();
+
+    const logData = {
+      userId: seller.id || 1,
+      userName: seller.name || seller.email || 'Unknown',
+      role: seller.role || 'seller',
+      action_id: actionId,
+      module_id: moduleId,
+      description: description,
+      ipAddress,
+      device,
+      status: 'SUCCESS',
+      ...additionalData
+    };
+
+    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(logData),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error('Failed to create activity log:', result.message);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error creating activity log:', error);
+    return null;
+  }
+};
+
 export default function HistoryPage() {
   const [history, setHistory] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const [productFilter, setProductFilter] = useState('all');
   const navigate = useNavigate();
-const seller = JSON.parse(
-  localStorage.getItem("seller")
-);
-  // ✅ Fetch history from backend
- useEffect(() => {
-  const sellerId = seller.id; // or however you're storing it after login
-  fetch(`${API_URL}/history?seller_id=${sellerId}`)
-    .then(res => res.json())
-    .then(data => setHistory(data))
-    .catch(err => console.error(err));
-}, []);
+  
+  const seller = JSON.parse(
+    localStorage.getItem("seller")
+  );
+  
+  useEffect(() => {
+    const sellerId = seller.id;
+    
+    // Log page view (action_id: 35, module_id: 11)
+    createActivityLog(37, 11, 'Viewed history page');
+    
+    fetch(`${API_URL}/history?seller_id=${sellerId}`)
+      .then(res => res.json())
+      .then(data => setHistory(data))
+      .catch(err => console.error(err));
+  }, []);
 
-  // ✅ Products list
+  // Log search activity when query changes
+  useEffect(() => {
+    if (query) {
+      createActivityLog(35, 11, `Searched history with query: ${query}`, {
+        searchQuery: query
+      });
+    }
+  }, [query]);
+
   const products = useMemo(() => {
     return [...new Set(history.map(h => h.product))].sort();
   }, [history]);
 
-  // ✅ Filtering
   const filtered = useMemo(() => {
     return history.filter(h => {
       const matchesQuery =
@@ -38,6 +109,17 @@ const seller = JSON.parse(
       return matchesQuery && matchesProduct;
     });
   }, [query, productFilter, history]);
+
+  const handleCardClick = (entry: any) => {
+    // Log card click navigation (action_id: 37, module_id: 11)
+    createActivityLog(36, 11, `Navigated to history detail for: ${entry.product}`, {
+      history_id: entry.id,
+      product: entry.product,
+      companies_count: entry.companies?.length || 0,
+      date: entry.date
+    });
+    navigate(`/history/${entry.id}`);
+  };
 
   return (
     <div>
@@ -87,7 +169,7 @@ const seller = JSON.parse(
             <div
               key={entry.id}
               className="bg-card rounded-lg border p-4 cursor-pointer hover:border-primary/30 transition-colors"
-              onClick={() => navigate(`/history/${entry.id}`)}
+              onClick={() => handleCardClick(entry)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
