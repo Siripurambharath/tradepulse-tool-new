@@ -22,6 +22,8 @@ import TrackingPageIndetail from "./pages/TrackingPage";
 import ContactDetailPage from "./pages/ContactDetailPage";
 import TrackingPagIndetail from "./pages/TrackingPagIndetail";
 import AdminUsers from "./pages/AdminPage/AdminUsers";
+import AddBuyerPage from "./pages/AddBuyerPage"
+import BuyerBulkUpload from "./pages/BulkUpload";
 
 const queryClient = new QueryClient();
 
@@ -61,7 +63,9 @@ const App = () => (
                  <Route path="/emailconfig" element={<EmailConfiguration />} />
                   <Route path="/trackingindetail/:id" element={<TrackingPagIndetail />} />
                   <Route path="/contactsindetail/:id" element={<ContactDetailPage />} />
-   <Route path="/users" element={<AdminUsers />} />
+                  <Route path="/users" element={<AdminUsers />} />
+                  <Route path="/add-buyer" element={<AddBuyerPage />} />
+                  <Route path="/bulk-upload" element={<BuyerBulkUpload />} />
             </Route>
           </Route>
 

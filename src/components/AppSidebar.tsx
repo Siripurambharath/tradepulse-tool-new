@@ -1,4 +1,4 @@
-import { Search, Users, Contact, Activity, BarChart3, Clock, FileText, Megaphone, LogOut } from 'lucide-react';
+import { Search, Users, Contact, Activity, BarChart3, Clock, FileText, Megaphone, LogOut, UserPlus, Upload  } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -82,6 +82,8 @@ const navItems = [
   // { title: 'Templates', url: '/templates', icon: FileText },
   { title: 'EmailConfig', url: '/emailconfig', icon: FileText },
   // { title: 'Campaigns', url: '/campaigns', icon: Megaphone },
+   { title: 'Single Adding Buyer', url: '/add-buyer', icon: UserPlus },
+  { title: 'Bulk Upload Buyers', url: '/bulk-upload', icon: Upload },
 ];
 
 export function AppSidebar() {

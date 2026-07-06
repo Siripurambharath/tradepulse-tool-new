@@ -1,0 +1,17 @@
+/* Hide default browser calendar icon */
+.custom-date-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: none;
+  -webkit-appearance: none;
+}
+
+.custom-date-input::-webkit-inner-spin-button,
+.custom-date-input::-webkit-clear-button {
+  display: none;
+}
+
+.custom-date-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
