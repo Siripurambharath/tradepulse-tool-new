@@ -11,6 +11,12 @@ interface DuplicateEntry {
   message: string;
 }
 
+interface SchemaMismatch {
+  message: string;
+  missingColumns: string[];
+  extraColumns: string[];
+}
+
 const BuyerBulkUpload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -18,6 +24,7 @@ const BuyerBulkUpload: React.FC = () => {
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [duplicates, setDuplicates] = useState<DuplicateEntry[]>([]);
   const [showDuplicates, setShowDuplicates] = useState(false);
+  const [schemaMismatch, setSchemaMismatch] = useState<SchemaMismatch | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /* ============================
@@ -30,6 +37,7 @@ const BuyerBulkUpload: React.FC = () => {
       setMessageType("");
       setDuplicates([]);
       setShowDuplicates(false);
+      setSchemaMismatch(null);
     } else {
       setFile(null);
     }
@@ -44,6 +52,7 @@ const BuyerBulkUpload: React.FC = () => {
     setMessageType("");
     setDuplicates([]);
     setShowDuplicates(false);
+    setSchemaMismatch(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -92,12 +101,25 @@ const BuyerBulkUpload: React.FC = () => {
       setMessageType("");
       setDuplicates([]);
       setShowDuplicates(false);
+      setSchemaMismatch(null);
 
       const res = await axios.post(
         `${BASE_URL}/api/buyers/bulk-upload`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
+
+      // Check for schema mismatch response
+      if (res.data.schemaMismatch) {
+        setSchemaMismatch({
+          message: res.data.message || "Schema mismatch detected",
+          missingColumns: res.data.missingColumns || [],
+          extraColumns: res.data.extraColumns || []
+        });
+        setMessage(`❌ ${res.data.message || "Schema mismatch detected"}`);
+        setMessageType("error");
+        return;
+      }
 
       const insertedCount = res.data.inserted || 0;
       const skippedCount = res.data.skipped || 0;
@@ -129,9 +151,21 @@ const BuyerBulkUpload: React.FC = () => {
       }
       
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || "Upload failed";
-      setMessage(`❌ ${errorMsg}`);
-      setMessageType("error");
+      // Check if it's a schema mismatch error from backend
+      if (err.response?.data?.schemaMismatch) {
+        const errorData = err.response.data;
+        setSchemaMismatch({
+          message: errorData.message || "Schema mismatch detected",
+          missingColumns: errorData.missingColumns || [],
+          extraColumns: errorData.extraColumns || []
+        });
+        setMessage(`❌ ${errorData.message || "Schema mismatch detected"}`);
+        setMessageType("error");
+      } else {
+        const errorMsg = err.response?.data?.message || "Upload failed";
+        setMessage(`❌ ${errorMsg}`);
+        setMessageType("error");
+      }
     } finally {
       setLoading(false);
     }
@@ -157,6 +191,7 @@ const BuyerBulkUpload: React.FC = () => {
               <li>Upload the filled Excel file</li>
               <li>Multiple contacts and emails can be added (comma-separated)</li>
               <li><strong>Duplicate Prevention:</strong> Records with same product, company name, and matching contact/email will be skipped</li>
+              <li><strong>Important:</strong> The Excel file must have the exact same column headers as the template</li>
             </ul>
           </div>
 
@@ -262,17 +297,71 @@ const BuyerBulkUpload: React.FC = () => {
                     Clear
                   </button>
                 )}
-                {messageType === "error" && (
+                {(messageType === "error" || schemaMismatch) && (
                   <button
                     onClick={() => {
                       setMessage("");
                       setMessageType("");
+                      setSchemaMismatch(null);
                     }}
                     className="text-sm text-red-700 hover:text-red-900 font-medium"
                   >
                     ✕
                   </button>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Schema Mismatch Details */}
+          {schemaMismatch && (
+            <div className="mt-4">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h4 className="font-semibold text-red-800 mb-3">
+                  ⚠️ Schema Mismatch Detected
+                </h4>
+                <div className="space-y-4">
+                  {schemaMismatch.missingColumns.length > 0 && (
+                    <div>
+                      <p className="font-medium text-red-700">Missing Columns:</p>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {schemaMismatch.missingColumns.map((col, index) => (
+                          <span key={index} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
+                            {col}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-sm text-red-600 mt-1">
+                        Please add these columns to your Excel file.
+                      </p>
+                    </div>
+                  )}
+                  {schemaMismatch.extraColumns.length > 0 && (
+                    <div>
+                      <p className="font-medium text-red-700">Extra Columns:</p>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {schemaMismatch.extraColumns.map((col, index) => (
+                          <span key={index} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
+                            {col}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-sm text-red-600 mt-1">
+                        Please remove these columns from your Excel file.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    setSchemaMismatch(null);
+                    setMessage("");
+                    setMessageType("");
+                  }}
+                  className="mt-3 text-sm text-red-700 hover:text-red-900 font-medium underline"
+                >
+                  Close
+                </button>
               </div>
             </div>
           )}

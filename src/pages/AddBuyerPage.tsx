@@ -28,7 +28,7 @@ const AddBuyerPage = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  // Form state
+  // Form state - Updated field name
   const [formData, setFormData] = useState({
     product: '',
     hsn_code: '',
@@ -36,7 +36,7 @@ const AddBuyerPage = () => {
     company_name: '',
     website: '',
     address: '',
-    details: '',
+    additional_details: '',  // Changed from details
     suggested_keywords: '',
     hsn_descriptions: '',
     confidence_level: '',
@@ -369,13 +369,13 @@ const AddBuyerPage = () => {
               />
             </div>
 
-            {/* Details */}
+            {/* Additional Details - Updated field name */}
             <div className="space-y-2">
-              <Label htmlFor="details">Details</Label>
+              <Label htmlFor="additional_details">Additional Details</Label>
               <Textarea
-                id="details"
-                name="details"
-                value={formData.details}
+                id="additional_details"
+                name="additional_details"
+                value={formData.additional_details}
                 onChange={handleInputChange}
                 placeholder="Enter additional details"
                 rows={2}

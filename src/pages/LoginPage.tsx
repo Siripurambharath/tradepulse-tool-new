@@ -3,9 +3,9 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Globe, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import API_URL from '@/components/api';
 
-const BASE_URL = API_URL;
+const BASE_URL = "https://globpulsebita.gfeworldwide.com/api";
+const LOCAL_BASE_URL = "http://localhost:5000"; // Your local backend URL
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -18,101 +18,49 @@ export default function LoginPage() {
   // If token already exists, redirect to search
   const token = localStorage.getItem("token");
   if (token) {
+    console.log('🔐 Token found, redirecting to search');
     return <Navigate to="/search" replace />;
   }
 
-  // Helper function to get device info
-  const getDeviceInfo = () => {
-    const userAgent = navigator.userAgent;
-    if (userAgent.includes('Chrome')) return 'Chrome';
-    if (userAgent.includes('Firefox')) return 'Firefox';
-    if (userAgent.includes('Safari')) return 'Safari';
-    if (userAgent.includes('Edge')) return 'Edge';
-    return 'Unknown Browser';
-  };
+  // Helper function to store user in local database
+ const storeUserInLocalDB = async (id, email, password, role) => {
+  try {
+    const response = await fetch(`${LOCAL_BASE_URL}/api/store-user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({
+          id,
+          email,
+          password,
+          role,
+        }),
+    });
 
-  // Helper function to get IP address (using a free IP service)
-  const getIPAddress = async () => {
-    try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      return data.ip;
-    } catch (error) {
-      console.error('Error fetching IP:', error);
-      return '127.0.0.1'; // Fallback IP
+    const data = await response.json();
+
+    if (data.success) {
+      console.log(data.exists ? 'ℹ️ User already exists' : '✅ User stored successfully');
+      return true;
+    } else {
+      console.error('❌ Failed to store user:', data.message);
+      return false;
     }
-  };
+  } catch (error) {
+    console.error('❌ Error storing user in local DB:', error);
+    return false;
+  }
+};
 
-  // Function to create activity log - ONLY FOR USERS (not admin)
-  const createActivityLog = async (userId: number, userName: string, role: string) => {
-    try {
-      const ipAddress = await getIPAddress();
-      const device = getDeviceInfo();
-
-      const logData = {
-        userId,
-        userName,
-        role,
-        action_id: 1, 
-        module_id: 2,
-        description: 'User logged in successfully',
-        ipAddress,
-        device,
-        status: 'SUCCESS'
-      };
-
-      const response = await fetch(`http://localhost:5001/api/activity-log`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(logData),
-      });
-
-      const result = await response.json();
-      if (!result.success) {
-        console.error('Failed to create activity log:', result.message);
-      }
-      return result;
-    } catch (error) {
-      console.error('Error creating activity log:', error);
-      // Don't block login flow if activity log fails
-      return null;
-    }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    console.log('🔑 [Frontend] Login attempt for email:', email);
     setLoading(true);
     setError('');
 
-    // Check for admin credentials first
-    if (email === 'Admin@gmail.com' && password === '1234') {
-      try {
-        // Admin login - store admin flag and redirect to templates
-        localStorage.setItem("token", "admin-token");
-        localStorage.setItem("userRole", "admin");
-        const adminData = { 
-          email: 'Admin@gmail.com',
-          role: 'admin',
-          name: 'Admin',
-          id: 1 // Default admin ID
-        };
-        localStorage.setItem("seller", JSON.stringify(adminData));
-        
-        // ❌ NO activity log for admin
-        
-        setLoading(false);
-        navigate("/templates");
-      } catch (error) {
-        setLoading(false);
-        setError("Login failed. Please try again.");
-      }
-      return;
-    }
-
     try {
-      const response = await fetch(`${BASE_URL}/api/seller/login`, {
+      // First, login to server API
+      console.log('📡 [Frontend] Calling server login API...');
+      const response = await fetch(`${BASE_URL}/seller/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,29 +69,45 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
+      console.log('📡 [Frontend] Server login response:', data);
 
       if (data.status === true && data.token) {
+        console.log('✅ [Frontend] Login successful!');
+        
+        // Login successful - store token and user info
         localStorage.setItem("token", data.token);
-        localStorage.setItem("userRole", "seller");
         localStorage.setItem("seller", JSON.stringify(data.seller));
+        console.log('💾 [Frontend] Token and seller data saved to localStorage');
 
-        // ✅ Create activity log for seller only (not admin)
-        if (data.seller && data.seller.id) {
-          await createActivityLog(
-            data.seller.id,
-            data.seller.name || data.seller.email,
-            'seller'
-          );
-        }
+        // Store user in local database (async - don't wait for it)
+        console.log('📤 [Frontend] Starting user storage process...');
+        storeUserInLocalDB(
+  data.seller.id,
+  email,
+  password,
+  data.seller.role || "seller"
+)
+          .then(success => {
+            if (success) {
+              console.log('✅ [Frontend] User storage completed successfully');
+            } else {
+              console.warn('⚠️ [Frontend] User storage failed but login continues');
+            }
+          });
 
+        // Navigate to search page
+        console.log('🚀 [Frontend] Navigating to search page');
         navigate("/search");
       } else {
+        console.log('❌ [Frontend] Login failed:', data.message);
         setError(data.message || "Invalid Email or Password");
       }
     } catch (err) {
+      console.error('❌ [Frontend] Login error:', err);
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+      console.log('🔓 [Frontend] Login process completed');
     }
   };
 
