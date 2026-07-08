@@ -12,7 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 import { Textarea } from '@/components/ui/textarea';
-import API_URL from '@/components/api';
+import {API_URL} from '@/components/api';
+import { ACTIVITY_URL } from '@/components/api';
 
 import {
   Select,
@@ -85,7 +86,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -38,6 +38,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ACTIVITY_URL, API_URL } from '@/components/api';
 
 // Activity Log Helper Functions
 const getDeviceInfo = () => {
@@ -79,7 +80,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -155,7 +156,7 @@ const fetchBuyerDetails = async () => {
       console.warn('No sellerId found in localStorage');
     }
 
-    const response = await axios.get(`http://localhost:5000/api/replyhistory/${id}`, {
+    const response = await axios.get(`${API_URL}/api/replyhistory/${id}`, {
       params: { sellerId: sellerId }
     });
     

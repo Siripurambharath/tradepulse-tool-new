@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Eye, Send, Reply, ThumbsUp, ThumbsDown, AlertCircle, MessageSquare } from 'lucide-react';
 import axios from 'axios';
+import { ACTIVITY_URL, API_URL } from '@/components/api';
 
 // Activity Log Helper Functions
 const getDeviceInfo = () => {
@@ -49,7 +50,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -156,7 +157,7 @@ export default function TrackingPage() {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5000/api/tracking/counts?seller_id=${sellerId}`);
+      const response = await axios.get(`${API_URL}/api/tracking/counts?seller_id=${sellerId}`);
       if (response.data.success) {
         setCounts({
           sent: response.data.data.sent,
@@ -184,7 +185,7 @@ export default function TrackingPage() {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5000/api/tracking/all?seller_id=${sellerId}`);
+      const response = await axios.get(`${API_URL}/api/tracking/all?seller_id=${sellerId}`);
       
       if (response.data.success) {
         setTrackingData(response.data.data);

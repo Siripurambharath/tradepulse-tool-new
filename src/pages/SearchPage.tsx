@@ -12,8 +12,11 @@ import {
 import { Search, Loader2, ChevronLeft, ChevronRight, Mail, X, ThumbsUp, ThumbsDown } from 'lucide-react';
 import EmailModal from '@/components/EmailModal';
 import { toast } from 'sonner';
+import { ACTIVITY_URL, API_URL } from '@/components/api';
+import { useEmailConfigCheck } from '@/hooks/Emailconfigcheck';
+import EmailConfigModal from '@/components/EmailcheckModal';
 
-const API = 'http://localhost:5000';
+const API = API_URL;
 
 interface Buyer {
   buyer_id: number;
@@ -23,6 +26,14 @@ interface Buyer {
   country: string;
   company_name: string;
   website: string;
+  address: string;
+  details: string;
+  suggested_keywords: string;
+  hsn_descriptions: string;
+  confidence_level: string;
+  reason: string;
+  classification_notes: string;
+  manual_verification: string;
   contacts: string;
   emails: string;
 }
@@ -36,6 +47,7 @@ const getDeviceInfo = () => {
   if (userAgent.includes('Edge')) return 'Edge';
   return 'Unknown Browser';
 };
+
 
 const getIPAddress = async () => {
   try {
@@ -67,7 +79,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -97,20 +109,28 @@ function BuyerDetailModal({
   if (!buyer) return null;
 
   const fields: { label: string; value: string }[] = [
-    { label: 'Company Name', value: buyer.company_name },
-    { label: 'Product', value: buyer.product },
-    { label: 'HSN Code', value: buyer.hsn_code },
-    { label: 'Country', value: buyer.country },
-    { label: 'Website', value: buyer.website },
-    { label: 'Contacts', value: buyer.contacts },
-    { label: 'Emails', value: buyer.emails },
-    {
-      label: 'Date',
-      value: buyer.buyer_date
-        ? new Date(buyer.buyer_date).toLocaleDateString('en-GB').replace(/\//g, '-')
-        : '',
-    },
-  ];
+  { label: 'Company Name', value: buyer.company_name },
+  { label: 'Product', value: buyer.product },
+  { label: 'HSN Code', value: buyer.hsn_code },
+  { label: 'HSN Description', value: buyer.hsn_descriptions },
+  { label: 'Country', value: buyer.country },
+  { label: 'Address', value: buyer.address },
+  { label: 'Website', value: buyer.website },
+  { label: 'Details', value: buyer.details },
+  { label: 'Contacts', value: buyer.contacts },
+  { label: 'Emails', value: buyer.emails },
+  { label: 'Confidence', value: buyer.confidence_level },
+  { label: 'Reason', value: buyer.reason },
+  { label: 'Classification Notes', value: buyer.classification_notes },
+  { label: 'Manual Verification', value: buyer.manual_verification },
+  { label: 'Keywords', value: buyer.suggested_keywords },
+  {
+    label: 'Date',
+    value: buyer.buyer_date
+      ? new Date(buyer.buyer_date).toLocaleDateString('en-GB').replace(/\//g, '-')
+      : '',
+  },
+];
 
   return (
     <div
@@ -185,7 +205,7 @@ export default function SearchPage() {
   const [emailOpen, setEmailOpen] = useState(false);
   const [detailBuyer, setDetailBuyer] = useState<Buyer | null>(null);
   const [submittingId, setSubmittingId] = useState<number | null>(null);
-
+const [detailLoading, setDetailLoading] = useState(false);
   const perPage = 50;
 
   /* Load Filters */
@@ -195,6 +215,7 @@ export default function SearchPage() {
     createActivityLog(16, 1, 'Viewed search page');
   }, []);
 
+const { checkEmailConfig, modalOpen, modalMessage, setModalOpen } = useEmailConfigCheck();
   const loadFilters = async () => {
     try {
       const [countryRes, productRes] = await Promise.all([
@@ -364,6 +385,19 @@ const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_int
     const uniqueProducts = [...new Set(selectedBuyers.map(b => b.product).filter(Boolean))];
     return uniqueProducts.length > 1;
   };
+  const fetchBuyerDetail = async (buyerId: number) => {
+  setDetailLoading(true);
+  try {
+    const res = await fetch(`${API}/buyers/${buyerId}`);
+    const json = await res.json();
+    setDetailBuyer({ ...json.data, buyer_id: json.data.id });
+  } catch (err) {
+    console.error(err);
+    toast.error('Failed to load details');
+  } finally {
+    setDetailLoading(false);
+  }
+};
 
 const getRecipients = () => {
   return getSelectedBuyers().flatMap((r) =>
@@ -391,7 +425,7 @@ const getRecipients = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Search Buyers</h1>
-        <Button 
+        {/* <Button 
           onClick={() => {
             setEmailOpen(true);
             // Log email modal open action
@@ -404,7 +438,24 @@ const getRecipients = () => {
         >
           <Mail className="h-4 w-4" />
           Send Email ({selected.size})
-        </Button>
+        </Button> */}
+
+        <Button 
+  onClick={async () => {
+    const ok = await checkEmailConfig();
+    if (!ok) return;
+
+    setEmailOpen(true);
+    createActivityLog(6, 3, 'Opened email modal', { 
+      selected_count: selected.size 
+    });
+  }} 
+  disabled={selected.size === 0} 
+  className="gap-2"
+>
+  <Mail className="h-4 w-4" />
+  Send Email ({selected.size})
+</Button>
       </div>
 
       {/* Filters */}
@@ -478,7 +529,7 @@ const getRecipients = () => {
             >
               <colgroup>
                 <col style={{ width: '40px' }} />
-                <col style={{ width: '80px' }} />
+                <col style={{ width: '150px' }} />
                 <col style={{ width: '100px' }} />
                 <col style={{ width: '100px' }} />
                 <col style={{ width: '200px' }} />
@@ -526,7 +577,7 @@ const getRecipients = () => {
                       <button
                         className="text-blue-600 underline underline-offset-2 hover:text-blue-800 font-medium transition-colors"
                         onClick={() => {
-                          setDetailBuyer(r);
+                           fetchBuyerDetail(r.buyer_id);
                           // Log detail view
                           createActivityLog(7, 3, `Viewed buyer details: ${r.company_name} (HSN: ${r.hsn_code})`, {
                             buyer_id: r.buyer_id,
@@ -611,6 +662,12 @@ const getRecipients = () => {
         multipleProducts={isMultipleProductsSelected()}
         onClose={() => setEmailOpen(false)}
       />
+
+      <EmailConfigModal
+  open={modalOpen}
+  message={modalMessage}
+  onClose={() => setModalOpen(false)}
+/>
     </div>
   );
 }

@@ -11,8 +11,9 @@ import {
 } from '@/components/ui/select';
 import { Search, Loader2, ChevronLeft, ChevronRight, Mail, X } from 'lucide-react';
 import EmailModal from '@/components/EmailModal';
+import { ACTIVITY_URL , API_URL} from '@/components/api';
 
-const API = 'http://localhost:5000';
+const API = API_URL;
 
 interface Buyer {
   buyer_id: number;

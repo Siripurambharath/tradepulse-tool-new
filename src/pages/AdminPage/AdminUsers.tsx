@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, RefreshCw, User, Activity, Clock, Mail, Globe } from 'lucide-react';
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Pagination } from './Pagination';
+import { ACTIVITY_URL } from '@/components/api';
 
 interface ActivityLog {
   id: number;
@@ -45,7 +46,7 @@ const AdminUsers = () => {
   const fetchActivityLogs = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5001/api/activity-log');
+      const response = await fetch(`${ACTIVITY_URL}/api/activity-log`);
       const data = await response.json();
       
       if (data.success) {

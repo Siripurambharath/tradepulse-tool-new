@@ -23,8 +23,9 @@ import {
 } from 'lucide-react';
 
 import EmailModal from '@/components/EmailModal';
+import { ACTIVITY_URL,API_URL } from '@/components/api';
 
-const API = 'http://localhost:5000';
+const API = API_URL; // Use the imported API_URL constant
 
 interface Shipment {
   id: number;

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { ArrowLeft, Clock, Users, Eye, MessageSquare } from 'lucide-react';
-import API_URL from '@/components/api';
+import {API_URL} from '@/components/api';
 
 export default function HistoryDetailPage() {
   const { id } = useParams();

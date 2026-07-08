@@ -9,7 +9,7 @@ import {
   MessageSquare,
   Package,
 } from 'lucide-react';
-import API_URL from '@/components/api';
+import {API_URL} from '@/components/api';
 
 export default function HistoryDetailPage() {
   const { id } = useParams();
