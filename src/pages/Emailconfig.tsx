@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import API_URL from "@/components/api";
+import {API_URL, ACTIVITY_URL} from "@/components/api";
 
 // Activity Log Helper Functions
 const getDeviceInfo = () => {
@@ -41,7 +41,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,6 +61,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
 };
 
 export default function EmailConfiguration() {
+  
   const [formData, setFormData] = useState({
     profileName: "",
     provider: "",
@@ -76,6 +77,9 @@ export default function EmailConfiguration() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [emailConfig, setEmailConfig] = useState(0);
+const [emailSent, setEmailSent] = useState(0);
+const [sendingTest, setSendingTest] = useState(false);
 
   useEffect(() => {
     fetchConfig();
@@ -102,7 +106,10 @@ export default function EmailConfiguration() {
 
       const data = await response.json();
 
-      if (data.success) {
+   if (data.success) {
+
+  setEmailConfig(data.data.email_config);
+  setEmailSent(data.data.email_sent);
         setFormData({
           profileName: data.data.profile_name || "",
           provider: data.data.provider || "",
@@ -147,10 +154,12 @@ export default function EmailConfiguration() {
       );
 
       const data = await response.json();
+if (data.success) {
 
-      if (data.success) {
-        alert("Configuration updated successfully");
-      } else {
+    setEmailConfig(1);
+
+    alert("Configuration updated successfully");
+} else {
         alert(data.message);
       }
     } catch (err) {
@@ -160,6 +169,49 @@ export default function EmailConfiguration() {
       setLoading(false);
     }
   };
+
+  const sendTestMail = async () => {
+
+  try {
+
+    setSendingTest(true);
+
+    const seller = JSON.parse(localStorage.getItem("seller"));
+
+    const response = await fetch(
+      `${API_URL}/api/send-test-email/${seller.id}`,
+      {
+        method: "POST"
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+
+      setEmailSent(1);
+
+      alert("Test Email Sent Successfully.");
+
+    } else {
+
+      alert(data.message);
+
+    }
+
+  } catch (err) {
+
+    console.log(err);
+
+    alert("Unable to send email.");
+
+  } finally {
+
+    setSendingTest(false);
+
+  }
+
+};
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -299,15 +351,52 @@ export default function EmailConfiguration() {
           </div>
         </div>
 
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded"
-          >
-            {loading ? "Saving..." : "Save Configuration"}
-          </button>
-        </div>
+       <div className="flex gap-3 mt-6">
+
+<button
+    onClick={handleSave}
+    disabled={loading}
+    className="px-4 py-2 bg-blue-600 text-white rounded"
+>
+    {loading ? "Saving..." : "Save Configuration"}
+</button>
+
+<button
+    onClick={sendTestMail}
+    disabled={
+      emailConfig !== 1 ||
+      emailSent === 1 ||
+      sendingTest
+    }
+    className={`px-4 py-2 rounded text-white ${
+      emailConfig !== 1 || emailSent === 1
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-green-600"
+    }`}
+>
+    {sendingTest
+      ? "Sending..."
+      : emailSent === 1
+      ? "Test Mail Sent"
+      : "Send Test Mail"}
+</button>
+
+</div>
+{emailConfig === 0 && (
+
+<p className="text-red-600 mt-3">
+Please save configuration first.
+</p>
+
+)}
+
+{emailConfig === 1 && emailSent === 1 && (
+
+<p className="text-green-600 mt-3">
+Test email already sent successfully.
+</p>
+
+)}
       </div>
     </div>
   );

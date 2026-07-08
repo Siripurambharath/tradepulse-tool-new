@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 import { Mail, MessageSquare, TrendingUp, ThumbsUp, ThumbsDown, Building } from 'lucide-react';
+import { ACTIVITY_URL, API_URL } from '@/components/api';
 
 const COLORS = ['hsl(217,91%,60%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)', 'hsl(0,84%,60%)', 'hsl(199,89%,48%)'];
 
@@ -45,7 +46,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -100,7 +101,7 @@ export default function AnalyticsPage() {
     // Log page view (action_id: 34, module_id: 9)
     createActivityLog(34, 9, 'Viewed analytics dashboard page');
 
-    fetch(`http://localhost:5000/api/tracking/counts?seller_id=${sellerId}`)
+    fetch(`${API_URL}/api/tracking/counts?seller_id=${sellerId}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {

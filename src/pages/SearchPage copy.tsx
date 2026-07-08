@@ -8,6 +8,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusBadge } from '@/components/StatusBadge';
 import { EmailModal } from '@/components/EmailModal';
+import { ACTIVITY_URL, API_URL } from '@/components/api';
 import {
   Search, ChevronDown, ChevronRight, Mail, LayoutGrid, List, MapPin,
   Ship, Globe, Package, FileText, Eye, BadgeCheck, Zap, Building2,
@@ -64,7 +65,7 @@ export default function SearchPage() {
     const fetchCompanies = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5000/companies');
+        const response = await fetch(`${API_URL}/companies`);
         if (!response.ok) throw new Error('Failed to fetch companies');
         const data = await response.json();
         

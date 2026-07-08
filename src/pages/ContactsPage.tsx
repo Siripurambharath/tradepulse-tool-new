@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { EmailModal } from '@/components/EmailModal';
 import { Search, Mail, Eye } from 'lucide-react';
 import axios from 'axios';
+import { API_URL, ACTIVITY_URL } from '@/components/api';
 
 // Activity Log Helper Functions
 const getDeviceInfo = () => {
@@ -48,7 +49,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -112,7 +113,7 @@ const fetchContacts = async () => {
       return;
     }
 
-    const response = await axios.get(`http://localhost:5000/api/contacts?seller_id=${sellerId}`);
+    const response = await axios.get(`${API_URL}/api/contacts?seller_id=${sellerId}`);
     if (response.data.success) {
       setContacts(response.data.data);
       console.log('Fetched contacts:', response.data.data);

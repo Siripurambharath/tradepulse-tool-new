@@ -1,4 +1,4 @@
-import { Search, Users, Contact, Activity, BarChart3, Clock, FileText, Megaphone, LogOut, UserPlus, Upload  } from 'lucide-react';
+import { Search, Users, Contact, Activity, BarChart3, Clock, FileText, Megaphone, LogOut, UserPlus, Upload } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { ACTIVITY_URL } from './api';
 
 // Activity Log Helper Functions
 const getDeviceInfo = () => {
@@ -53,7 +54,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -81,8 +82,8 @@ const navItems = [
   { title: 'History', url: '/history', icon: Clock },
   // { title: 'Templates', url: '/templates', icon: FileText },
   { title: 'EmailConfig', url: '/emailconfig', icon: FileText },
-  // { title: 'Campaigns', url: '/campaigns', icon: Megaphone },
-   { title: 'Single Adding Buyer', url: '/add-buyer', icon: UserPlus },
+  // { title: 'Campaigns', url: '/campaigns', icon: Megaphone }, 
+  { title: 'Single Adding Buyer', url: '/add-buyer', icon: UserPlus },
   { title: 'Bulk Upload Buyers', url: '/bulk-upload', icon: Upload },
 ];
 

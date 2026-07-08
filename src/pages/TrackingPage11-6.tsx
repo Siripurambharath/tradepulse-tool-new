@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Search } from 'lucide-react';
+import { ACTIVITY_URL, API_URL } from '@/components/api';
 
 export default function TrackingPage() {
   const [query, setQuery] = useState('');
@@ -14,7 +15,7 @@ export default function TrackingPage() {
   const statuses = ['Not Contacted', 'Sent', 'Replied', 'Interested', 'Not Interested'];
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/tracking/all')
+    fetch(`${API_URL}/api/tracking/all`)
       .then(res => res.json())
       .then(data => {
         console.log('API Response:', data);

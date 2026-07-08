@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Search, Clock, Users } from 'lucide-react';
-import API_URL from '@/components/api';
+import {API_URL,ACTIVITY_URL } from '@/components/api';
 
 // Activity Log Helper Functions
 const getDeviceInfo = () => {
@@ -46,7 +46,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -81,10 +81,20 @@ export default function HistoryPage() {
     // Log page view (action_id: 35, module_id: 11)
     createActivityLog(37, 11, 'Viewed history page');
     
-    fetch(`${API_URL}/history?seller_id=${sellerId}`)
-      .then(res => res.json())
-      .then(data => setHistory(data))
-      .catch(err => console.error(err));
+   fetch(`${API_URL}/history?seller_id=${sellerId}`)
+  .then(async (res) => {
+    const data = await res.json();
+
+    console.log(
+      "%cHistory API Response",
+      "color: green; font-weight: bold;"
+    );
+    console.log(JSON.stringify(data, null, 2));
+
+    setHistory(data);
+  })
+  .catch(err => console.error("History API Error:", err));
+      
   }, []);
 
   // Log search activity when query changes
