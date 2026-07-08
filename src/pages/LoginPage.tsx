@@ -1,12 +1,199 @@
+// import { useState } from 'react';
+// import { Navigate, useNavigate } from 'react-router-dom';
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Globe, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+
+// const BASE_URL = "https://globpulsebita.gfeworldwide.com/api";
+// const LOCAL_BASE_URL = "http://localhost:5000"; // Your local backend URL
+
+// export default function LoginPage() {
+//   const [email, setEmail] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [showPassword, setShowPassword] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState('');
+//   const navigate = useNavigate();
+
+//   // If token already exists, redirect to search
+//   const token = localStorage.getItem("token");
+//   if (token) {
+//     console.log('🔐 Token found, redirecting to search');
+//     return <Navigate to="/search" replace />;
+//   }
+
+//   // Helper function to store user in local database
+//  const storeUserInLocalDB = async (id, email, password, role) => {
+//   try {
+//     const response = await fetch(`${LOCAL_BASE_URL}/api/store-user`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//        body: JSON.stringify({
+//           id,
+//           email,
+//           password,
+//           role,
+//         }),
+//     });
+
+//     const data = await response.json();
+
+//     if (data.success) {
+//       console.log(data.exists ? 'ℹ️ User already exists' : '✅ User stored successfully');
+//       return true;
+//     } else {
+//       console.error('❌ Failed to store user:', data.message);
+//       return false;
+//     }
+//   } catch (error) {
+//     console.error('❌ Error storing user in local DB:', error);
+//     return false;
+//   }
+// };
+
+//   const handleLogin = async (e) => {
+//     e.preventDefault();
+//     console.log('🔑 [Frontend] Login attempt for email:', email);
+//     setLoading(true);
+//     setError('');
+
+//     try {
+//       // First, login to server API
+//       console.log('📡 [Frontend] Calling server login API...');
+//       const response = await fetch(`${BASE_URL}/seller/login`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({ email, password }),
+//       });
+
+//       const data = await response.json();
+//       console.log('📡 [Frontend] Server login response:', data);
+
+//       if (data.status === true && data.token) {
+//         console.log('✅ [Frontend] Login successful!');
+        
+//         // Login successful - store token and user info
+//         localStorage.setItem("token", data.token);
+//         localStorage.setItem("seller", JSON.stringify(data.seller));
+//         console.log('💾 [Frontend] Token and seller data saved to localStorage');
+
+//         // Store user in local database (async - don't wait for it)
+//         console.log('📤 [Frontend] Starting user storage process...');
+//         storeUserInLocalDB(
+//   data.seller.id,
+//   email,
+//   password,
+//   data.seller.role || "seller"
+// )
+//           .then(success => {
+//             if (success) {
+//               console.log('✅ [Frontend] User storage completed successfully');
+//             } else {
+//               console.warn('⚠️ [Frontend] User storage failed but login continues');
+//             }
+//           });
+
+//         // Navigate to search page
+//         console.log('🚀 [Frontend] Navigating to search page');
+//         navigate("/search");
+//       } else {
+//         console.log('❌ [Frontend] Login failed:', data.message);
+//         setError(data.message || "Invalid Email or Password");
+//       }
+//     } catch (err) {
+//       console.error('❌ [Frontend] Login error:', err);
+//       setError("Something went wrong. Please try again.");
+//     } finally {
+//       setLoading(false);
+//       console.log('🔓 [Frontend] Login process completed');
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen flex items-center justify-center bg-background">
+//       <div className="w-full max-w-md p-8">
+//         <div className="flex flex-col items-center mb-8">
+//           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-4">
+//             <Globe className="h-8 w-8 text-primary-foreground" />
+//           </div>
+//           <h1 className="text-2xl font-bold text-foreground">Global Trade</h1>
+//           <p className="text-muted-foreground text-sm">Sales Accelerator</p>
+//         </div>
+
+//         <div className="bg-card rounded-xl border p-6 shadow-sm">
+//           <h2 className="text-lg font-semibold text-foreground mb-1">Welcome back</h2>
+//           <p className="text-sm text-muted-foreground mb-6">Sign in to your account</p>
+
+//           <form onSubmit={handleLogin} className="space-y-4">
+//             <div>
+//               <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
+//               <div className="relative">
+//                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+//                 <Input
+//                   type="email"
+//                   placeholder="you@company.com"
+//                   value={email}
+//                   onChange={e => setEmail(e.target.value)}
+//                   className="pl-10 bg-card"
+//                   required
+//                 />
+//               </div>
+//             </div>
+
+//             <div>
+//               <label className="text-sm font-medium text-foreground mb-1 block">Password</label>
+//               <div className="relative">
+//                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+//                 <Input
+//                   type={showPassword ? "text" : "password"}
+//                   placeholder="••••••••"
+//                   value={password}
+//                   onChange={e => setPassword(e.target.value)}
+//                   className="pl-10 pr-10 bg-card"
+//                   required
+//                 />
+//                 <button
+//                   type="button"
+//                   onClick={() => setShowPassword(!showPassword)}
+//                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+//                 >
+//                   {showPassword ? (
+//                     <EyeOff className="h-4 w-4" />
+//                   ) : (
+//                     <Eye className="h-4 w-4" />
+//                   )}
+//                 </button>
+//               </div>
+//             </div>
+
+//             {/* Error Message */}
+//             {error && (
+//               <p className="text-sm text-red-500 text-center">{error}</p>
+//             )}
+
+//             <Button type="submit" className="w-full" disabled={loading}>
+//               {loading ? "Signing in..." : "Sign In"}
+//             </Button>
+//           </form>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Globe, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import API_URL from '@/components/api';
 
-const BASE_URL = "https://globpulsebita.gfeworldwide.com/api";
-const LOCAL_BASE_URL = "http://localhost:5000"; // Your local backend URL
-
+// const BASE_URL = "https://globpulsebita.gfeworldwide.com/api"; // replace with your actual base URL
+const BASE_URL = API_URL; // replace with your actual base URL
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,51 +203,19 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   // If token already exists, redirect to search
-  const token = localStorage.getItem("token");
-  if (token) {
-    console.log('🔐 Token found, redirecting to search');
-    return <Navigate to="/search" replace />;
-  }
+  // If token already exists, redirect to search
+const token = localStorage.getItem("token");
+if (token) {
+  return <Navigate to="/search" replace />;
+}
 
-  // Helper function to store user in local database
- const storeUserInLocalDB = async (id, email, password, role) => {
-  try {
-    const response = await fetch(`${LOCAL_BASE_URL}/api/store-user`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({
-          id,
-          email,
-          password,
-          role,
-        }),
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      console.log(data.exists ? 'ℹ️ User already exists' : '✅ User stored successfully');
-      return true;
-    } else {
-      console.error('❌ Failed to store user:', data.message);
-      return false;
-    }
-  } catch (error) {
-    console.error('❌ Error storing user in local DB:', error);
-    return false;
-  }
-};
-
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🔑 [Frontend] Login attempt for email:', email);
     setLoading(true);
     setError('');
 
     try {
-      // First, login to server API
-      console.log('📡 [Frontend] Calling server login API...');
-      const response = await fetch(`${BASE_URL}/seller/login`, {
+      const response = await fetch(`${BASE_URL}/api/seller/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,45 +224,18 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-      console.log('📡 [Frontend] Server login response:', data);
 
       if (data.status === true && data.token) {
-        console.log('✅ [Frontend] Login successful!');
-        
-        // Login successful - store token and user info
         localStorage.setItem("token", data.token);
         localStorage.setItem("seller", JSON.stringify(data.seller));
-        console.log('💾 [Frontend] Token and seller data saved to localStorage');
-
-        // Store user in local database (async - don't wait for it)
-        console.log('📤 [Frontend] Starting user storage process...');
-        storeUserInLocalDB(
-  data.seller.id,
-  email,
-  password,
-  data.seller.role || "seller"
-)
-          .then(success => {
-            if (success) {
-              console.log('✅ [Frontend] User storage completed successfully');
-            } else {
-              console.warn('⚠️ [Frontend] User storage failed but login continues');
-            }
-          });
-
-        // Navigate to search page
-        console.log('🚀 [Frontend] Navigating to search page');
         navigate("/search");
       } else {
-        console.log('❌ [Frontend] Login failed:', data.message);
         setError(data.message || "Invalid Email or Password");
       }
     } catch (err) {
-      console.error('❌ [Frontend] Login error:', err);
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
-      console.log('🔓 [Frontend] Login process completed');
     }
   };
 
