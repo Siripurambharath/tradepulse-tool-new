@@ -416,7 +416,6 @@
 
 
 
-
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import {
@@ -712,30 +711,22 @@ const BuyerBulkUpload: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Enhanced Header Section */}
+        {/* Flat Header Section - No Shadows, No 3D */}
         <div className="relative mb-10">
-          {/* Background Decoration */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-indigo-600/5 to-purple-600/10 rounded-3xl blur-3xl"></div>
-          
           <div className="relative">
-            {/* Main Header Card */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 overflow-hidden">
+            {/* Flat Header Card */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
               <div className="relative p-8 md:p-10">
-                {/* Animated Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 opacity-5"></div>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-indigo-500/20 to-pink-500/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
+                {/* Simple background color */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30"></div>
                 
                 <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                   {/* Left Section - Title & Description */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      {/* Animated Icon Container */}
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur-xl opacity-30 animate-pulse"></div>
-                        <div className="relative p-3.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg shadow-blue-500/30">
-                          <FileSpreadsheet className="h-7 w-7 text-white" />
-                        </div>
+                      {/* Flat Icon Container */}
+                      <div className="p-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
+                        <FileSpreadsheet className="h-7 w-7 text-white" />
                       </div>
                       
                       <div>
@@ -743,12 +734,12 @@ const BuyerBulkUpload: React.FC = () => {
                           Bulk Buyer Upload
                         </h1>
                         <div className="flex items-center gap-2 mt-1">
-                          <Sparkles className="h-3.5 w-3.5 text-yellow-500 animate-pulse" />
-                          <span className="text-xs font-medium text-yellow-600 dark:text-yellow-400 bg-yellow-100/50 dark:bg-yellow-900/30 px-2.5 py-0.5 rounded-full border border-yellow-200 dark:border-yellow-800">
+                          <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
+                          <span className="text-xs font-medium text-yellow-600 dark:text-yellow-400 bg-yellow-100/70 dark:bg-yellow-900/40 px-2.5 py-0.5 rounded-full border border-yellow-200 dark:border-yellow-800">
                             Enterprise
                           </span>
-                          <span className="text-xs text-muted-foreground">•</span>
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="text-xs text-slate-400 dark:text-slate-500">•</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                             <Shield className="h-3 w-3" />
                             Secure Upload
                           </span>
@@ -756,23 +747,23 @@ const BuyerBulkUpload: React.FC = () => {
                       </div>
                     </div>
                     
-                    <p className="text-muted-foreground max-w-2xl text-sm md:text-base leading-relaxed">
+                    <p className="text-slate-600 dark:text-slate-300 max-w-2xl text-sm md:text-base leading-relaxed">
                       Upload multiple buyers at once using our Excel template. 
                       <span className="hidden sm:inline"> Streamline your buyer management process with bulk import.</span>
                     </p>
                   </div>
                   
-                  {/* Right Section - Quick Stats / Badges */}
+                  {/* Right Section - Flat Badges */}
                   <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
                       <Zap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                       <span className="text-xs font-medium text-blue-700 dark:text-blue-300">Bulk Import</span>
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                      <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      <span className="text-xs font-medium text-green-700 dark:text-green-300">1000+ Records</span>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                      <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">1000+ Records</span>
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg border border-purple-200 dark:border-purple-800">
                       <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                       <span className="text-xs font-medium text-purple-700 dark:text-purple-300">Quick Upload</span>
                     </div>
@@ -783,40 +774,40 @@ const BuyerBulkUpload: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden">
+        {/* Main Card - Flat Design */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="p-8">
             {/* Stats Section - Shows after upload */}
             {uploadStats && (
               <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-200 dark:border-green-800 hover:shadow-lg transition-all">
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800">
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                     <div>
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">{uploadStats.inserted}</p>
-                      <p className="text-xs text-green-700 dark:text-green-300">Inserted</p>
+                      <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{uploadStats.inserted}</p>
+                      <p className="text-xs text-emerald-700 dark:text-emerald-300">Inserted</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4 border border-yellow-200 dark:border-yellow-800 hover:shadow-lg transition-all">
+                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                    <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                     <div>
-                      <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{uploadStats.duplicates}</p>
-                      <p className="text-xs text-yellow-700 dark:text-yellow-300">Duplicates</p>
+                      <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{uploadStats.duplicates}</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-300">Duplicates</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800 hover:shadow-lg transition-all">
+                <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 border border-rose-200 dark:border-rose-800">
                   <div className="flex items-center gap-2">
-                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    <XCircle className="h-5 w-5 text-rose-600 dark:text-rose-400" />
                     <div>
-                      <p className="text-2xl font-bold text-red-600 dark:text-red-400">{uploadStats.skipped}</p>
-                      <p className="text-xs text-red-700 dark:text-red-300">Skipped</p>
+                      <p className="text-2xl font-bold text-rose-600 dark:text-rose-400">{uploadStats.skipped}</p>
+                      <p className="text-xs text-rose-700 dark:text-rose-300">Skipped</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all">
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
                   <div className="flex items-center gap-2">
                     <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     <div>
@@ -829,10 +820,10 @@ const BuyerBulkUpload: React.FC = () => {
             )}
 
             <div className="space-y-6">
-              {/* Instructions */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
+              {/* Instructions - Flat */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-500/10 rounded-xl">
+                  <div className="p-2 bg-blue-500/10 rounded-lg">
                     <Info className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="flex-1">
@@ -869,21 +860,21 @@ const BuyerBulkUpload: React.FC = () => {
                 </div>
               </div>
 
-              {/* Download Template */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 border-2 border-dashed border-green-300 dark:border-green-700">
+              {/* Download Template - Flat */}
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-6 border-2 border-dashed border-emerald-300 dark:border-emerald-700">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-green-500/20 rounded-xl">
-                      <Download className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <div className="p-3 bg-emerald-500/20 rounded-lg">
+                      <Download className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-green-800 dark:text-green-300">Get Started</h4>
-                      <p className="text-sm text-green-700 dark:text-green-400">Download the template to begin</p>
+                      <h4 className="font-semibold text-emerald-800 dark:text-emerald-300">Get Started</h4>
+                      <p className="text-sm text-emerald-700 dark:text-emerald-400">Download the template to begin</p>
                     </div>
                   </div>
                   <button
                     onClick={downloadTemplate}
-                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-medium shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30 flex items-center gap-2"
+                    className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors duration-300 font-medium flex items-center gap-2"
                   >
                     <Download className="h-4 w-4" />
                     Download Template
@@ -891,13 +882,13 @@ const BuyerBulkUpload: React.FC = () => {
                 </div>
               </div>
 
-              {/* Upload Section */}
+              {/* Upload Section - Flat */}
               <div 
-                className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 p-8 ${
+                className={`relative rounded-xl border-2 border-dashed transition-all duration-300 p-8 ${
                   dragActive 
                     ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20' 
                     : file 
-                      ? 'border-green-500 bg-green-50/30 dark:bg-green-900/10' 
+                      ? 'border-emerald-500 bg-emerald-50/30 dark:bg-emerald-900/10' 
                       : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
                 }`}
                 onDragEnter={handleDrag}
@@ -906,20 +897,20 @@ const BuyerBulkUpload: React.FC = () => {
                 onDrop={handleDrop}
               >
                 {dragActive && (
-                  <div className="absolute inset-0 bg-blue-500/10 rounded-2xl flex items-center justify-center">
+                  <div className="absolute inset-0 bg-blue-500/10 rounded-xl flex items-center justify-center">
                     <div className="text-blue-600 dark:text-blue-400 font-medium text-lg">Drop your file here</div>
                   </div>
                 )}
                 
                 <div className="text-center">
                   <div className="flex justify-center mb-4">
-                    <div className={`p-4 rounded-2xl ${
+                    <div className={`p-4 rounded-xl ${
                       file 
-                        ? 'bg-green-500/20' 
+                        ? 'bg-emerald-500/20' 
                         : 'bg-slate-100 dark:bg-slate-700'
                     }`}>
                       {file ? (
-                        <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
+                        <CheckCircle className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
                       ) : (
                         <Upload className="h-12 w-12 text-slate-400 dark:text-slate-500" />
                       )}
@@ -946,7 +937,7 @@ const BuyerBulkUpload: React.FC = () => {
                       </p>
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                       >
                         Choose File
                       </button>
@@ -956,7 +947,7 @@ const BuyerBulkUpload: React.FC = () => {
                   {file && (
                     <div className="mt-4 space-y-3">
                       <div className="flex items-center justify-center gap-3 text-sm">
-                        <FileSpreadsheet className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <FileSpreadsheet className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                         <span className="font-medium text-foreground">{file.name}</span>
                         <span className="text-muted-foreground">({formatFileSize(file.size)})</span>
                       </div>
@@ -964,10 +955,10 @@ const BuyerBulkUpload: React.FC = () => {
                         <button
                           onClick={handleUpload}
                           disabled={loading}
-                          className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
+                          className={`px-6 py-3 rounded-lg font-medium transition-colors duration-300 flex items-center gap-2 ${
                             loading
                               ? "bg-slate-400 cursor-not-allowed"
-                              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30"
+                              : "bg-blue-600 hover:bg-blue-700 text-white"
                           }`}
                         >
                           {loading ? (
@@ -984,7 +975,7 @@ const BuyerBulkUpload: React.FC = () => {
                         </button>
                         <button
                           onClick={resetForm}
-                          className="px-4 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                          className="px-4 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -997,30 +988,30 @@ const BuyerBulkUpload: React.FC = () => {
               {/* Message Display */}
               {message && (
                 <div
-                  className={`p-4 rounded-2xl flex items-start justify-between gap-4 ${
+                  className={`p-4 rounded-xl flex items-start justify-between gap-4 ${
                     messageType === "success"
-                      ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
+                      ? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
                       : messageType === "warning"
-                      ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800"
-                      : "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+                      ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
+                      : "bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800"
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    {messageType === "success" && <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />}
-                    {messageType === "warning" && <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />}
-                    {messageType === "error" && <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />}
+                    {messageType === "success" && <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mt-0.5" />}
+                    {messageType === "warning" && <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />}
+                    {messageType === "error" && <XCircle className="h-5 w-5 text-rose-600 dark:text-rose-400 mt-0.5" />}
                     <div>
                       <p className={`font-medium ${
-                        messageType === "success" ? "text-green-700 dark:text-green-300" :
-                        messageType === "warning" ? "text-yellow-700 dark:text-yellow-300" :
-                        "text-red-700 dark:text-red-300"
+                        messageType === "success" ? "text-emerald-700 dark:text-emerald-300" :
+                        messageType === "warning" ? "text-amber-700 dark:text-amber-300" :
+                        "text-rose-700 dark:text-rose-300"
                       }`}>
                         {message}
                       </p>
                       {messageType === "warning" && duplicates.length > 0 && (
                         <button
                           onClick={() => setShowDuplicates(!showDuplicates)}
-                          className="mt-2 text-sm font-medium text-yellow-700 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-100 underline flex items-center gap-1"
+                          className="mt-2 text-sm font-medium text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 underline flex items-center gap-1"
                         >
                           {showDuplicates ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                           {showDuplicates ? "Hide Duplicates" : "View Duplicates"}
@@ -1042,40 +1033,40 @@ const BuyerBulkUpload: React.FC = () => {
 
               {/* Schema Mismatch Details */}
               {schemaMismatch && (
-                <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-6">
+                <div className="bg-rose-50 dark:bg-rose-900/20 border-2 border-rose-200 dark:border-rose-800 rounded-xl p-6">
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400 mt-0.5" />
+                    <AlertCircle className="h-6 w-6 text-rose-600 dark:text-rose-400 mt-0.5" />
                     <div className="flex-1">
-                      <h4 className="font-semibold text-red-800 dark:text-red-300 text-lg mb-3">
+                      <h4 className="font-semibold text-rose-800 dark:text-rose-300 text-lg mb-3">
                         ⚠️ Schema Mismatch Detected
                       </h4>
                       <div className="space-y-4">
                         {schemaMismatch.missingColumns.length > 0 && (
                           <div>
-                            <p className="font-medium text-red-700 dark:text-red-300 mb-2">Missing Columns:</p>
+                            <p className="font-medium text-rose-700 dark:text-rose-300 mb-2">Missing Columns:</p>
                             <div className="flex flex-wrap gap-2">
                               {schemaMismatch.missingColumns.map((col, index) => (
-                                <span key={index} className="bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200 px-3 py-1.5 rounded-lg text-sm font-medium">
+                                <span key={index} className="bg-rose-200 dark:bg-rose-800 text-rose-800 dark:text-rose-200 px-3 py-1.5 rounded-lg text-sm font-medium">
                                   {col}
                                 </span>
                               ))}
                             </div>
-                            <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+                            <p className="text-sm text-rose-600 dark:text-rose-400 mt-2">
                               Please add these columns to your Excel file.
                             </p>
                           </div>
                         )}
                         {schemaMismatch.extraColumns.length > 0 && (
                           <div>
-                            <p className="font-medium text-red-700 dark:text-red-300 mb-2">Extra Columns:</p>
+                            <p className="font-medium text-rose-700 dark:text-rose-300 mb-2">Extra Columns:</p>
                             <div className="flex flex-wrap gap-2">
                               {schemaMismatch.extraColumns.map((col, index) => (
-                                <span key={index} className="bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200 px-3 py-1.5 rounded-lg text-sm font-medium">
+                                <span key={index} className="bg-rose-200 dark:bg-rose-800 text-rose-800 dark:text-rose-200 px-3 py-1.5 rounded-lg text-sm font-medium">
                                   {col}
                                 </span>
                               ))}
                             </div>
-                            <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+                            <p className="text-sm text-rose-600 dark:text-rose-400 mt-2">
                               Please remove these columns from your Excel file.
                             </p>
                           </div>
@@ -1087,7 +1078,7 @@ const BuyerBulkUpload: React.FC = () => {
                           setMessage("");
                           setMessageType("");
                         }}
-                        className="mt-4 text-sm text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-100 font-medium underline"
+                        className="mt-4 text-sm text-rose-700 dark:text-rose-300 hover:text-rose-900 dark:hover:text-rose-100 font-medium underline"
                       >
                         Close
                       </button>
@@ -1098,42 +1089,42 @@ const BuyerBulkUpload: React.FC = () => {
 
               {/* Duplicates Display */}
               {showDuplicates && duplicates.length > 0 && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-800 rounded-2xl p-6">
+                <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-xl p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-semibold text-yellow-800 dark:text-yellow-300 text-lg flex items-center gap-2">
+                    <h4 className="font-semibold text-amber-800 dark:text-amber-300 text-lg flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5" />
                       Duplicate Entries Skipped ({duplicates.length})
                     </h4>
                     <button
                       onClick={() => setShowDuplicates(false)}
-                      className="text-yellow-700 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-100"
+                      className="text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100"
                     >
                       <XCircle className="h-5 w-5" />
                     </button>
                   </div>
-                  <div className="max-h-64 overflow-y-auto rounded-xl border border-yellow-200 dark:border-yellow-800">
+                  <div className="max-h-64 overflow-y-auto rounded-lg border border-amber-200 dark:border-amber-800">
                     <table className="min-w-full text-sm">
-                      <thead className="bg-yellow-100 dark:bg-yellow-900/30">
+                      <thead className="bg-amber-100 dark:bg-amber-900/30">
                         <tr>
-                          <th className="px-4 py-3 text-left text-yellow-800 dark:text-yellow-300">
+                          <th className="px-4 py-3 text-left text-amber-800 dark:text-amber-300">
                             <div className="flex items-center gap-1">
                               <Package className="h-3 w-3" />
                               Product
                             </div>
                           </th>
-                          <th className="px-4 py-3 text-left text-yellow-800 dark:text-yellow-300">
+                          <th className="px-4 py-3 text-left text-amber-800 dark:text-amber-300">
                             <div className="flex items-center gap-1">
                               <Building2 className="h-3 w-3" />
                               Company
                             </div>
                           </th>
-                          <th className="px-4 py-3 text-left text-yellow-800 dark:text-yellow-300">
+                          <th className="px-4 py-3 text-left text-amber-800 dark:text-amber-300">
                             <div className="flex items-center gap-1">
                               <Phone className="h-3 w-3" />
                               Contacts
                             </div>
                           </th>
-                          <th className="px-4 py-3 text-left text-yellow-800 dark:text-yellow-300">
+                          <th className="px-4 py-3 text-left text-amber-800 dark:text-amber-300">
                             <div className="flex items-center gap-1">
                               <Mail className="h-3 w-3" />
                               Emails
@@ -1141,13 +1132,13 @@ const BuyerBulkUpload: React.FC = () => {
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-yellow-200 dark:divide-yellow-800">
+                      <tbody className="divide-y divide-amber-200 dark:divide-amber-800">
                         {duplicates.map((dup, index) => (
-                          <tr key={index} className="hover:bg-yellow-100/50 dark:hover:bg-yellow-900/10 transition-colors">
-                            <td className="px-4 py-3 text-yellow-800 dark:text-yellow-300 font-medium">{dup.product}</td>
-                            <td className="px-4 py-3 text-yellow-800 dark:text-yellow-300">{dup.company_name}</td>
-                            <td className="px-4 py-3 text-yellow-800 dark:text-yellow-300 text-xs">{dup.contact_numbers}</td>
-                            <td className="px-4 py-3 text-yellow-800 dark:text-yellow-300 text-xs">{dup.emails}</td>
+                          <tr key={index} className="hover:bg-amber-100/50 dark:hover:bg-amber-900/10 transition-colors">
+                            <td className="px-4 py-3 text-amber-800 dark:text-amber-300 font-medium">{dup.product}</td>
+                            <td className="px-4 py-3 text-amber-800 dark:text-amber-300">{dup.company_name}</td>
+                            <td className="px-4 py-3 text-amber-800 dark:text-amber-300 text-xs">{dup.contact_numbers}</td>
+                            <td className="px-4 py-3 text-amber-800 dark:text-amber-300 text-xs">{dup.emails}</td>
                           </tr>
                         ))}
                       </tbody>
