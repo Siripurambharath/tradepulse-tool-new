@@ -1,3 +1,87 @@
+// // AppLayout.tsx
+// import { Outlet, useLocation } from 'react-router-dom';
+// import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+// import { AppSidebar } from './AppSidebar';
+// import { Globe, Sun, Moon } from 'lucide-react';
+// import { Button } from '@/components/ui/button';
+// import { useEffect, useState } from 'react';
+
+// export function AppLayout() {
+//   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+//   const location = useLocation();
+  
+//   // Pages that should NOT show AppSidebar
+//   const noSidebarPages = ['/templates', '/users'];
+//   const isNoSidebarPage = noSidebarPages.includes(location.pathname);
+
+//   useEffect(() => {
+//     document.documentElement.classList.toggle('dark', dark);
+//   }, [dark]);
+
+//   // If on templates or adminusers page, render without AppSidebar
+//   if (isNoSidebarPage) {
+//     return (
+//       <SidebarProvider>
+//         <div className="min-h-screen flex w-full">
+//           <div className="flex-1 flex flex-col min-w-0">
+//             <header className="h-12 flex items-center justify-between border-b bg-card px-4 shrink-0">
+//               <div className="flex items-center gap-3">
+//                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
+//                   <Globe className="h-4 w-4" />
+//                   <span>Global Trade Sales Accelerator</span>
+//                 </div>
+//               </div>
+//               <Button
+//                 variant="ghost"
+//                 size="icon"
+//                 onClick={() => setDark(d => !d)}
+//                 className="h-8 w-8"
+//               >
+//                 {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+//               </Button>
+//             </header>
+//             <main className="flex-1 overflow-auto p-0 bg-background">
+//               <Outlet />
+//             </main>
+//           </div>
+//         </div>
+//       </SidebarProvider>
+//     );
+//   }
+
+//   // Normal layout with AppSidebar
+//   return (
+//     <SidebarProvider>
+//       <div className="min-h-screen flex w-full">
+//         <AppSidebar />
+//         <div className="flex-1 flex flex-col min-w-0">
+//           <header className="h-12 flex items-center justify-between border-b bg-card px-4 shrink-0">
+//             <div className="flex items-center gap-3">
+//               <SidebarTrigger className="text-muted-foreground" />
+//               <div className="flex items-center gap-2 text-sm text-muted-foreground">
+//                 <Globe className="h-4 w-4" />
+//                 <span>Global Trade Sales Accelerator</span>
+//               </div>
+//             </div>
+//             <Button
+//               variant="ghost"
+//               size="icon"
+//               onClick={() => setDark(d => !d)}
+//               className="h-8 w-8"
+//             >
+//               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+//             </Button>
+//           </header>
+//           <main className="flex-1 overflow-auto p-6 bg-background">
+//             <Outlet />
+//           </main>
+//         </div>
+//       </div>
+//     </SidebarProvider>
+//   );
+// }
+
+
 // AppLayout.tsx
 import { Outlet, useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -10,15 +94,19 @@ export function AppLayout() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
   const location = useLocation();
   
-  // Pages that should NOT show AppSidebar
-  const noSidebarPages = ['/templates', '/users'];
-  const isNoSidebarPage = noSidebarPages.includes(location.pathname);
+  // Pages that should NOT show AppSidebar (they have their own sidebar)
+  const noSidebarPages = ['/templates', '/users', '/admin/history', '/admin/historydetail'];
+  
+  // Check if current path matches any no-sidebar page
+  const isNoSidebarPage = noSidebarPages.some(page => 
+    location.pathname === page || location.pathname.startsWith('/admin/history')
+  );
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
   }, [dark]);
 
-  // If on templates or adminusers page, render without AppSidebar
+  // If on templates, users, or admin history pages, render without AppSidebar
   if (isNoSidebarPage) {
     return (
       <SidebarProvider>
