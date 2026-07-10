@@ -123,6 +123,50 @@ const AddBuyerPage = () => {
     }));
   };
 
+  // Normalize contacts to a clean array of trimmed, non-empty numbers
+  const getNormalizedContacts = () =>
+    contacts
+      .filter(c => c.contact_number && c.contact_number.trim())
+      .map(c => c.contact_number.trim());
+
+  // Normalize emails to a clean array of trimmed, non-empty emails
+  const getNormalizedEmails = () =>
+    emails
+      .filter(e => e.email && e.email.trim())
+      .map(e => e.email.trim());
+
+  // Client-side duplicate guard: catches the exact same contact number or
+  // email being entered twice within THIS form before it's even submitted.
+  // (Server-side check in buyerRoutes.js still guards against duplicates
+  // against buyers already saved in the database.)
+  const hasInFormDuplicates = () => {
+    const contactValues = getNormalizedContacts();
+    const emailValues = getNormalizedEmails().map(e => e.toLowerCase());
+
+    const uniqueContacts = new Set(contactValues);
+    const uniqueEmails = new Set(emailValues);
+
+    if (uniqueContacts.size !== contactValues.length) {
+      toast({
+        title: "Duplicate Contact",
+        description: "The same contact number has been entered more than once.",
+        variant: "destructive",
+      });
+      return true;
+    }
+
+    if (uniqueEmails.size !== emailValues.length) {
+      toast({
+        title: "Duplicate Email",
+        description: "The same email address has been entered more than once.",
+        variant: "destructive",
+      });
+      return true;
+    }
+
+    return false;
+  };
+
   // Validate form
   const validateForm = () => {
     // Check required fields
@@ -173,6 +217,11 @@ const AddBuyerPage = () => {
       }
     }
 
+    // Check for duplicate contact numbers / emails entered within this form
+    if (hasInFormDuplicates()) {
+      return false;
+    }
+
     return true;
   };
 
@@ -188,13 +237,8 @@ const AddBuyerPage = () => {
 
     try {
       // Filter out empty contacts and emails
-      const validContacts = contacts
-        .filter(c => c.contact_number && c.contact_number.trim())
-        .map(c => ({ contact_number: c.contact_number.trim() }));
-
-      const validEmails = emails
-        .filter(e => e.email && e.email.trim())
-        .map(e => ({ email: e.email.trim() }));
+      const validContacts = getNormalizedContacts().map(c => ({ contact_number: c }));
+      const validEmails = getNormalizedEmails().map(e => ({ email: e }));
 
       const payload = {
         ...formData,
@@ -224,6 +268,14 @@ const AddBuyerPage = () => {
           description: "Buyer added successfully!",
         });
         navigate('/buyers');
+      } else if (result.duplicate) {
+        // Server-side duplicate detected (same product + company_name with
+        // identical set of contacts and emails already exists in the DB)
+        toast({
+          title: "Duplicate Buyer",
+          description: result.message || "A buyer with the same product, company, contact numbers, and emails already exists.",
+          variant: "destructive",
+        });
       } else {
         throw new Error(result.message || 'Failed to add buyer');
       }
