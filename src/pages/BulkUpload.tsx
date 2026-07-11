@@ -444,8 +444,9 @@ import {
   Shield,
   Zap
 } from "lucide-react";
+import { API_URL, ACTIVITY_URL } from '@/components/api';
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = API_URL;
 
 interface DuplicateEntry {
   product: string;

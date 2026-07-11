@@ -601,6 +601,7 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import "./AddBuyerPage.css"
+import { API_URL, ACTIVITY_URL } from '@/components/api';
 
 const AddBuyerPage = () => {
   const navigate = useNavigate();
@@ -694,6 +695,51 @@ const AddBuyerPage = () => {
     }));
   };
 
+  // Normalize contacts to a clean array of trimmed, non-empty numbers
+  const getNormalizedContacts = () =>
+    contacts
+      .filter(c => c.contact_number && c.contact_number.trim())
+      .map(c => c.contact_number.trim());
+
+  // Normalize emails to a clean array of trimmed, non-empty emails
+  const getNormalizedEmails = () =>
+    emails
+      .filter(e => e.email && e.email.trim())
+      .map(e => e.email.trim());
+
+  // Client-side duplicate guard: catches the exact same contact number or
+  // email being entered twice within THIS form before it's even submitted.
+  // (Server-side check in buyerRoutes.js still guards against duplicates
+  // against buyers already saved in the database.)
+  const hasInFormDuplicates = () => {
+    const contactValues = getNormalizedContacts();
+    const emailValues = getNormalizedEmails().map(e => e.toLowerCase());
+
+    const uniqueContacts = new Set(contactValues);
+    const uniqueEmails = new Set(emailValues);
+
+    if (uniqueContacts.size !== contactValues.length) {
+      toast({
+        title: "Duplicate Contact",
+        description: "The same contact number has been entered more than once.",
+        variant: "destructive",
+      });
+      return true;
+    }
+
+    if (uniqueEmails.size !== emailValues.length) {
+      toast({
+        title: "Duplicate Email",
+        description: "The same email address has been entered more than once.",
+        variant: "destructive",
+      });
+      return true;
+    }
+
+    return false;
+  };
+
+  // Validate form
   const validateForm = () => {
     const requiredFields = ['product', 'hsn_code', 'country', 'company_name'];
     for (let field of requiredFields) {
@@ -739,6 +785,11 @@ const AddBuyerPage = () => {
       }
     }
 
+    // Check for duplicate contact numbers / emails entered within this form
+    if (hasInFormDuplicates()) {
+      return false;
+    }
+
     return true;
   };
 
@@ -771,7 +822,7 @@ const AddBuyerPage = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://localhost:5000/api/buyers', {
+      const response = await fetch(`${API_URL}/api/buyers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -788,6 +839,14 @@ const AddBuyerPage = () => {
           description: "Buyer added successfully!",
         });
         navigate('/buyers');
+      } else if (result.duplicate) {
+        // Server-side duplicate detected (same product + company_name with
+        // identical set of contacts and emails already exists in the DB)
+        toast({
+          title: "Duplicate Buyer",
+          description: result.message || "A buyer with the same product, company, contact numbers, and emails already exists.",
+          variant: "destructive",
+        });
       } else {
         throw new Error(result.message || 'Failed to add buyer');
       }
@@ -953,9 +1012,9 @@ const AddBuyerPage = () => {
                     <button 
                       type="button" 
                       onClick={() => {
-                        const dateInput = document.getElementById("buyer_date");
-                        if (dateInput) {
-                          dateInput.showPicker?.();
+                        const dateInput = document.getElementById("buyer_date") as HTMLInputElement | null;
+                        if (dateInput && "showPicker" in dateInput) {
+                          (dateInput as { showPicker?: () => void }).showPicker?.();
                         }
                       }} 
                       className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-blue-600 transition-colors"

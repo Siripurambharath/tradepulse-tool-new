@@ -24,7 +24,10 @@ import TrackingPagIndetail from "./pages/TrackingPagIndetail";
 import AdminUsers from "./pages/AdminPage/AdminUsers";
 import AddBuyerPage from "./pages/AddBuyerPage"
 import BuyerBulkUpload from "./pages/BulkUpload";
-
+import AdminHistoryPage from "./pages/AdminPage/AdminHistorypage";
+import AdminHistoryDetail from "./pages/AdminPage/AdminHistoryDetail";
+import AdminSeller from "./pages/AdminPage/AdminSeller";
+import AdminTracker from "./pages/AdminPage/TrackingPage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -66,6 +69,11 @@ const App = () => (
                   <Route path="/users" element={<AdminUsers />} />
                   <Route path="/add-buyer" element={<AddBuyerPage />} />
                   <Route path="/bulk-upload" element={<BuyerBulkUpload />} />
+                  <Route path="/admin/history" element={<AdminHistoryPage />} />
+                  <Route path="/admin/historydetail" element={<AdminHistoryDetail />} />
+                  <Route path="/admin/sellers" element={<AdminSeller />} />
+                  <Route path="/admin/tracking/:sellerId" element={<AdminTracker />} />
+<Route path="/admin/historydetail/:id" element={<AdminHistoryDetail />} />
             </Route>
           </Route>
 

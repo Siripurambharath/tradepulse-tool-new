@@ -694,8 +694,11 @@ import {
 } from 'lucide-react';
 import EmailModal from '@/components/EmailModal';
 import { toast } from 'sonner';
+import { ACTIVITY_URL, API_URL } from '@/components/api';
+import { useEmailConfigCheck } from '@/hooks/Emailconfigcheck';
+import EmailConfigModal from '@/components/EmailcheckModal';
 
-const API = 'http://localhost:5000';
+const API = API_URL;
 
 interface Buyer {
   buyer_id: number;
@@ -749,7 +752,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -893,6 +896,9 @@ export default function SearchPage() {
   const [submittingId, setSubmittingId] = useState<number | null>(null);
 
   const perPage = 50;
+
+  // Initialize email config check hook
+  const { checkEmailConfig, modalOpen, modalMessage, setModalOpen } = useEmailConfigCheck();
 
   /* Load Filters */
   useEffect(() => {
@@ -1091,7 +1097,11 @@ export default function SearchPage() {
             </p>
           </div>
           <Button 
-            onClick={() => {
+            onClick={async () => {
+              // Check email config first
+              const ok = await checkEmailConfig();
+              if (!ok) return;
+              
               setEmailOpen(true);
               createActivityLog(6, 3, 'Opened email modal', { selected_count: selected.size });
             }} 
@@ -1405,6 +1415,12 @@ export default function SearchPage() {
         product={getProductToSend()}
         multipleProducts={isMultipleProductsSelected()}
         onClose={() => setEmailOpen(false)}
+      />
+
+      <EmailConfigModal
+        open={modalOpen}
+        message={modalMessage}
+        onClose={() => setModalOpen(false)}
       />
     </div>
   );
