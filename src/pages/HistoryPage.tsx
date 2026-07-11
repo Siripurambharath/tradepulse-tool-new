@@ -812,7 +812,7 @@ export default function HistoryPage() {
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 border border-primary/10">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 border border-primary/10 mt-10">
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div>

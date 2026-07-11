@@ -730,9 +730,9 @@ const BuyerBulkUpload: React.FC = () => {
                       </div>
                       
                       <div>
-                        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
-                          Bulk Buyer Upload
-                        </h1>
+                       <h1 className="text-3xl md:text-4xl font-bold text-[#0B1849] dark:text-[#0B1849]">
+                Bulk Buyer Upload
+                </h1>
                         <div className="flex items-center gap-2 mt-1">
                           <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
                           <span className="text-xs font-medium text-yellow-600 dark:text-yellow-400 bg-yellow-100/70 dark:bg-yellow-900/40 px-2.5 py-0.5 rounded-full border border-yellow-200 dark:border-yellow-800">
