@@ -16,8 +16,8 @@ import {
 
 const navItems = [
   { title: 'Templates', url: '/templates', icon: FileText },
-  { title: 'Users', url: '/users', icon: Megaphone },
-  { title: 'History', url: '/admin/history', icon: Clock },
+  { title: 'Users', url: '/adminusers', icon: Megaphone },
+  // { title: 'History', url: '/admin/history', icon: Clock },
   { title: 'Sellers', url: '/admin/sellers', icon: BarChart3 },
 ];
 

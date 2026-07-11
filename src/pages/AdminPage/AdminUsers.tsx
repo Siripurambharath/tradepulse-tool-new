@@ -1,82 +1,77 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom'; // Add this import
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, RefreshCw, User, Activity, Clock, Mail, Globe } from 'lucide-react';
+import { Search, RefreshCw, User, Mail, Shield, Users, RefreshCw as RefreshIcon } from 'lucide-react';
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Pagination } from './Pagination';
-import { ACTIVITY_URL } from '@/components/api';
+import {API_URL} from "@/components/api"
 
-interface ActivityLog {
-  id: number;
-  user_id: string;
-  user_name: string;
+
+interface User {
+  user_id: number;
+  id: string;
+  email: string;
   role: string;
-  action_id: number;
-  action_name: string;
-  module_id: number;
-  module_name: string;
-  description: string;
-  ip_address: string;
-  device: string;
-  status: string;
-  created_at: string;
+  email_sent: number;
+  email_config: number;
 }
 
-const AdminUsers = () => {
-  const [logs, setLogs] = useState<ActivityLog[]>([]);
+const Adminusers = () => {
+  const navigate = useNavigate(); // Add navigate hook
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [moduleFilter, setModuleFilter] = useState('all');
-  const [actionFilter, setActionFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [itemsPerPageOptions] = useState([5, 10, 20, 50, 100]);
 
-  // Get unique modules and actions for filters
-  const modules = [...new Set(logs.map(log => log.module_name))].sort();
-  const actions = [...new Set(logs.map(log => log.action_name))].sort();
+  // Get unique roles for filter
+  const roles = [...new Set(users.map(user => user.role))].sort();
 
   useEffect(() => {
-    fetchActivityLogs();
+    fetchUsers();
   }, []);
 
-  const fetchActivityLogs = async () => {
+  const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${ACTIVITY_URL}/api/activity-log`);
+      const response = await fetch(`${API_URL}/users`);
       const data = await response.json();
       
-      if (data.success) { 
-        setLogs(data.data);
+      if (data.success) {
+        setUsers(data.data);
       }
     } catch (error) {
-      console.error('Error fetching activity logs:', error);
+      console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter logs
-  const filteredLogs = logs.filter(log => {
+  // Handle email click - navigate to tracking page with seller ID
+  const handleEmailClick = (userId: string) => {
+    // Navigate to tracking page with the user ID
+    navigate(`/usersindetail/${userId}`);
+  };
+
+  // Filter users
+  const filteredUsers = users.filter(user => {
     const matchesSearch = !searchQuery || 
-      log.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.action_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.module_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.ip_address.includes(searchQuery);
+      user.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesModule = moduleFilter === 'all' || log.module_name === moduleFilter;
-    const matchesAction = actionFilter === 'all' || log.action_name === actionFilter;
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     
-    return matchesSearch && matchesModule && matchesAction;
+    return matchesSearch && matchesRole;
   });
 
   // Pagination
-  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-  const paginatedLogs = filteredLogs.slice(
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -84,37 +79,29 @@ const AdminUsers = () => {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, moduleFilter, actionFilter, itemsPerPage]);
+  }, [searchQuery, roleFilter, itemsPerPage]);
 
-  const getStatusBadge = (status: string) => {
-    if (status === 'SUCCESS') {
-      return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">✓ Success</Badge>;
-    }
-    return <Badge variant="secondary">{status}</Badge>;
+  const getRoleBadge = (role: string) => {
+    const colors: Record<string, string> = {
+      'admin': 'bg-red-100 text-red-700',
+      'seller': 'bg-blue-100 text-blue-700',
+      'user': 'bg-green-100 text-green-700',
+    };
+    return (
+      <Badge className={`${colors[role] || 'bg-gray-100 text-gray-700'} hover:${colors[role] || 'bg-gray-100'}`}>
+        {role.charAt(0).toUpperCase() + role.slice(1)}
+      </Badge>
+    );
   };
 
-const getActionBadge = (actionName: string) => {
-  const colors: Record<string, string> = {
-    'LOGIN': 'text-blue-600',
-    'Products Table': 'text-purple-600',
-    'Contacts Table': 'text-indigo-600',
-    'Tracking Table': 'text-cyan-600',
-    'Analytics Dashboard Page': 'text-emerald-600',
-    'History Page': 'text-amber-600',
-    'Email Configuration Page': 'text-pink-600',
-  };
-  return <span className={`font-medium ${colors[actionName] || 'text-gray-600'}`}>{actionName}</span>;
-};
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
+  const getStatusBadge = (status: number, type: string) => {
+    const isEnabled = status === 1;
+    const label = type === 'sent' ? 'Email Sent' : 'Email Config';
+    return (
+      <Badge className={isEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}>
+        {isEnabled ? '✓' : '✗'} {label}
+      </Badge>
+    );
   };
 
   const handlePageChange = (page: number) => {
@@ -134,14 +121,14 @@ const getActionBadge = (actionName: string) => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Activity className="h-6 w-6 text-primary" />
-              Activity Log
+              <Users className="h-6 w-6 text-primary" />
+              Users
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Track all user activities across the platform
+              Manage and view all registered users
             </p>
           </div>
-          <Button onClick={fetchActivityLogs} disabled={loading} variant="outline">
+          <Button onClick={fetchUsers} disabled={loading} variant="outline">
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
@@ -153,11 +140,11 @@ const getActionBadge = (actionName: string) => {
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-100">
-                  <Activity className="h-5 w-5 text-blue-600" />
+                  <Users className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{logs.length}</p>
-                  <p className="text-xs text-muted-foreground">Total Activities</p>
+                  <p className="text-2xl font-bold">{users.length}</p>
+                  <p className="text-xs text-muted-foreground">Total Users</p>
                 </div>
               </div>
             </CardContent>
@@ -166,11 +153,11 @@ const getActionBadge = (actionName: string) => {
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-green-100">
-                  <User className="h-5 w-5 text-green-600" />
+                  <Shield className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{new Set(logs.map(l => l.user_name)).size}</p>
-                  <p className="text-xs text-muted-foreground">Unique Users</p>
+                  <p className="text-2xl font-bold">{users.filter(u => u.role === 'admin').length}</p>
+                  <p className="text-xs text-muted-foreground">Admins</p>
                 </div>
               </div>
             </CardContent>
@@ -179,11 +166,11 @@ const getActionBadge = (actionName: string) => {
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-purple-100">
-                  <Globe className="h-5 w-5 text-purple-600" />
+                  <Mail className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{new Set(logs.map(l => l.module_name)).size}</p>
-                  <p className="text-xs text-muted-foreground">Modules Used</p>
+                  <p className="text-2xl font-bold">{users.filter(u => u.email_sent === 1).length}</p>
+                  <p className="text-xs text-muted-foreground">Email Sent</p>
                 </div>
               </div>
             </CardContent>
@@ -192,11 +179,11 @@ const getActionBadge = (actionName: string) => {
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-amber-100">
-                  <Clock className="h-5 w-5 text-amber-600" />
+                  <RefreshIcon className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{new Set(logs.map(l => l.action_name)).size}</p>
-                  <p className="text-xs text-muted-foreground">Actions Performed</p>
+                  <p className="text-2xl font-bold">{users.filter(u => u.email_config === 1).length}</p>
+                  <p className="text-xs text-muted-foreground">Email Configured</p>
                 </div>
               </div>
             </CardContent>
@@ -210,34 +197,24 @@ const getActionBadge = (actionName: string) => {
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by user, action, module..."
+                  placeholder="Search by user ID or email..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
-              <Select value={moduleFilter} onValueChange={setModuleFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All Modules" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Modules</SelectItem>
-                  {modules.map(module => (
-                    <SelectItem key={module} value={module}>{module}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={actionFilter} onValueChange={setActionFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All Actions" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Actions</SelectItem>
-                  {actions.map(action => (
-                    <SelectItem key={action} value={action}>{action}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select
+                value={roleFilter}
+                onChange={e => setRoleFilter(e.target.value)}
+                className="px-3 py-2 rounded-md border bg-background text-sm"
+              >
+                <option value="all">All Roles</option>
+                {roles.map(role => (
+                  <option key={role} value={role}>
+                    {role.charAt(0).toUpperCase() + role.slice(1)}
+                  </option>
+                ))}
+              </select>
             </div>
           </CardContent>
         </Card>
@@ -249,62 +226,61 @@ const getActionBadge = (actionName: string) => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/30">
-                    <th className="p-3 text-left font-medium text-foreground">S.NO</th>
-                    <th className="p-3 text-left font-medium text-foreground">Users</th>
-                    <th className="p-3 text-left font-medium text-foreground">Action</th>
-                    <th className="p-3 text-left font-medium text-foreground">Module</th>
-                    <th className="p-3 text-left font-medium text-foreground">Description</th>
-                    <th className="p-3 text-left font-medium text-foreground">IP Address</th>
-                    <th className="p-3 text-left font-medium text-foreground">Device</th>
-                    <th className="p-3 text-left font-medium text-foreground min-w-[160px]">Time</th>
+                    <th className="p-3 text-left font-medium text-foreground">#</th>
+                    <th className="p-3 text-left font-medium text-foreground">User ID</th>
+                    <th className="p-3 text-left font-medium text-foreground">Email</th>
+                    <th className="p-3 text-left font-medium text-foreground">Role</th>
+                    <th className="p-3 text-center font-medium text-foreground">Email Sent</th>
+                    <th className="p-3 text-center font-medium text-foreground">Email Config</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={9} className="text-center py-8">
+                      <td colSpan={6} className="text-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                        <p className="mt-2 text-muted-foreground">Loading activity logs...</p>
+                        <p className="mt-2 text-muted-foreground">Loading users...</p>
                       </td>
                     </tr>
-                  ) : paginatedLogs.length === 0 ? (
+                  ) : paginatedUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="text-center py-8 text-muted-foreground">
-                        No activity logs found
+                      <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                        No users found
                       </td>
                     </tr>
                   ) : (
-                    paginatedLogs.map((log, index) => (
-                      <tr key={log.id} className="border-b hover:bg-muted/20 transition-colors">
-                        <td className="p-3 font-medium">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                    paginatedUsers.map((user, index) => (
+                      <tr key={user.user_id} className="border-b hover:bg-muted/20 transition-colors">
+                        <td className="p-3 font-medium">
+                          {(currentPage - 1) * itemsPerPage + index + 1}
+                        </td>
                         <td className="p-3">
                           <div className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                               <User className="h-3 w-3 text-primary" />
                             </div>
-                            <div>
-                              <p className="font-medium text-sm">{log.user_name}</p>
-                              <p className="text-xs text-muted-foreground">{log.role}</p>
-                            </div>
+                            <span className="font-mono text-xs">{user.id}</span>
                           </div>
                         </td>
-                        <td className="p-3">{getActionBadge(log.action_name)}</td>
                         <td className="p-3">
-                          <Badge variant="outline">{log.module_name}</Badge>
+                          {/* Make email clickable */}
+                          <button
+                            onClick={() => handleEmailClick(user.id)}
+                            className="text-primary hover:underline hover:text-blue-600 transition-colors cursor-pointer flex items-center gap-1 group"
+                          >
+                            <Mail className="h-3.5 w-3.5" />
+                            {user.email}
+                            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                              (view tracking)
+                            </span>
+                          </button>
                         </td>
-                        <td className="p-3 max-w-xs">
-                          <p className="truncate" title={log.description}>{log.description}</p>
+                        <td className="p-3">{getRoleBadge(user.role)}</td>
+                        <td className="p-3 text-center">
+                          {getStatusBadge(user.email_sent, 'sent')}
                         </td>
-                        <td className="p-3">
-                          <code className="text-xs bg-muted px-2 py-1 rounded">{log.ip_address}</code>
-                        </td>
-                        <td className="p-3">
-                          <span className="text-xs">{log.device}</span>
-                        </td>
-                        <td className="p-3 min-w-[160px]">
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
-                            {formatDate(log.created_at)}
-                          </div>
+                        <td className="p-3 text-center">
+                          {getStatusBadge(user.email_config, 'config')}
                         </td>
                       </tr>
                     ))
@@ -314,11 +290,11 @@ const getActionBadge = (actionName: string) => {
             </div>
 
             {/* Pagination Component */}
-            {filteredLogs.length > 0 && (
+            {filteredUsers.length > 0 && (
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
-                totalItems={filteredLogs.length}
+                totalItems={filteredUsers.length}
                 itemsPerPage={itemsPerPage}
                 onPageChange={handlePageChange}
                 onItemsPerPageChange={handleItemsPerPageChange}
@@ -332,4 +308,4 @@ const getActionBadge = (actionName: string) => {
   );
 };
 
-export default AdminUsers;
+export default Adminusers;
