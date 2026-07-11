@@ -409,6 +409,8 @@ import {
   Calendar, ArrowUpRight, LayoutGrid, List, Send
 } from 'lucide-react';
 import axios from 'axios';
+import { ACTIVITY_URL, API_URL } from '@/components/api';
+const API = API_URL;
 
 // Activity Log Helper Functions
 const getDeviceInfo = () => {
@@ -450,7 +452,7 @@ const createActivityLog = async (actionId: number, moduleId: number, description
       ...additionalData
     };
 
-    const response = await fetch(`http://localhost:5001/api/activity-log`, {
+    const response = await fetch(`${ACTIVITY_URL}/api/activity-log`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -512,7 +514,7 @@ export default function ContactsPage() {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5000/api/contacts?seller_id=${sellerId}`);
+      const response = await axios.get(`${API}/api/contacts?seller_id=${sellerId}`);
       if (response.data.success) {
         setContacts(response.data.data);
         console.log('Fetched contacts:', response.data.data);

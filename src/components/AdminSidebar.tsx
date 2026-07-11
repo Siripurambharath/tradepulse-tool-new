@@ -17,6 +17,7 @@ import {
 const navItems = [
   { title: 'Templates', url: '/templates', icon: FileText },
   { title: 'Users', url: '/users', icon: Megaphone },
+  { title: 'History', url: '/admin/history', icon: Clock },
 ];
 
 export function AdminSidebar() {

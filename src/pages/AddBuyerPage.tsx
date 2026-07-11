@@ -601,6 +601,7 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import "./AddBuyerPage.css"
+import { API_URL, ACTIVITY_URL } from '@/components/api';
 
 const AddBuyerPage = () => {
   const navigate = useNavigate();
@@ -771,7 +772,7 @@ const AddBuyerPage = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://localhost:5000/api/buyers', {
+      const response = await fetch(`${API_URL}/api/buyers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

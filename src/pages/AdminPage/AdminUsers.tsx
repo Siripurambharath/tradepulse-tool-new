@@ -49,7 +49,7 @@ const AdminUsers = () => {
       const response = await fetch(`${ACTIVITY_URL}/api/activity-log`);
       const data = await response.json();
       
-      if (data.success) {
+      if (data.success) { 
         setLogs(data.data);
       }
     } catch (error) {
