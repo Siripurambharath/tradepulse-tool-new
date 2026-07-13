@@ -170,7 +170,9 @@
 //   );
 // }
 
-// AppLayout.tsx
+
+
+
 import { Outlet, useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
@@ -179,50 +181,116 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import "./AppLayout.css";
 
 export function AppLayout() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
   const location = useLocation();
   
   // Pages that should NOT show AppSidebar (they have their own sidebar)
-
-
-  const noSidebarPages = ['/templates', '/adminusers', '/admin/history', '/admin/historydetail', '/admin/sellers', ];
+  const noSidebarPages = ['/adminusers', '/admin/history', '/admin/historydetail', '/admin/sellers'];
   
   // Check if current path matches any no-sidebar page
   const isNoSidebarPage = noSidebarPages.some(page => 
-   location.pathname === page || location.pathname.startsWith('/admin/history') || location.pathname.startsWith('/admin/tracking') || location.pathname.startsWith('/usersindetail')
+    location.pathname === page || 
+    location.pathname.startsWith('/admin/history') || 
+    location.pathname.startsWith('/admin/tracking') || 
+    location.pathname.startsWith('/usersindetail')
   );
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
   }, [dark]);
 
-  // If on templates, users, or admin history pages, render without AppSidebar
+  // Full header shared by both layouts
+  const renderFullHeader = (showSidebarTrigger: boolean) => (
+    <header 
+      className="h-14 flex items-center justify-between px-4 shrink-0 fixed top-0 right-0 left-0 z-50 gap-4 bg-card content-space"
+      style={{ 
+        left: showSidebarTrigger ? 'var(--sidebar-width, 240px)' : 0,
+        right: 0,
+        borderBottom: '1px solid #40A2E3',
+      }}
+    >
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {showSidebarTrigger && <SidebarTrigger className="text-muted-foreground shrink-0" />}
+        
+        {/* Search Bar */}
+        <div className="relative flex-1 max-w-xl min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#499A13' }} />
+          <Input
+            placeholder="Search buyers, RFQs, products, documents..."
+            className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1 text-sm focus-visible:ring-[#499A13] w-full"
+            style={{ 
+              '--ring-color': '#499A13',
+              borderColor: '#499A13'
+            } as React.CSSProperties}
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 shrink-0">
+        {/* Upgrade Button */}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-8 px-3 text-xs font-medium hover:bg-[#499A13]/10 shrink-0"
+          style={{ 
+            borderColor: '#499A13',
+            color: '#499A13'
+          }}
+        >
+          <Sparkles className="h-3 w-3 mr-1" style={{ color: '#499A13' }} />
+          Upgrade
+        </Button>
+
+        {/* User/Avatar */}
+        <div className="flex items-center gap-2 ml-2 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <div 
+              className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-medium text-white shrink-0"
+              style={{ backgroundColor: '#499A13' }}
+            >
+              iii
+            </div>
+            <span className="text-sm font-medium hidden sm:inline">iiiqbets</span>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+        </div>
+
+        {/* Accelerator Badge */}
+        <Badge 
+          variant="secondary" 
+          className="h-6 px-2 text-[10px] font-medium border shrink-0"
+          style={{ 
+            backgroundColor: '#499A13',
+            color: 'white',
+            borderColor: '#499A13'
+          }}
+        >
+          Accelerator
+        </Badge>
+
+        {/* Dark mode toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setDark(d => !d)}
+          className="h-8 w-8 ml-1 shrink-0"
+        >
+          {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
+      </div>
+    </header>
+  );
+
+  // No-sidebar layout (admin pages with their own sidebar)
   if (isNoSidebarPage) {
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <div className="flex-1 flex flex-col min-w-0">
-            {/* Fixed header with bottom border color #40A2E3 */}
-            <header 
-              className="h-14 flex items-center justify-between border-b px-6 shrink-0 fixed top-0 left-0 right-0 z-50 bg-card"
-              style={{ borderBottomColor: '#40A2E3' }}
-            >
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Globe className="h-4 w-4" style={{ color: '#499A13' }} />
-                <span>Global Trade Sales Accelerator</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setDark(d => !d)}
-                className="h-8 w-8"
-              >
-                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
-            </header>
-            {/* Add padding-top to account for fixed header */}
+            {renderFullHeader(false)}
             <main className="flex-1 overflow-auto pt-14 bg-background">
               <Outlet />
             </main>
@@ -232,93 +300,14 @@ export function AppLayout() {
     );
   }
 
-  // Normal layout with AppSidebar - matching the image design
+  // Normal layout with AppSidebar
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Fixed header with bottom border color #40A2E3 */}
-          <header 
-            className="h-14 flex items-center justify-between px-4 shrink-0 fixed top-0 right-0 left-0 z-50 gap-4 bg-card"
-            style={{ 
-              left: 'var(--sidebar-width, 240px)',
-              borderBottom: '1px solid #40A2E3'
-            }}
-          >
-            <div className="flex items-center gap-3 flex-1">
-              <SidebarTrigger className="text-muted-foreground" />
-              
-              {/* Search Bar - matches image */}
-              <div className="relative flex-1 max-w-xl">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#499A13' }} />
-                <Input
-                  placeholder="Search buyers, RFQs, products, documents..."
-                  className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1 text-sm focus-visible:ring-[#499A13]"
-                  style={{ 
-                    '--ring-color': '#499A13',
-                    borderColor: '#499A13'
-                  } as React.CSSProperties}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Upgrade Button - matches image with #499A13 color */}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8 px-3 text-xs font-medium hover:bg-[#499A13]/10"
-                style={{ 
-                  borderColor: '#499A13',
-                  color: '#499A13'
-                }}
-              >
-                <Sparkles className="h-3 w-3 mr-1" style={{ color: '#499A13' }} />
-                Upgrade
-              </Button>
-
-              {/* User/Avatar section - matches image */}
-              <div className="flex items-center gap-2 ml-2">
-                <div className="flex items-center gap-1.5">
-                  <div 
-                    className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-medium text-white"
-                    style={{ backgroundColor: '#499A13' }}
-                  >
-                    iii
-                  </div>
-                  <span className="text-sm font-medium">iiiqbets</span>
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                </div>
-              </div>
-
-              {/* Accelerator Badge - matches image with #499A13 color */}
-              <Badge 
-                variant="secondary" 
-                className="h-6 px-2 text-[10px] font-medium border"
-                style={{ 
-                  backgroundColor: '#499A13',
-                  color: 'white',
-                  borderColor: '#499A13'
-                }}
-              >
-                Accelerator
-              </Badge>
-
-              {/* Dark mode toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setDark(d => !d)}
-                className="h-8 w-8 ml-1"
-              >
-                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
-            </div>
-          </header>
-          
-          {/* Add padding-top to account for fixed header */}
-          <main className="flex-1 overflow-auto pt-14 p-6 bg-background">
+          {renderFullHeader(true)}
+          <main className="flex-1 overflow-auto pt-14 bg-background">
             <Outlet />
           </main>
         </div>

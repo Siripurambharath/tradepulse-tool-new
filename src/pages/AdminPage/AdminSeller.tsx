@@ -8,6 +8,7 @@ import { Search, RefreshCw, User, Mail, Shield, Users, RefreshCw as RefreshIcon 
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Pagination } from './Pagination';
 import {API_URL} from "@/components/api"
+import './AdminUsers.css';
 
 interface User {
   user_id: number;
@@ -115,7 +116,7 @@ const AdminUsers = () => {
   return (
     <div className="flex h-screen w-full">
       <AdminSidebar />
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-6 content-space">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -308,3 +309,6 @@ const AdminUsers = () => {
 };
 
 export default AdminUsers;
+
+
+

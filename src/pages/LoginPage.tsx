@@ -316,14 +316,7 @@ export default function LoginPage() {
                   </button>
                 </div>
 
-                <div className="text-center mb-5">
-                  <a
-                    href="#"
-                    className="text-sm text-[#0B1849] hover:text-[#499A13] hover:underline transition-colors"
-                  >
-                    Forgot Password?
-                  </a>
-                </div>
+              
 
                 {/* Error Message */}
                 {error && (
@@ -338,14 +331,7 @@ export default function LoginPage() {
                   {loading ? "Signing in..." : "Login"}
                 </button>
 
-                <div className="text-center mt-6">
-                  <a
-                    href="#"
-                    className="text-[#0B1849] font-semibold hover:text-[#499A13] hover:underline transition-colors"
-                  >
-                    Create Account
-                  </a>
-                </div>
+               
               </form>
             </div>
           </div>
