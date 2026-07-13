@@ -84,12 +84,12 @@ const Adminusers = () => {
 
   const getRoleBadge = (role: string) => {
     const colors: Record<string, string> = {
-      'admin': 'bg-red-100 text-red-700',
-      'seller': 'bg-blue-100 text-blue-700',
-      'user': 'bg-green-100 text-green-700',
+      'admin': 'bg-red-100 text-red-700 border border-red-200',
+      'seller': 'bg-blue-100 text-blue-700 border border-blue-200',
+      'user': 'bg-green-100 text-green-700 border border-green-200',
     };
     return (
-      <Badge className={`${colors[role] || 'bg-gray-100 text-gray-700'} hover:${colors[role] || 'bg-gray-100'}`}>
+      <Badge className={`${colors[role] || 'bg-gray-100 text-gray-700 border border-gray-200'} font-medium hover:${colors[role] || 'bg-gray-100'}`}>
         {role.charAt(0).toUpperCase() + role.slice(1)}
       </Badge>
     );
@@ -99,7 +99,7 @@ const Adminusers = () => {
     const isEnabled = status === 1;
     const label = type === 'sent' ? 'Email Sent' : 'Email Config';
     return (
-      <Badge className={isEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}>
+      <Badge className={isEnabled ? 'bg-green-100 text-green-700 border border-green-200 font-medium' : 'bg-gray-100 text-gray-500 border border-gray-200 font-medium'}>
         {isEnabled ? '✓' : '✗'} {label}
       </Badge>
     );
@@ -129,61 +129,61 @@ const Adminusers = () => {
               Manage and view all registered users
             </p>
           </div>
-          <Button onClick={fetchUsers} disabled={loading} variant="outline">
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <Button onClick={fetchUsers} disabled={loading} variant="outline" className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="pt-4">
+          <Card className="border-border/60 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
+            <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-100">
+                <div className="p-2.5 rounded-xl bg-blue-100 ring-1 ring-blue-200/60">
                   <Users className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{users.length}</p>
+                  <p className="text-2xl font-bold text-foreground leading-tight">{users.length}</p>
                   <p className="text-xs text-muted-foreground">Total Users</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-4">
+          <Card className="border-border/60 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300">
+            <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-100">
-                  <Shield className="h-5 w-5 text-green-600" />
+                <div className="p-2.5 rounded-xl bg-red-100 ring-1 ring-red-200/60">
+                  <Shield className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{users.filter(u => u.role === 'admin').length}</p>
+                  <p className="text-2xl font-bold text-foreground leading-tight">{users.filter(u => u.role === 'admin').length}</p>
                   <p className="text-xs text-muted-foreground">Admins</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-4">
+          <Card className="border-border/60 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-300">
+            <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-purple-100">
+                <div className="p-2.5 rounded-xl bg-purple-100 ring-1 ring-purple-200/60">
                   <Mail className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{users.filter(u => u.email_sent === 1).length}</p>
+                  <p className="text-2xl font-bold text-foreground leading-tight">{users.filter(u => u.email_sent === 1).length}</p>
                   <p className="text-xs text-muted-foreground">Email Sent</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-4">
+          <Card className="border-border/60 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300">
+            <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-amber-100">
+                <div className="p-2.5 rounded-xl bg-amber-100 ring-1 ring-amber-200/60">
                   <RefreshIcon className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{users.filter(u => u.email_config === 1).length}</p>
+                  <p className="text-2xl font-bold text-foreground leading-tight">{users.filter(u => u.email_config === 1).length}</p>
                   <p className="text-xs text-muted-foreground">Email Configured</p>
                 </div>
               </div>
@@ -192,7 +192,7 @@ const Adminusers = () => {
         </div>
 
         {/* Filters */}
-        <Card className="mb-6">
+        <Card className="mb-6 border-border/60 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-3">
               <div className="relative flex-1 min-w-[200px]">
@@ -207,7 +207,7 @@ const Adminusers = () => {
               <select
                 value={roleFilter}
                 onChange={e => setRoleFilter(e.target.value)}
-                className="px-3 py-2 rounded-md border bg-background text-sm"
+                className="px-3 py-2 rounded-md border bg-background text-sm hover:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
               >
                 <option value="all">All Roles</option>
                 {roles.map(role => (
@@ -221,57 +221,62 @@ const Adminusers = () => {
         </Card>
 
         {/* Table */}
-        <Card>
+        <Card className="border-border/60 shadow-sm">
           <CardContent className="pt-6">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border border-border/60">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-muted/30">
-                    <th className="p-3 text-left font-medium text-foreground">#</th>
-                    <th className="p-3 text-left font-medium text-foreground">User ID</th>
-                    <th className="p-3 text-left font-medium text-foreground">Email</th>
-                    <th className="p-3 text-left font-medium text-foreground">Role</th>
-                    <th className="p-3 text-center font-medium text-foreground">Email Sent</th>
-                    <th className="p-3 text-center font-medium text-foreground">Email Config</th>
+                  <tr className="border-b bg-muted/40">
+                    <th className="p-3 text-left font-semibold text-foreground text-xs uppercase tracking-wide">#</th>
+                    <th className="p-3 text-left font-semibold text-foreground text-xs uppercase tracking-wide">User ID</th>
+                    <th className="p-3 text-left font-semibold text-foreground text-xs uppercase tracking-wide">Email</th>
+                    <th className="p-3 text-left font-semibold text-foreground text-xs uppercase tracking-wide">Role</th>
+                    <th className="p-3 text-center font-semibold text-foreground text-xs uppercase tracking-wide">Email Sent</th>
+                    <th className="p-3 text-center font-semibold text-foreground text-xs uppercase tracking-wide">Email Config</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                        <p className="mt-2 text-muted-foreground">Loading users...</p>
+                      <td colSpan={6} className="text-center py-10">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto"></div>
+                        <p className="mt-3 text-muted-foreground text-sm">Loading users...</p>
                       </td>
                     </tr>
                   ) : paginatedUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No users found
+                      <td colSpan={6} className="text-center py-10">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                            <Users className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <p className="text-muted-foreground text-sm">No users found</p>
+                        </div>
                       </td>
                     </tr>
                   ) : (
                     paginatedUsers.map((user, index) => (
-                      <tr key={user.user_id} className="border-b hover:bg-muted/20 transition-colors">
-                        <td className="p-3 font-medium">
+                      <tr key={user.user_id} className="border-b last:border-b-0 hover:bg-muted/30 transition-colors">
+                        <td className="p-3 font-medium text-muted-foreground">
                           {(currentPage - 1) * itemsPerPage + index + 1}
                         </td>
                         <td className="p-3">
                           <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
                               <User className="h-3 w-3 text-primary" />
                             </div>
-                            <span className="font-mono text-xs">{user.id}</span>
+                            <span className="font-mono text-xs text-foreground">{user.id}</span>
                           </div>
                         </td>
                         <td className="p-3">
                           {/* Make email clickable */}
                           <button
                             onClick={() => handleEmailClick(user.id)}
-                            className="text-primary hover:underline hover:text-blue-600 transition-colors cursor-pointer flex items-center gap-1 group"
+                            className="text-primary hover:underline hover:text-blue-600 transition-colors cursor-pointer flex items-center gap-1.5 group"
                           >
                             <Mail className="h-3.5 w-3.5" />
                             {user.email}
-                            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                               (view tracking)
                             </span>
                           </button>
