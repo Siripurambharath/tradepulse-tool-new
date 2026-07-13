@@ -17,6 +17,8 @@ import {
   deleteTemplate
 } from './EmailTemplates';
 import  {AdminSidebar}  from "@/components/AdminSidebar";
+import './TemplatePage.css';
+
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState([]);
@@ -67,9 +69,9 @@ export default function TemplatesPage() {
   return (
       <div className="flex h-screen w-full">
         <AdminSidebar />
-          <div className="p-6 max-w-7xl mx-auto">
+          <div className="p-6 max-w-7xl mx-auto content-space">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 space-content">
               <h1 className="text-2xl font-bold text-foreground">
                 Email Templates
               </h1>

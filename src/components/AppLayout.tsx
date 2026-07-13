@@ -187,7 +187,7 @@ export function AppLayout() {
   // Pages that should NOT show AppSidebar (they have their own sidebar)
 
 
-  const noSidebarPages = ['/templates', '/adminusers', '/admin/history', '/admin/historydetail', '/admin/sellers', ];
+  const noSidebarPages = [ ];
   
   // Check if current path matches any no-sidebar page
   const isNoSidebarPage = noSidebarPages.some(page => 
