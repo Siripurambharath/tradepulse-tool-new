@@ -602,7 +602,7 @@ const AdminUsers = () => {
                     <th className="p-4 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">Role</th>
                     <th className="p-4 text-center font-semibold text-slate-600 text-xs uppercase tracking-wider">Email Sent</th>
                     <th className="p-4 text-center font-semibold text-slate-600 text-xs uppercase tracking-wider">Email Config</th>
-                    <th className="p-4 text-center font-semibold text-slate-600 text-xs uppercase tracking-wider">Actions</th>
+                   
                   </tr>
                 </thead>
                 <tbody>
