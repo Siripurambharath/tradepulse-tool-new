@@ -289,7 +289,7 @@ export default function TrackingPage() {
   return (
     <div className="flex h-screen w-full">
       <AdminSidebar />
-      <div className="flex-1 overflow-auto p-6 bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30">
+      <div className="flex-1 overflow-auto p-6 bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 content-space">
         {/* Decorative gradient header */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
         
