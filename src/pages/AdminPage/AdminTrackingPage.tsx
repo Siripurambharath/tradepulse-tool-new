@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,11 +10,11 @@ import {
   Search, Eye, Send, Reply, ThumbsUp, ThumbsDown, 
   AlertCircle, MessageSquare, Users,
   Mail, Activity, BarChart3, Filter, ArrowUpRight,
-  Building2, Package, Globe, RefreshCw, ArrowLeft, User
+  Building2, Package, Globe, RefreshCw, ArrowLeft, User,
+  ChevronLeft, ChevronRight, Loader2
 } from 'lucide-react';
 import axios from 'axios';
 import { API_URL } from '@/components/api';
-import { AdminSidebar } from "@/components/AdminSidebar"; // Add this import
 
 interface TrackingItem {
   buyer_id: number;
@@ -51,11 +51,31 @@ interface Counts {
   total_companies: number;
 }
 
-export default function TrackingPage() {
+// Custom debounce hook for smooth search
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+export default function AdminTrackingPage() {
   const navigate = useNavigate();
   const { sellerId } = useParams<{ sellerId: string }>();
+  
+  // State
   const [activeTab, setActiveTab] = useState('sent');
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [statusFilter, setStatusFilter] = useState('all');
   const [trackingData, setTrackingData] = useState<TrackingData>({
     sent: [],
@@ -73,7 +93,19 @@ export default function TrackingPage() {
   });
   const [sellerEmail, setSellerEmail] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPageOptions] = useState([10, 20, 50, 100]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pagination, setPagination] = useState<any>(null);
+
+  // Cache for search results
+  const searchCache = useRef<Map<string, any>>(new Map());
 
   const statuses = ['sent', 'interested', 'not_contacted'];
   
@@ -90,14 +122,11 @@ export default function TrackingPage() {
         const sellerStr = localStorage.getItem('seller');
         if (sellerStr) {
           const seller = JSON.parse(sellerStr);
-          // Check if the logged-in user matches the sellerId
           if (seller.id && String(seller.id) === sellerId) {
             setSellerEmail(seller.email || '');
             return;
           }
         }
-        // If not the current user, you might want to fetch from API
-        // For now, we'll just show the sellerId
         setSellerEmail(`Seller ${sellerId}`);
       } catch (error) {
         console.error('Error getting seller email:', error);
@@ -106,10 +135,11 @@ export default function TrackingPage() {
     };
 
     getSellerEmail();
-    fetchTrackingData();
     fetchCounts();
+    fetchTrackingData();
   }, [sellerId]);
 
+  // Fetch counts only
   const fetchCounts = async () => {
     try {
       if (!sellerId) return;
@@ -121,7 +151,7 @@ export default function TrackingPage() {
           replied: response.data.data.replied,
           interested: response.data.data.interested,
           not_interested: response.data.data.not_interested,
-          not_contacted: response.data.data.not_contacted,
+          not_contacted: response.data.data.not_contacted || 0,
           total_companies: response.data.total.all
         });
       }
@@ -130,9 +160,14 @@ export default function TrackingPage() {
     }
   };
 
-  const fetchTrackingData = async () => {
+  // Fetch tracking data with pagination
+  const fetchTrackingData = useCallback(async (isSearch = false) => {
     try {
-      setLoading(true);
+      if (isSearch) {
+        setIsSearching(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
 
       if (!sellerId) {
@@ -141,11 +176,52 @@ export default function TrackingPage() {
         return;
       }
 
-      const response = await axios.get(`${API_URL}/api/tracking/all?seller_id=${sellerId}`);
+      // Build query params
+      const params = new URLSearchParams();
+      params.set('seller_id', sellerId);
+      params.set('page', String(currentPage));
+      params.set('limit', String(itemsPerPage));
+      
+      // Add search if present
+      if (debouncedSearchQuery) {
+        params.set('search', debouncedSearchQuery);
+      }
+
+      // Generate cache key
+      const cacheKey = `${sellerId}-${debouncedSearchQuery}-${currentPage}-${itemsPerPage}`;
+      
+      // Check cache first
+      if (searchCache.current.has(cacheKey)) {
+        const cachedData = searchCache.current.get(cacheKey);
+        setTrackingData(cachedData.trackingData || { sent: [], replied: [], interested: [], not_interested: [] });
+        setTotalCount(cachedData.totalCount || 0);
+        setTotalPages(cachedData.totalPages || 0);
+        setPagination(cachedData.pagination || null);
+        if (isSearch) setIsSearching(false);
+        else setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(`${API_URL}/api/tracking/page?${params.toString()}`);
       
       if (response.data.success) {
-        setTrackingData(response.data.data);
-        console.log('Tracking data for seller', sellerId, ':', response.data.data);
+        const data = response.data.data;
+        const paginationData = response.data.pagination;
+        
+        setTrackingData(data);
+        setTotalCount(paginationData?.totalItems || 0);
+        setTotalPages(paginationData?.totalPages || 0);
+        setPagination(paginationData || null);
+        
+        // Store in cache
+        searchCache.current.set(cacheKey, {
+          trackingData: data,
+          totalCount: paginationData?.totalItems || 0,
+          totalPages: paginationData?.totalPages || 0,
+          pagination: paginationData || null
+        });
+        
+        console.log('Tracking data for seller', sellerId, ':', data);
       } else {
         setError('Failed to load tracking data');
       }
@@ -153,35 +229,49 @@ export default function TrackingPage() {
       console.error('Error fetching tracking data:', error);
       setError(error.message || 'Error loading tracking data');
     } finally {
-      setLoading(false);
+      if (isSearch) setIsSearching(false);
+      else setLoading(false);
     }
-  };
+  }, [sellerId, currentPage, itemsPerPage, debouncedSearchQuery]);
+
+  // Initial load
+  useEffect(() => {
+    fetchTrackingData(false);
+  }, []);
+
+  // Handle search when debounced query changes
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      fetchTrackingData(true);
+    } else {
+      // If search is cleared, fetch all data
+      fetchTrackingData(false);
+      // Clear cache when search is cleared
+      searchCache.current.clear();
+    }
+  }, [debouncedSearchQuery, currentPage, itemsPerPage, fetchTrackingData]);
 
   const getCurrentData = () => {
     switch (activeTab) {
       case 'sent':
-        return trackingData.sent;
+        return trackingData.sent || [];
       case 'replied':
-        return trackingData.replied;
+        return trackingData.replied || [];
       case 'interested':
-        return trackingData.interested;
+        return trackingData.interested || [];
       case 'not_interested':
-        return trackingData.not_interested;
+        return trackingData.not_interested || [];
       default:
         return [];
     }
   };
 
   const filteredData = useMemo(() => {
-    let allData = [];
-    
-    if (activeTab === 'sent') allData = trackingData.sent;
-    else if (activeTab === 'replied') allData = trackingData.replied;
-    else if (activeTab === 'interested') allData = trackingData.interested;
-    else if (activeTab === 'not_interested') allData = trackingData.not_interested;
+    let allData = getCurrentData();
     
     let filtered = allData;
     
+    // Search filter (already handled by backend, but keep for client-side filtering)
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(item => {
@@ -226,10 +316,11 @@ export default function TrackingPage() {
         return <Badge variant="secondary" className="bg-gray-100 text-gray-600">{status || 'Unknown'}</Badge>;
     }
   };
-
-  const viewDetails = (item: TrackingItem) => {
-    navigate(`/trackingindetail/${item.buyer_id}`);
-  };
+// Find this function in AdminTrackingPage
+const viewDetails = (item: TrackingItem) => {
+  // Pass both sellerId AND buyerId
+  navigate(`/admin/trackingindetail/${sellerId}/${item.buyer_id}`);
+};
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -240,20 +331,41 @@ export default function TrackingPage() {
   };
 
   const handleBack = () => {
-    navigate('/admin/sellers'); // Navigate back to admin users
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/admin/sellers", { replace: true });
+    }
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentPage(1);
+    setSearchQuery(e.target.value);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    searchCache.current.clear();
+  };
+
+  const handleItemsPerPageChange = (items: number) => {
+    setItemsPerPage(items);
+    setCurrentPage(1);
+    searchCache.current.clear();
+  };
+
+  // Show full page loader only on initial load
   if (loading) {
     return (
-      <div className="flex h-screen w-full">
-        <AdminSidebar />
-        <div className="flex-1 overflow-auto p-6 bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto" />
-            <p className="mt-6 text-sm font-medium text-muted-foreground animate-pulse">
-              Loading tracking data for seller {sellerId}...
-            </p>
+      <div className="w-full min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full blur-xl opacity-20 animate-pulse" />
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto relative" />
           </div>
+          <p className="mt-6 text-sm font-medium text-muted-foreground animate-pulse">
+            Loading tracking data for seller {sellerId}...
+          </p>
         </div>
       </div>
     );
@@ -261,9 +373,8 @@ export default function TrackingPage() {
 
   if (error) {
     return (
-      <div className="flex h-screen w-full">
-        <AdminSidebar />
-        <div className="flex-1 overflow-auto p-6 bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center">
+      <div className="w-full min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30">
+        <div className="w-full p-6 flex items-center justify-center min-h-screen">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-w-md w-full text-center">
             <div className="p-4 bg-gradient-to-r from-red-50 to-rose-50 rounded-full w-fit mx-auto mb-4">
               <AlertCircle className="h-12 w-12 text-red-500" />
@@ -271,13 +382,12 @@ export default function TrackingPage() {
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Error Loading Data</h3>
             <p className="text-sm text-muted-foreground mb-6">{error}</p>
             <div className="flex gap-3 justify-center">
-              <Button onClick={fetchTrackingData} className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600">
+              <Button onClick={() => fetchTrackingData(false)} className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600">
                 <RefreshCw className="h-4 w-4" />
                 Try Again
               </Button>
-              <Button onClick={handleBack} variant="outline" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Go Back
+              <Button onClick={() => navigate("/search")}>
+                Back
               </Button>
             </div>
           </div>
@@ -287,16 +397,15 @@ export default function TrackingPage() {
   }
 
   return (
-    <div className="flex h-screen w-full">
-      <AdminSidebar />
-      <div className="flex-1 overflow-auto p-6 bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 content-space">
+    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30">
+      <div className="w-full p-6">
         {/* Decorative gradient header */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
         
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Header with Back Button */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -313,7 +422,7 @@ export default function TrackingPage() {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   Email Tracking Dashboard
                 </h1>
-                <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1 flex-wrap">
                   <User className="h-4 w-4" />
                   Seller: <span className="font-medium text-foreground">{sellerEmail}</span>
                   <span className="text-xs text-muted-foreground">(ID: {sellerId})</span>
@@ -323,7 +432,7 @@ export default function TrackingPage() {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <Card 
               className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 bg-gradient-to-br from-blue-50 to-indigo-50"
               onClick={() => handleCardClick('sent')}
@@ -384,17 +493,7 @@ export default function TrackingPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 bg-gradient-to-br from-gray-50 to-slate-50">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="p-2.5 bg-white rounded-xl shadow-sm w-fit mx-auto mb-3">
-                    <Users className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <p className="text-3xl font-bold text-gray-700">{counts.not_contacted}</p>
-                  <p className="text-xs font-medium text-gray-600/70 uppercase tracking-wider mt-1">Not Contacted</p>
-                </div>
-              </CardContent>
-            </Card>
+        
           </div>
 
           {/* Search and Filter Bar */}
@@ -405,9 +504,18 @@ export default function TrackingPage() {
                 <Input
                   placeholder="Search company, product or country..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={handleSearchChange}
                   className="pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80"
                 />
+                {searchQuery && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isSearching ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                    ) : (
+                      <span className="text-xs text-emerald-500 font-medium">✓</span>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="relative">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -432,7 +540,46 @@ export default function TrackingPage() {
                   <Activity className="h-3.5 w-3.5 text-blue-500" />
                   Showing: <span className="font-semibold text-gray-700">{filteredData.length}</span>
                 </span>
+                {isSearching && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-xs font-medium border border-amber-200">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Searching...
+                  </span>
+                )}
               </div>
+            </div>
+          </div>
+
+          {/* Results count and pagination info */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{filteredData.length}</span> of{' '}
+                <span className="font-semibold text-foreground">{totalCount}</span> items
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled={currentPage === 1} 
+                onClick={() => handlePageChange(currentPage - 1)}
+                className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="px-4 py-1.5 bg-white rounded-lg border text-sm font-medium shadow-sm">
+                Page <span className="text-blue-600">{currentPage}</span> / {totalPages || 1}
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled={currentPage >= totalPages} 
+                onClick={() => handlePageChange(currentPage + 1)}
+                className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
@@ -889,6 +1036,50 @@ export default function TrackingPage() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Bottom Pagination */}
+          {totalCount > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t">
+              <div className="text-sm text-muted-foreground">
+                Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} items
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 mr-4">
+                  <span className="text-sm text-slate-600">Rows:</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                    className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400/20 focus:border-blue-400"
+                  >
+                    {itemsPerPageOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={currentPage === 1} 
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="px-3 py-1 bg-white rounded-lg border text-xs font-medium">
+                  {currentPage} / {totalPages || 1}
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={currentPage >= totalPages} 
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

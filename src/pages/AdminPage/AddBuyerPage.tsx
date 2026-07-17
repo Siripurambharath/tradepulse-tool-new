@@ -707,10 +707,6 @@ const AddBuyerPage = () => {
       .filter(e => e.email && e.email.trim())
       .map(e => e.email.trim());
 
-  // Client-side duplicate guard: catches the exact same contact number or
-  // email being entered twice within THIS form before it's even submitted.
-  // (Server-side check in buyerRoutes.js still guards against duplicates
-  // against buyers already saved in the database.)
   const hasInFormDuplicates = () => {
     const contactValues = getNormalizedContacts();
     const emailValues = getNormalizedEmails().map(e => e.toLowerCase());
@@ -874,7 +870,7 @@ const AddBuyerPage = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/buyers')}
+              onClick={() => navigate('/templates')}
               className="hover:bg-blue-50 hover:text-blue-700 transition-colors rounded-xl"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />

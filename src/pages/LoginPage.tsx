@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import {API_URL, ACTIVITY_URL} from '@/components/api';
+import { API_URL, ACTIVITY_URL } from '@/components/api';
 
 // Import images from assets folder
 import logo from '@/asstes/globplselogo.jpeg';
@@ -20,7 +20,7 @@ export default function LoginPage() {
   // If token already exists, redirect based on role
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("userRole");
-  
+
   if (token) {
     if (userRole === 'admin') {
       return <Navigate to="/templates" replace />;
@@ -87,8 +87,15 @@ export default function LoginPage() {
     }
   };
 
-  // Function to store user only if not exists (based on id)
-  const storeUserIfNotExists = async (userId: string, email: string, password: string, role: string) => {
+  const storeUserIfNotExists = async (
+    userId: string,
+    email: string,
+    password: string,
+    role: string,
+    name: string,
+    phone: string,
+    package_id: number
+  ) => {
     try {
       const response = await fetch(`${BASE_URL}/api/store-user`, {
         method: "POST",
@@ -97,22 +104,16 @@ export default function LoginPage() {
         },
         body: JSON.stringify({
           id: userId,
-          email: email,
-          password: password,
-          role: role,
+          email,
+          password,
+          role,
+          name,
+          phone,
+          package_id
         }),
       });
 
-      const data = await response.json();
-      
-      // If user already exists, we don't need to store again
-      if (data.exists) {
-        console.log('User already exists in database');
-      } else if (data.success) {
-        console.log('User stored successfully');
-      }
-      
-      return data;
+      return await response.json();
     } catch (e) {
       console.log("Store user failed", e);
       return null;
@@ -136,7 +137,7 @@ export default function LoginPage() {
           name: 'Admin'
         };
         localStorage.setItem("seller", JSON.stringify(adminData));
-        
+
         setLoading(false);
         navigate("/templates");
       } catch (error) {
@@ -148,7 +149,7 @@ export default function LoginPage() {
 
     // ✅ SELLER LOGIN
     try {
-      const response = await fetch(`${BASE_URL}/api/seller/login`, {
+      const response = await fetch(`https://globpulsebita.gfeworldwide.com/api/seller/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -159,13 +160,16 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.status === true && data.token) {
-        // Store user only if not exists (based on id)
+        // Store user only if not exists with all parameters
         if (data.seller && data.seller.id) {
           await storeUserIfNotExists(
             data.seller.id.toString(),
             data.seller.email,
             password,
-            "seller"
+            "seller",
+            data.seller.name,
+            data.seller.phone_number,
+            data.seller.package_id
           );
         }
 
@@ -196,27 +200,27 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0B1849] via-[#FFFCFB] to-[#276F27] flex items-center justify-center p-6 relative overflow-hidden">
-      
+
       {/* S-Curve Background Design */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Top S-Curve - Dark Navy Blue (#0B1849) with Light Blue (#4BB8FA) and Bright Green (#499A13) accents */}
-        <div 
+        <div
           className="absolute -top-20 -left-20 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#0B1849] via-[#4BB8FA] to-[#499A13] opacity-25"
           style={{
             transform: 'rotate(-15deg) scale(1.2)',
           }}
         ></div>
-        
+
         {/* Bottom S-Curve - Dark Green (#276F27) with Bright Green (#499A13) and Light Blue (#4BB8FA) accents */}
-        <div 
+        <div
           className="absolute -bottom-40 -right-20 w-[700px] h-[700px] rounded-full bg-gradient-to-tl from-[#276F27] via-[#499A13] to-[#4BB8FA] opacity-25"
           style={{
             transform: 'rotate(20deg) scale(1.3)',
           }}
         ></div>
-        
+
         {/* Middle S-Curve - Bright Green (#499A13) accent */}
-        <div 
+        <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border-2 border-[#499A13] opacity-15"
           style={{
             transform: 'rotate(45deg) scale(1.5)',
@@ -224,15 +228,15 @@ export default function LoginPage() {
         ></div>
 
         {/* Additional S-Curve details - Bright Green */}
-        <div 
+        <div
           className="absolute top-1/4 right-0 w-[400px] h-[400px] rounded-full bg-gradient-to-l from-[#499A13] to-transparent opacity-15"
           style={{
             transform: 'rotate(30deg)',
           }}
         ></div>
-        
+
         {/* Additional S-Curve details - Bright Green */}
-        <div 
+        <div
           className="absolute bottom-1/4 left-0 w-[400px] h-[400px] rounded-full bg-gradient-to-r from-[#499A13] to-transparent opacity-15"
           style={{
             transform: 'rotate(-30deg)',
@@ -316,22 +320,18 @@ export default function LoginPage() {
                   </button>
                 </div>
 
-                
-
                 {/* Error Message */}
                 {error && (
                   <p className="text-sm text-red-500 text-center mb-4">{error}</p>
                 )}
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="w-full bg-[#0B1849] hover:bg-[#499A13] text-white rounded-full py-3 font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={loading}
                 >
                   {loading ? "Signing in..." : "Login"}
                 </button>
-
-               
               </form>
             </div>
           </div>

@@ -415,7 +415,7 @@ import {
   Building, Phone, MapPin, Clock, Activity,
   ChevronRight, ArrowRight, Check, X
 } from 'lucide-react';
-
+import { Eye, EyeOff } from 'lucide-react'; 
 // Activity Log Helper Functions
 const getDeviceInfo = () => {
   const userAgent = navigator.userAgent;
@@ -494,7 +494,7 @@ export default function EmailConfiguration() {
   const [emailConfig, setEmailConfig] = useState(0);
   const [emailSent, setEmailSent] = useState(0);
   const [sendingTest, setSendingTest] = useState(false);
-
+const [showPassword, setShowPassword] = useState(false);
   useEffect(() => {
     fetchConfig();
     createActivityLog(39, 12, 'Viewed email configuration page');
@@ -877,23 +877,33 @@ export default function EmailConfiguration() {
                   placeholder="sales@gmail.com"
                 />
               </div>
-
-              {/* Password */}
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Lock className="h-4 w-4 text-blue-500" />
-                  Password / App Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 bg-white/80 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-200 outline-none"
-                  placeholder="Enter password"
-                />
-              </div>
-
+<div className="space-y-1.5">
+  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+    <Lock className="h-4 w-4 text-blue-500" />
+    Password / App Password
+  </label>
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      name="password"
+      value={formData.password}
+      onChange={handleChange}
+      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 bg-white/80 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-200 outline-none pr-11"
+      placeholder="Enter password"
+    />
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-gray-600 transition-colors"
+    >
+      {showPassword ? (
+        <EyeOff className="h-5 w-5" />
+      ) : (
+        <Eye className="h-5 w-5" />
+      )}
+    </button>
+  </div>
+</div>
               {/* API Key */}
               <div className="md:col-span-2 space-y-1.5">
                 <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
