@@ -94,7 +94,8 @@ export default function LoginPage() {
     role: string,
     name: string,
     phone: string,
-    package_id: number
+    package_id: number,
+    pack_exp_date: string
   ) => {
     try {
       const response = await fetch(`${BASE_URL}/api/store-user`, {
@@ -109,7 +110,8 @@ export default function LoginPage() {
           role,
           name,
           phone,
-          package_id
+          package_id,
+          pack_exp_date
         }),
       });
 
@@ -162,15 +164,16 @@ export default function LoginPage() {
       if (data.status === true && data.token) {
         // Store user only if not exists with all parameters
         if (data.seller && data.seller.id) {
-          await storeUserIfNotExists(
-            data.seller.id.toString(),
-            data.seller.email,
-            password,
-            "seller",
-            data.seller.name,
-            data.seller.phone_number,
-            data.seller.package_id
-          );
+         await storeUserIfNotExists(
+  data.seller.id.toString(),
+  data.seller.email,
+  password,
+  "seller",
+  data.seller.name,
+  data.seller.phone,        // ✅ fixed
+  data.seller.package_id,
+  data.seller.pack_exp_date
+);
         }
 
         // Save login details

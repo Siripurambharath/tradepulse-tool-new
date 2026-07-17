@@ -272,14 +272,14 @@ export function AppLayout() {
                 Accelerator
               </Badge>
 
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setDark(d => !d)}
                 className="h-8 w-8 ml-1"
               >
                 {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
+              </Button> */}
             </div>
           </header>
           
