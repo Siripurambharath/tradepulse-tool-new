@@ -690,7 +690,8 @@ import {
   Search, Loader2, ChevronLeft, ChevronRight, Mail, X, 
   ThumbsUp, ThumbsDown, Users, Building2, Globe, 
   Package, Hash, Sparkles, Filter, ArrowUpDown,
-  Send, User, Briefcase, MapPin, AtSign, Phone
+  Send, User, Briefcase, MapPin, AtSign, Phone, Lock, Unlock,
+  Copy, Check
 } from 'lucide-react';
 import EmailModal from '@/components/EmailModal';
 import { toast } from 'sonner';
@@ -708,8 +709,10 @@ interface Buyer {
   country: string;
   company_name: string;
   website: string;
-  contacts: string;
+  contacts: string;       // masked or real, depending on revealed flag
   emails: string;
+  phone_revealed: boolean;
+  email_revealed: boolean;
 }
 
 // Activity Log Helper Functions
@@ -878,6 +881,32 @@ const Calendar = ({ className }: { className?: string }) => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
   </svg>
 );
+function CopyButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      toast.success('Copied to clipboard');
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      console.error('Copy failed:', err);
+      toast.error('Failed to copy');
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="shrink-0 p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors"
+      title="Copy"
+    >
+      {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
+  );
+}
 
 /* Main Page */
 export default function SearchPage() {
@@ -894,7 +923,48 @@ export default function SearchPage() {
   const [emailOpen, setEmailOpen] = useState(false);
   const [detailBuyer, setDetailBuyer] = useState<Buyer | null>(null);
   const [submittingId, setSubmittingId] = useState<number | null>(null);
+const [revealingId, setRevealingId] = useState<number | null>(null);
 
+const revealContact = async (buyerId: number, type: 'phone' | 'email') => {
+  setRevealingId(buyerId);
+  try {
+    const res = await fetch(`${API}/buyers/${buyerId}/reveal-contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seller_id: seller.id, reveal_type: type }),
+    });
+    const json = await res.json();
+
+    if (json.success) {
+      setRows((prev) =>
+        prev.map((r) =>
+          r.buyer_id === buyerId
+            ? {
+                ...r,
+                contacts: type === 'phone' ? json.data.contacts : r.contacts,
+                emails: type === 'email' ? json.data.emails : r.emails,
+                phone_revealed: type === 'phone' ? true : r.phone_revealed,
+                email_revealed: type === 'email' ? true : r.email_revealed,
+              }
+            : r
+        )
+      );
+    } else if (json.error === 'LIMIT_REACHED') {
+      toast.error(json.message, { duration: 5000 });
+      // optional: trigger an "Upgrade plan" modal here
+    } else if (json.error === 'PLAN_EXPIRED') {
+      toast.error(json.message, { duration: 5000 });
+      // optional: redirect to billing/renewal page
+    } else {
+      toast.error(json.message || `Failed to reveal ${type}`);
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error(`Failed to reveal ${type}`);
+  } finally {
+    setRevealingId(null);
+  }
+};
   const perPage = 50;
 
   // Initialize email config check hook
@@ -923,11 +993,12 @@ export default function SearchPage() {
   useEffect(() => {
     fetchData();
   }, [page, query, countryFilter, productFilter]);
-
+const seller = JSON.parse(localStorage.getItem("seller"));
   const fetchData = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
+      params.set("seller_id", seller.id);
       params.set('limit', String(perPage));
       params.set('offset', String(page * perPage));
       if (query) params.set('search', query);
@@ -974,7 +1045,16 @@ export default function SearchPage() {
   };
 
   const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_interested') => {
-    setSubmittingId(buyer.buyer_id);
+     if (!buyer.email_revealed) {
+    toast.error('Please reveal this buyer\'s email before recording a response.');
+    return;
+  }
+   if (!buyer.phone_revealed) {
+    toast.error('Please reveal this buyer\'s email before recording a response.');
+    return;
+  }
+  setSubmittingId(buyer.buyer_id);
+   
     
     try {
       const firstEmail = buyer.emails?.split(',')[0]?.trim();
@@ -1057,8 +1137,11 @@ export default function SearchPage() {
     return uniqueProducts.length > 1;
   };
 
-  const getRecipients = () => {
-    return getSelectedBuyers().flatMap((r) =>
+  // Filter recipients to only revealed emails
+const getRecipients = () => {
+  return getSelectedBuyers()
+    .filter((r) => r.email_revealed) // skip locked buyers entirely
+    .flatMap((r) =>
       (r.emails || '')
         .split(',')
         .map((email) => ({
@@ -1068,13 +1151,18 @@ export default function SearchPage() {
           email: email.trim(),
           country: r.country,
           product: r.product,
-          buyer_id: r.buyer_id,  
+          buyer_id: r.buyer_id,
           templateUsed: 'Welcome Template',
           contacts: r.contacts,
         }))
         .filter((recipient) => recipient.email)
     );
-  };
+};
+
+// Count how many selected buyers are locked (email not revealed)
+const getLockedSelectedCount = () => {
+  return getSelectedBuyers().filter((r) => !r.email_revealed).length;
+};
 
   const totalPages = Math.ceil(totalCount / perPage);
   const selectedCount = selected.size;
@@ -1096,26 +1184,50 @@ export default function SearchPage() {
               Find and connect with potential buyers worldwide
             </p>
           </div>
-          <Button 
-            onClick={async () => {
-              // Check email config first
-              const ok = await checkEmailConfig();
-              if (!ok) return;
-              
-              setEmailOpen(true);
-              createActivityLog(6, 3, 'Opened email modal', { selected_count: selected.size });
-            }} 
-            disabled={selectedCount === 0} 
-            className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
-          >
-            <Mail className="h-4 w-4" />
-            <span>Send Email</span>
-            {selectedCount > 0 && (
-              <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold">
-                {selectedCount}
-              </span>
-            )}
-          </Button>
+        <Button 
+  onClick={async () => {
+    const selectedBuyers = getSelectedBuyers();
+    const lockedCount = selectedBuyers.filter((r) => !r.email_revealed).length;
+    const revealedCount = selectedBuyers.length - lockedCount;
+
+    // Block entirely if none of the selected buyers have a revealed email
+    if (revealedCount === 0) {
+      toast.error(
+        lockedCount === 1
+          ? 'This buyer\'s email is locked. Reveal it first to send an email.'
+          : 'All selected buyers have locked emails. Reveal at least one to send an email.'
+      );
+      return;
+    }
+
+    // Some are locked — warn but still allow sending to the revealed ones
+    if (lockedCount > 0) {
+      toast.warning(
+        `${lockedCount} selected buyer${lockedCount > 1 ? 's have' : ' has'} a locked email and will be skipped.`
+      );
+    }
+
+    const ok = await checkEmailConfig();
+    if (!ok) return;
+
+    setEmailOpen(true);
+    createActivityLog(6, 3, 'Opened email modal', { 
+      selected_count: selected.size,
+      revealed_count: revealedCount,
+      locked_skipped: lockedCount,
+    });
+  }} 
+  disabled={selectedCount === 0} 
+  className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
+>
+  <Mail className="h-4 w-4" />
+  <span>Send Email</span>
+  {selectedCount > 0 && (
+    <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold">
+      {selectedCount}
+    </span>
+  )}
+</Button>
         </div>
 
         {/* Enhanced Filters with glassmorphism */}
@@ -1325,15 +1437,62 @@ export default function SearchPage() {
                         {r.company_name}
                       </td>
 
-                      <td className="p-4 max-w-[120px] truncate text-gray-600" title={r.contacts}>
-                        {r.contacts}
-                      </td>
+                     {/* Contacts cell */}
+{/* Contacts cell */}
+<td className="p-4 max-w-[140px]">
+  {r.phone_revealed ? (
+    <div className="flex items-center gap-1 min-w-0">
+      <span className="text-gray-600 text-xs truncate min-w-0" title={r.contacts}>
+        {r.contacts}
+      </span>
+      <CopyButton value={r.contacts} />
+    </div>
+  ) : (
+    <button
+      onClick={() => revealContact(r.buyer_id, "phone")}
+      disabled={revealingId === r.buyer_id}
+      className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
+      title="Click to reveal phone number"
+    >
+      {revealingId === r.buyer_id ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <>
+          <Lock className="h-3.5 w-3.5" />
+          <span>Locked</span>
+        </>
+      )}
+    </button>
+  )}
+</td>
 
-                      <td className="p-4 max-w-[150px] truncate">
-                        <span className="text-blue-600 text-xs" title={r.emails}>
-                          {r.emails}
-                        </span>
-                      </td>
+{/* Emails cell */}
+<td className="p-4 max-w-[170px]">
+  {r.email_revealed ? (
+    <div className="flex items-center gap-1 min-w-0">
+      <span className="text-blue-600 text-xs truncate min-w-0" title={r.emails}>
+        {r.emails}
+      </span>
+      <CopyButton value={r.emails} />
+    </div>
+  ) : (
+    <button
+      onClick={() => revealContact(r.buyer_id, "email")}
+      disabled={revealingId === r.buyer_id}
+      className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
+      title="Click to reveal email"
+    >
+      {revealingId === r.buyer_id ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <>
+          <Lock className="h-3.5 w-3.5" />
+          <span>Locked</span>
+        </>
+      )}
+    </button>
+  )}
+</td>
 
                       <td className="p-4">
                         <div className="flex gap-1.5">
