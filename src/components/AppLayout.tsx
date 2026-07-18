@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,12 +16,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { API_URL } from './api';
 
 export function AppLayout() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
   const location = useLocation();
   const navigate = useNavigate();
-  
+  const [packageName, setPackageName] = useState("Loading...");
   // Pages that should NOT show AppSidebar (they have their own sidebar)
   const noSidebarPages = [];
   
@@ -31,7 +33,35 @@ export function AppLayout() {
     location.pathname.startsWith('/usersindetail') ||
     location.pathname.startsWith('/admin/trackingindetail') 
   );
+useEffect(() => {
+  const fetchPackage = async () => {
+    try {
+      const seller = JSON.parse(localStorage.getItem("seller") || "{}");
 
+      if (!seller?.package_id) {
+        setPackageName("No Package");
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/package/${seller.package_id}`
+      );
+
+      const data = await response.json();
+console.log("Package fetch response:", data);
+      if (data.success) {
+        setPackageName(data.data.package_name);
+      } else {
+        setPackageName("No Package");
+      }
+    } catch (err) {
+      console.error("Package fetch error:", err);
+      setPackageName("No Package");
+    }
+  };
+
+  fetchPackage();
+}, []);
   // 🔐 AUTH MONITORING - Check if user is still authenticated
   useEffect(() => {
     const checkAuth = () => {
@@ -212,7 +242,7 @@ export function AppLayout() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Button 
+              {/* <Button 
                 variant="outline" 
                 size="sm" 
                 className="h-8 px-3 text-xs font-medium hover:bg-[#499A13]/10"
@@ -223,7 +253,7 @@ export function AppLayout() {
               >
                 <Sparkles className="h-3 w-3 mr-1" style={{ color: '#499A13' }} />
                 Upgrade
-              </Button>
+              </Button> */}
 
               {/* User Profile Dropdown with Logout */}
               <DropdownMenu>
@@ -260,17 +290,17 @@ export function AppLayout() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Badge 
-                variant="secondary" 
-                className="h-6 px-2 text-[10px] font-medium border"
-                style={{ 
-                  backgroundColor: '#499A13',
-                  color: 'white',
-                  borderColor: '#499A13'
-                }}
-              >
-                Accelerator
-              </Badge>
+             <Badge
+  variant="secondary"
+  className="h-6 px-2 text-[10px] font-medium border"
+  style={{
+    backgroundColor: "#499A13",
+    color: "white",
+    borderColor: "#499A13",
+  }}
+>
+  {packageName}
+</Badge>
 
               {/* <Button
                 variant="ghost"
