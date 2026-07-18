@@ -2,11 +2,12 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
-import { Globe, Sun, Moon, Search, Sparkles, ChevronDown, LogOut } from 'lucide-react';
+import { Globe, Sun, Moon, Search, Sparkles, ChevronDown, LogOut, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { PackageModal } from './PackageModal'; // Import the modal
 
 import {
   DropdownMenu,
@@ -23,6 +24,8 @@ export function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [packageName, setPackageName] = useState("Loading...");
+  const [isPackageModalOpen, setIsPackageModalOpen] = useState(false); // Add this state
+  
   // Pages that should NOT show AppSidebar (they have their own sidebar)
   const noSidebarPages = [];
   
@@ -33,105 +36,87 @@ export function AppLayout() {
     location.pathname.startsWith('/usersindetail') ||
     location.pathname.startsWith('/admin/trackingindetail') 
   );
-useEffect(() => {
-  const fetchPackage = async () => {
-    try {
-      const seller = JSON.parse(localStorage.getItem("seller") || "{}");
 
-      if (!seller?.package_id) {
+  useEffect(() => {
+    const fetchPackage = async () => {
+      try {
+        const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+
+        if (!seller?.package_id) {
+          setPackageName("No Package");
+          return;
+        }
+
+        const response = await fetch(
+          `${API_URL}/api/package/${seller.package_id}`
+        );
+
+        const data = await response.json();
+        console.log("Package fetch response:", data);
+        if (data.success) {
+          setPackageName(data.data.package_name);
+        } else {
+          setPackageName("No Package");
+        }
+      } catch (err) {
+        console.error("Package fetch error:", err);
         setPackageName("No Package");
-        return;
       }
+    };
 
-      const response = await fetch(
-        `${API_URL}/api/package/${seller.package_id}`
-      );
+    fetchPackage();
+  }, []);
 
-      const data = await response.json();
-console.log("Package fetch response:", data);
-      if (data.success) {
-        setPackageName(data.data.package_name);
-      } else {
-        setPackageName("No Package");
-      }
-    } catch (err) {
-      console.error("Package fetch error:", err);
-      setPackageName("No Package");
-    }
-  };
-
-  fetchPackage();
-}, []);
   // 🔐 AUTH MONITORING - Check if user is still authenticated
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        // Clear any remaining user data
         localStorage.removeItem("userRole");
         localStorage.removeItem("seller");
-        // Redirect to login
         navigate("/login", { replace: true });
       }
     };
 
-    // Check immediately
     checkAuth();
 
-    // Check on visibility change (user returns to tab)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         checkAuth();
       }
     };
 
-    // Check on storage events (other tabs or manual clear)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'token' && !e.newValue) {
-        // Token was removed from localStorage
         localStorage.removeItem("userRole");
         localStorage.removeItem("seller");
         navigate("/login", { replace: true });
       }
     };
 
-    // Check on page focus
     const handlePageFocus = () => {
       checkAuth();
     };
 
-    // Check before page becomes visible again
-    const handleBeforeUnload = () => {
-      // No need to do anything here, but keep for cleanup
-    };
-
-    // Add event listeners
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', handlePageFocus);
-    window.addEventListener('beforeunload', handleBeforeUnload);
 
-    // Optional: Periodic check every 30 seconds
     const interval = setInterval(checkAuth, 30000);
 
-    // Cleanup
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', handlePageFocus);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
       clearInterval(interval);
     };
   }, [navigate]);
 
   // Handle logout
   const handleLogout = () => {
-    // Clear all auth data
     localStorage.removeItem("token");
     localStorage.removeItem("userRole");
     localStorage.removeItem("seller");
-    
-    // Navigate to login
     navigate("/login", { replace: true });
   };
 
@@ -179,7 +164,6 @@ console.log("Package fetch response:", data);
     return (
       <div className="min-h-screen flex w-full">
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Full width header - no sidebar offset */}
           <header 
             className="h-14 flex items-center justify-between border-b px-6 shrink-0 fixed top-0 left-0 right-0 z-50 bg-card"
             style={{ borderBottomColor: '#40A2E3' }}
@@ -242,74 +226,71 @@ console.log("Package fetch response:", data);
             </div>
 
             <div className="flex items-center gap-3">
-              {/* <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8 px-3 text-xs font-medium hover:bg-[#499A13]/10"
-                style={{ 
-                  borderColor: '#499A13',
-                  color: '#499A13'
+{/* User Profile Dropdown with Logout */}
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <div className="flex items-center gap-2 ml-2 cursor-pointer hover:opacity-80 transition-opacity">
+      <div className="flex items-center gap-1.5">
+        <div 
+          className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-medium text-white"
+          style={{ backgroundColor: '#499A13' }}
+        >
+          {userInfo.name.charAt(0).toUpperCase()}
+        </div>
+        <span className="text-sm font-medium">{userInfo.name}</span>
+        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+      </div>
+    </div>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="end" className="w-64">
+    <DropdownMenuLabel>
+      <div className="flex flex-col space-y-1">
+        <p className="text-sm font-medium">{userInfo.name}</p>
+        <p className="text-xs text-muted-foreground">{userInfo.email}</p>
+        <p className="text-xs text-muted-foreground capitalize">Role: {userInfo.role}</p>
+      </div>
+    </DropdownMenuLabel>
+    <DropdownMenuSeparator />
+    
+    {/* Package Menu Item - Enhanced UI with hover effects */}
+    <DropdownMenuItem 
+      onClick={() => setIsPackageModalOpen(true)}
+      className="cursor-pointer group relative transition-colors duration-200 hover:bg-green-50 focus:bg-green-50"
+    >
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-md bg-green-50 group-hover:bg-green-100 transition-colors duration-200">
+            <Package className="h-4 w-4" style={{ color: '#499A13' }} />
+          </div>
+          <span className="font-medium group-hover:text-[#499A13] transition-colors duration-200">Package Details</span>
+        </div>
+    
+      </div>
+    </DropdownMenuItem>
+    
+    <DropdownMenuSeparator />
+    
+    <DropdownMenuItem 
+      onClick={handleLogout}
+      className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer hover:bg-red-50 transition-colors duration-200"
+    >
+      <LogOut className="h-4 w-4 mr-2" />
+      Logout
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+
+              <Badge
+                variant="secondary"
+                className="h-6 px-2 text-[10px] font-medium border"
+                style={{
+                  backgroundColor: "#499A13",
+                  color: "white",
+                  borderColor: "#499A13",
                 }}
               >
-                <Sparkles className="h-3 w-3 mr-1" style={{ color: '#499A13' }} />
-                Upgrade
-              </Button> */}
-
-              {/* User Profile Dropdown with Logout */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div className="flex items-center gap-2 ml-2 cursor-pointer hover:opacity-80 transition-opacity">
-                    <div className="flex items-center gap-1.5">
-                      <div 
-                        className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-medium text-white"
-                        style={{ backgroundColor: '#499A13' }}
-                      >
-                        {userInfo.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="text-sm font-medium">{userInfo.name}</span>
-                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{userInfo.name}</p>
-                      <p className="text-xs text-muted-foreground">{userInfo.email}</p>
-                      <p className="text-xs text-muted-foreground capitalize">Role: {userInfo.role}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={handleLogout}
-                    className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-             <Badge
-  variant="secondary"
-  className="h-6 px-2 text-[10px] font-medium border"
-  style={{
-    backgroundColor: "#499A13",
-    color: "white",
-    borderColor: "#499A13",
-  }}
->
-  {packageName}
-</Badge>
-
-              {/* <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setDark(d => !d)}
-                className="h-8 w-8 ml-1"
-              >
-                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button> */}
+                {packageName}
+              </Badge>
             </div>
           </header>
           
@@ -318,6 +299,12 @@ console.log("Package fetch response:", data);
           </main>
         </div>
       </div>
+
+      {/* Package Modal */}
+      <PackageModal 
+        open={isPackageModalOpen} 
+        onOpenChange={setIsPackageModalOpen} 
+      />
     </SidebarProvider>
   );
 }
