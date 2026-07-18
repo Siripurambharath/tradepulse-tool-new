@@ -18,14 +18,14 @@ import { useState } from 'react';
 
 const navItems = [
   { title: 'Templates', url: '/templates', icon: FileText },
-  // { title: 'Users', url: '/adminusers', icon: Megaphone },
+  { title: 'Users', url: '/adminusers', icon: Megaphone },
   // { title: 'Sellers', url: '/admin/sellers', icon: BarChart3 },
 // Single navigation item that opens the combined page
-{ 
-  title: 'User Management', 
-  url: '/admin/users', 
-  icon: Users 
-},
+// { 
+//   title: 'User Management', 
+//   url: '/admin/users', 
+//   icon: Users 
+// },
     { title: 'Single Adding Buyer', url: '/add-buyer', icon: UserPlus },
     { title: 'Bulk Upload Buyers', url: '/bulk-upload', icon: Upload },
 

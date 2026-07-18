@@ -1,15 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { User, Briefcase, Users, Sparkles, Zap } from 'lucide-react';
+import { User, Briefcase, Users, Sparkles, Zap, Eye, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { API_URL } from '@/components/api';
-import AdminUsers from './AdminUsers'; // Your existing Users page
-import AdminSellers from './AdminSeller'; // Your existing Sellers page
+import { useSearchParams } from 'react-router-dom'; // Add this import
+import AdminUserindetailPage from './AdminUserindetailPage';
+import AdminTrackingPage from './AdminTrackingPage';
 
 const AdminUsersManagement = () => {
-  const [activeTab, setActiveTab] = useState<'users' | 'sellers'>('users');
+  const [searchParams] = useSearchParams(); // Add this
+  const tabFromUrl = searchParams.get('tab') || 'userDetails'; // Get tab from URL
+  
+  const [activeTab, setActiveTab] = useState<'userDetails' | 'tracking'>(tabFromUrl as 'userDetails' | 'tracking');
   const [usersCount, setUsersCount] = useState(0);
   const [sellersCount, setSellersCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Update active tab when URL changes
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'userDetails' || tab === 'tracking') {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // Fetch counts for both tabs
   useEffect(() => {
@@ -59,7 +71,7 @@ const AdminUsersManagement = () => {
                 </h1>
                 <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-2">
                   <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-                  Manage and monitor all registered users and sellers
+                  Manage user activity and email tracking
                 </p>
               </div>
             </div>
@@ -69,30 +81,33 @@ const AdminUsersManagement = () => {
         {/* Tabs Navigation - Centered with Counts */}
         <div className="border-b border-slate-200/60">
           <div className="flex justify-center gap-6">
+            {/* User Details Tab */}
             <button
-              onClick={() => setActiveTab('users')}
+              onClick={() => setActiveTab('userDetails')}
               className={`pb-4 px-2 text-sm font-medium transition-all duration-300 relative flex items-center gap-2 ${
-                activeTab === 'users'
+                activeTab === 'userDetails'
                   ? 'text-indigo-600 border-b-2 border-indigo-600'
                   : 'text-slate-500 hover:text-slate-700 hover:border-b-2 hover:border-slate-300'
               }`}
             >
-              <User className="h-4 w-4" />
-              Users
+              <Eye className="h-4 w-4" />
+              User Activity
               <Badge className="ml-1 bg-indigo-100 text-indigo-700 border-0 hover:bg-indigo-200 transition-colors">
                 {loading ? '...' : usersCount}
               </Badge>
             </button>
+
+            {/* Tracking Tab */}
             <button
-              onClick={() => setActiveTab('sellers')}
+              onClick={() => setActiveTab('tracking')}
               className={`pb-4 px-2 text-sm font-medium transition-all duration-300 relative flex items-center gap-2 ${
-                activeTab === 'sellers'
+                activeTab === 'tracking'
                   ? 'text-indigo-600 border-b-2 border-indigo-600'
                   : 'text-slate-500 hover:text-slate-700 hover:border-b-2 hover:border-slate-300'
               }`}
             >
-              <Briefcase className="h-4 w-4" />
-              Sellers
+              <MapPin className="h-4 w-4" />
+              Email Tracking
               <Badge className="ml-1 bg-indigo-100 text-indigo-700 border-0 hover:bg-indigo-200 transition-colors">
                 {loading ? '...' : sellersCount}
               </Badge>
@@ -102,7 +117,7 @@ const AdminUsersManagement = () => {
 
         {/* Tab Content */}
         <div className="mt-6">
-          {activeTab === 'users' ? <AdminUsers /> : <AdminSellers />}
+          {activeTab === 'userDetails' ? <AdminUserindetailPage /> : <AdminTrackingPage />}
         </div>
 
         {/* Footer */}

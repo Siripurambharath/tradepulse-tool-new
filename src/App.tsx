@@ -94,7 +94,9 @@ const App = () => (
               <Route path="/admin/tracking/:sellerId" element={<AdminTrackingPage />} />
 <Route path="/admin/trackingindetail/:sellerId/:buyerId" element={<AdminTrackingPagIndetail />} />
               <Route path="/admin/trackingindetail" element={<AdminTrackingPagIndetail />} />
-              <Route path="/admin/users" element={<AdminUsersManagement />} />
+              <Route path="/admin/users" element={<AdminUsersManagement />} />    
+                          <Route path="/admin/users/:sellerId" element={<AdminUsersManagement />} />  
+
             </Route>
           </Route>
 

@@ -181,9 +181,9 @@ const AdminSeller = () => {
     searchCache.current.clear();
   };
 
-  const handleEmailClick = (userId: string) => {
-    navigate(`/admin/tracking/${userId}`);
-  };
+ const handleEmailClick = (userId: string) => {
+  navigate(`/admin/users/${userId}?tab=tracking`);
+};
 
   const getRoleBadge = (role: string) => {
     const config: Record<string, { bg: string; text: string; border: string; icon: JSX.Element }> = {

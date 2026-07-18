@@ -1006,6 +1006,7 @@ const seller = JSON.parse(localStorage.getItem("seller"));
       if (productFilter !== 'all') params.set('product', productFilter);
       const res = await fetch(`${API}/buyers?${params.toString()}`);
       const json = await res.json();
+console.log("buyers", JSON.stringify(json));
       setRows(json.data || []);
       setTotalCount(json.total || 0);
 

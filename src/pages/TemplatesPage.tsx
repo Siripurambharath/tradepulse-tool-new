@@ -1,4 +1,3 @@
-// TemplatesPage.tsx
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Plus, FileText, Trash2, Mail, Sparkles, Calendar } from 'lucide-react';
+import { Plus, FileText, Trash2, Mail, Sparkles, Calendar, Zap } from 'lucide-react';
+
 import {
   getTemplates,
   createTemplate,
@@ -68,6 +68,19 @@ export default function TemplatesPage() {
       console.log(error);
     }
   };
+
+ const placeholders = [
+ 
+  'company_name',
+  'contact',
+  'country',
+  'email_revealed',
+  'emails',
+  'hsn_code',
+  'phone_revealed',
+  'products',
+  'website'
+];
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/50">
@@ -181,9 +194,9 @@ export default function TemplatesPage() {
           </div>
         )}
 
-        {/* Dialog with improved design */}
+        {/* Dialog with reduced height */}
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-2xl p-0 max-w-lg overflow-hidden">
+          <DialogContent className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-2xl p-0 max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
             
             <DialogHeader className="px-6 pt-6 pb-0">
@@ -200,7 +213,7 @@ export default function TemplatesPage() {
               </p>
             </DialogHeader>
 
-            <div className="px-6 py-6 space-y-5">
+            <div className="px-6 py-4 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700 block">
                   Template Name
@@ -209,7 +222,7 @@ export default function TemplatesPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g., Welcome Email"
-                  className="bg-slate-50/80 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  className="bg-slate-50/80 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all h-9"
                 />
               </div>
 
@@ -221,7 +234,7 @@ export default function TemplatesPage() {
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="Use {{Company}} for dynamic content"
-                  className="bg-slate-50/80 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  className="bg-slate-50/80 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all h-9"
                 />
               </div>
 
@@ -232,24 +245,44 @@ export default function TemplatesPage() {
                 <Textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
-                  rows={8}
+                  rows={5}
                   placeholder="Write your email template... Use {{Company}}, {{Name}}, {{Link}} placeholders"
                   className="bg-slate-50/80 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all resize-none font-mono text-sm"
                 />
+                
+                {/* Placeholders Display - Compact Version */}
+                <div className="mt-1.5 p-2.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 rounded-lg border border-blue-100/50">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Zap className="h-3 w-3 text-blue-500" />
+                    <span className="text-[11px] font-semibold text-slate-700">Placeholders:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {placeholders.map((p) => (
+                      <span 
+                        key={p} 
+                        className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-white rounded text-[10px] font-mono text-slate-700 border border-blue-100/50 shadow-sm"
+                      >
+                        <span className="text-blue-400">{'{'}{'{'}</span>
+                        {p}
+                        <span className="text-blue-400">{'}'}{'}'}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex items-center justify-end gap-3 pt-1">
                 <Button 
                   variant="outline" 
                   onClick={() => setOpen(false)}
-                  className="border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                  className="border-slate-200 hover:bg-slate-50 hover:border-slate-300 h-9"
                 >
                   Cancel
                 </Button>
                 <Button 
                   onClick={handleAdd}
                   disabled={isLoading}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed h-9"
                 >
                   {isLoading ? (
                     <span className="flex items-center gap-2">

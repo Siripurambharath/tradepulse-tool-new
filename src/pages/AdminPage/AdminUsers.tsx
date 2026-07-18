@@ -168,9 +168,9 @@ const Adminusers = () => {
     searchCache.current.clear();
   };
 
-  const handleEmailClick = (userId: string) => {
-    navigate(`/usersindetail/${userId}`);
-  };
+const handleEmailClick = (userId: string) => {
+  navigate(`/admin/users/${userId}?tab=userDetails`);
+};
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentPage(1); // Reset to first page on search
