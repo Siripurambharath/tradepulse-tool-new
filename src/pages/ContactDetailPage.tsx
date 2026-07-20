@@ -553,12 +553,24 @@ export default function ContactDetailPage() {
                 <div className="p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow">
                   <Phone className="h-4 w-4 text-blue-600" />
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</p>
-                  <p className="text-sm font-semibold text-gray-800">
-                    {initialEmail?.contact_name?.match(/^\+?\d+$/) ? initialEmail.contact_name : '-'}
-                  </p>
-                </div>
+               <div className="flex items-center gap-3">
+  <div className="p-2 bg-blue-50 rounded-lg">
+    <Phone className="h-4 w-4 text-blue-600" />
+  </div>
+  <div>
+    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</p>
+    {initialEmail?.contact_name && /[\d\-+() ]{7,}/.test(initialEmail.contact_name) ? (
+      <a 
+        href={`tel:${initialEmail.contact_name.replace(/\s/g, '')}`}
+        className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+      >
+        {initialEmail.contact_name}
+      </a>
+    ) : (
+      <p className="text-sm font-semibold text-gray-400">Not available</p>
+    )}
+  </div>
+</div>
               </div>
               <div className="flex items-start gap-3 group">
                 <div className="p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow">

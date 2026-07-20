@@ -106,6 +106,7 @@ interface Contact {
   interaction_count: number;
   status: string;
   email: string; 
+  contact_number?: string;
   response: string | null;
   last_interaction: string;
 }
@@ -669,7 +670,7 @@ export default function ContactsPage() {
                         Email
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
+                    <th className="p-10 text-left font-semibold text-gray-700 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-blue-500" />
                         Phone
@@ -730,9 +731,22 @@ export default function ContactsPage() {
                           {contact.email || '-'}
                         </a>
                       </td>
-                      <td className="p-4">
-                        <span className="text-gray-500 text-xs">{contact.phone || '-'}</span>
-                      </td>
+                    <td className="p-4">
+  {contact.contact_name && /[\d\-+() ]{7,}/.test(contact.contact_name) ? (
+    <a 
+      href={`tel:${contact.contact_name.replace(/\s/g, '')}`}
+      className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-xs flex items-center gap-1.5 group"
+    >
+      <Phone className="h-3 w-3" />
+      <span className="group-hover:underline">{contact.contact_name}</span>
+    </a>
+  ) : (
+    <span className="text-gray-400 text-xs flex items-center gap-1">
+      <Phone className="h-3 w-3" />
+      Not available
+    </span>
+  )}
+</td>
                       <td className="p-4">
                         <Button 
                           variant="ghost" 
