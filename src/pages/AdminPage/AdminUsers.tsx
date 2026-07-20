@@ -22,6 +22,7 @@ interface User {
   email_config: number;
   name: string;
   phone: string;
+    phone_number: string; // Add this line
   package_id: string;
 }
 
@@ -397,140 +398,150 @@ const handleEmailClick = (userId: string) => {
           </div>
         </div>
 
-        {/* Users Table */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
-          <CardContent className="pt-0 p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gradient-to-r from-slate-50/80 to-indigo-50/80 border-b border-slate-200/60">
-                    <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">#</th>
-                    <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">User ID</th>
-                    <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">Email</th>
-                    <th className="p-5 text-center font-semibold text-slate-600 text-xs uppercase tracking-wider">Email Sent</th>
-                    <th className="p-5 text-center font-semibold text-slate-600 text-xs uppercase tracking-wider">Email Config</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {isSearching ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-20">
-                        <div className="flex flex-col items-center gap-4">
-                          <Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
-                          <p className="text-slate-500 text-sm font-medium">Searching users...</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : users.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-20">
-                        <div className="flex flex-col items-center gap-4">
-                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                            <Users className="h-10 w-10 text-slate-400" />
-                          </div>
-                          <div>
-                            <p className="text-slate-600 text-sm font-medium">No users found</p>
-                            <p className="text-xs text-slate-400 mt-1">
-                              {searchQuery ? 'Try adjusting your search terms' : 'No users registered yet'}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    users.map((user, index) => {
-                      const isHovered = hoveredRow === user.user_id;
-                      return (
-                        <tr 
-                          key={user.user_id} 
-                          className="border-b last:border-b-0 hover:bg-gradient-to-r hover:from-indigo-50/40 hover:to-transparent transition-all duration-300 group"
-                          onMouseEnter={() => setHoveredRow(user.user_id)}
-                          onMouseLeave={() => setHoveredRow(null)}
-                        >
-                          <td className="p-5 font-medium text-slate-400 text-xs">
-                            {(currentPage - 1) * itemsPerPage + index + 1}
-                          </td>
-                          <td className="p-5">
-                            <div className="flex items-center gap-3">
-                              <div className="relative">
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center ring-2 ring-white shadow-md group-hover:ring-indigo-300 transition-all duration-300">
-                                  <User className="h-4.5 w-4.5 text-indigo-600" />
-                                </div>
-                                {isHovered && (
-                                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-white animate-pulse"></div>
-                                )}
-                              </div>
-                              <span className="font-mono text-xs text-slate-700 font-medium">{user.id}</span>
-                            </div>
-                          </td>
-                          <td className="p-5">
-                            <button
-                              onClick={() => handleEmailClick(user.id)}
-                              className="text-indigo-600 hover:text-indigo-800 transition-all duration-200 flex items-center gap-2 group/email"
-                            >
-                              <Mail className="h-4 w-4 group-hover/email:scale-110 transition-transform duration-200" />
-                              <span className="hover:underline underline-offset-2 font-medium">{user.email}</span>
-                              <span className="text-[10px] text-slate-400 opacity-0 group-hover/email:opacity-100 transition-all duration-200 ml-1">
-                                →
-                              </span>
-                            </button>
-                          </td>
-               
-                          <td className="p-5 text-center">{getStatusBadge(user.email_sent, 'sent')}</td>
-                          <td className="p-5 text-center">{getStatusBadge(user.email_config, 'config')}</td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination Controls */}
-            {users.length > 0 && (
-              <div className="border-t border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-indigo-50/30 px-6 py-4">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-slate-600">Rows per page:</span>
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                      className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400"
-                    >
-                      {itemsPerPageOptions.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
+    {/* Users Table */}
+<Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+  <CardContent className="pt-0 p-0">
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-gradient-to-r from-slate-50/80 to-indigo-50/80 border-b border-slate-200/60">
+            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">#</th>
+            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">User ID</th>
+            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">Name</th>
+            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">Email</th>
+            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">Phone</th>
+            <th className="p-5 text-center font-semibold text-slate-600 text-xs uppercase tracking-wider">Email Sent</th>
+            <th className="p-5 text-center font-semibold text-slate-600 text-xs uppercase tracking-wider">Email Config</th>
+          </tr>
+        </thead>
+        <tbody>
+          {isSearching ? (
+            <tr>
+              <td colSpan={8} className="text-center py-20">
+                <div className="flex flex-col items-center gap-4">
+                  <Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
+                  <p className="text-slate-500 text-sm font-medium">Searching users...</p>
+                </div>
+              </td>
+            </tr>
+          ) : users.length === 0 ? (
+            <tr>
+              <td colSpan={8} className="text-center py-20">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                    <Users className="h-10 w-10 text-slate-400" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-600">
-                      {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}
-                    </span>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={currentPage === 1} 
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      className="hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={currentPage >= totalPages} 
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      className="hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+                  <div>
+                    <p className="text-slate-600 text-sm font-medium">No users found</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {searchQuery ? 'Try adjusting your search terms' : 'No users registered yet'}
+                    </p>
                   </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              </td>
+            </tr>
+          ) : (
+            users.map((user, index) => {
+              const isHovered = hoveredRow === user.user_id;
+              return (
+                <tr 
+                  key={user.user_id} 
+                  className="border-b last:border-b-0 hover:bg-gradient-to-r hover:from-indigo-50/40 hover:to-transparent transition-all duration-300 group"
+                  onMouseEnter={() => setHoveredRow(user.user_id)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                >
+                  <td className="p-5 font-medium text-slate-400 text-xs">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
+                  <td className="p-5">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center ring-2 ring-white shadow-md group-hover:ring-indigo-300 transition-all duration-300">
+                          <User className="h-4.5 w-4.5 text-indigo-600" />
+                        </div>
+                        {isHovered && (
+                          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-white animate-pulse"></div>
+                        )}
+                      </div>
+                      <span className="font-mono text-xs text-slate-700 font-medium">{user.id}</span>
+                    </div>
+                  </td>
+                  <td className="p-5">
+                    <span className="font-medium text-slate-700">
+                      {user.name || <span className="text-slate-400 italic text-xs">Not set</span>}
+                    </span>
+                  </td>
+                  <td className="p-5">
+                    <button
+                      onClick={() => handleEmailClick(user.id)}
+                      className="text-indigo-600 hover:text-indigo-800 transition-all duration-200 flex items-center gap-2 group/email"
+                    >
+                      <Mail className="h-4 w-4 group-hover/email:scale-110 transition-transform duration-200" />
+                      <span className="hover:underline underline-offset-2 font-medium">{user.email}</span>
+                      <span className="text-[10px] text-slate-400 opacity-0 group-hover/email:opacity-100 transition-all duration-200 ml-1">
+                        →
+                      </span>
+                    </button>
+                  </td>
+                  <td className="p-5">
+                    <span className="font-medium text-slate-700">
+                      {user.phone_number || <span className="text-slate-400 italic text-xs">N/A</span>}
+                    </span>
+                  </td>
+                  <td className="p-5 text-center">{getStatusBadge(user.email_sent, 'sent')}</td>
+                  <td className="p-5 text-center">{getStatusBadge(user.email_config, 'config')}</td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </div>
 
+    {/* Pagination Controls */}
+    {users.length > 0 && (
+      <div className="border-t border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-indigo-50/30 px-6 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-slate-600">Rows per page:</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+              className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400"
+            >
+              {itemsPerPageOptions.map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600">
+              {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}
+            </span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={currentPage === 1} 
+              onClick={() => handlePageChange(currentPage - 1)}
+              className="hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={currentPage >= totalPages} 
+              onClick={() => handlePageChange(currentPage + 1)}
+              className="hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+  </CardContent>
+</Card>
         {/* Footer Stats */}
         <div className="flex items-center justify-between text-xs text-slate-400 px-2 flex-wrap gap-2">
           <div className="flex items-center gap-4">
