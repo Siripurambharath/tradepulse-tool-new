@@ -17,10 +17,16 @@ export default function SsoCallback() {
     localStorage.setItem('token', token);
     localStorage.setItem('userRole', role || 'seller');
     localStorage.setItem('seller', JSON.stringify({
-      id: params.get('id'),
+      id: params.get('sub'),
       email: params.get('email'),
       name: params.get('name'),
-      role,
+      role: role,
+      package_id: params.get('package_id'),
+      package_name: params.get('package_name'),
+      effective_package_id: params.get('effective_package_id'),
+      effective_package_name: params.get('effective_package_name'),
+      plan_expiry_date: params.get('plan_expiry_date'),
+      payment_status: params.get('payment_status')
     }));
 
     navigate(role === 'admin' ? '/templates' : '/search', { replace: true });

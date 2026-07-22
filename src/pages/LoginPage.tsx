@@ -99,21 +99,21 @@ export default function LoginPage() {
   ) => {
     try {
       const response = await fetch(`${BASE_URL}/api/store-user`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: userId,
-          email,
-          password,
-          role,
-          name,
-          phone,
-          package_id,
-          pack_exp_date
-        }),
-      });
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    id: userId,
+    email,
+    password,
+    role,
+    name,
+    phone,
+    package_id,
+    pack_exp_date,
+  }),
+});
 
       return await response.json();
     } catch (e) {
