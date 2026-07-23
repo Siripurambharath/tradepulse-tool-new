@@ -13,7 +13,7 @@ import { Loader2, CheckCircle2, XCircle, Calendar, Phone, Mail, Package as Packa
 interface PackageData {
   package_id: number | null;
   package_name: string | null;
-  package_expire: string | null;
+  plan_expiry_date: string | null;
   is_expired: boolean;
   buyer_contact_limit: number | null;
   phone_used: number;
@@ -139,7 +139,7 @@ export function PackageModal({ open, onOpenChange }: PackageModalProps) {
                 <div>
                   <p className="text-xs text-muted-foreground">Expiry Date</p>
                   <p className="font-medium">
-                    {formatDate(packageData.package_expire)}
+                    {formatDate(packageData.plan_expiry_date)}
                   </p>
                 </div>
               </div>
