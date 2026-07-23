@@ -1442,7 +1442,7 @@ export function EmailModal({
                   className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg font-mono text-sm resize-none"
                   placeholder="Enter email message"
                 />
-                <div className="mt-1.5 p-1.5 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                {/* <div className="mt-1.5 p-1.5 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
                   <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
                     <Zap className="h-3 w-3 text-blue-500" />
                     <span className="font-medium">Placeholders:</span>
@@ -1452,7 +1452,7 @@ export function EmailModal({
                       </span>
                     ))}
                   </p>
-                </div>
+                </div> */}
               </div>
 
               {/* Actions */}

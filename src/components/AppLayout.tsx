@@ -42,13 +42,10 @@ export function AppLayout() {
       try {
         const seller = JSON.parse(localStorage.getItem("seller") || "{}");
 
-        if (!seller?.package_id) {
-          setPackageName("No Package");
-          return;
-        }
+       
 
         const response = await fetch(
-          `${API_URL}/api/package/${seller.package_id}`
+          `${API_URL}/api/package/${seller.id}`
         );
 
         const data = await response.json();
@@ -216,13 +213,13 @@ export function AppLayout() {
             <div className="flex items-center gap-3 flex-1">
               <SidebarTrigger className="text-muted-foreground" />
               
-              <div className="relative flex-1 max-w-xl">
+              {/* <div className="relative flex-1 max-w-xl">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#499A13' }} />
                 <Input
                   placeholder="Search buyers, RFQs, products, documents..."
                   className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1 text-sm focus-visible:ring-[#499A13]"
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className="flex items-center gap-3">

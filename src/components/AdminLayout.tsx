@@ -84,13 +84,13 @@ export const AdminLayout = () => {
             <div className="flex items-center gap-3 flex-1">
               <SidebarTrigger className="text-muted-foreground" />
               
-              <div className="relative flex-1 max-w-xl">
+              {/* <div className="relative flex-1 max-w-xl">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#499A13' }} />
                 <Input
                   placeholder="Search buyers, RFQs, products, documents..."
                   className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1 text-sm focus-visible:ring-[#499A13]"
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className="flex items-center gap-3">
