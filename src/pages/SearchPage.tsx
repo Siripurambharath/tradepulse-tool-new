@@ -1,8 +1,4 @@
-
-
-
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,7 +32,7 @@ interface Buyer {
   country: string;
   company_name: string;
   website: string;
-  contacts: string;       // masked or real, depending on revealed flag
+  contacts: string;
   emails: string;
   phone_revealed: boolean;
   email_revealed: boolean;
@@ -137,7 +133,6 @@ function BuyerDetailModal({
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden transform transition-all"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with gradient */}
         <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
@@ -202,13 +197,19 @@ function BuyerDetailModal({
   );
 }
 
-// Import Calendar icon
 const Calendar = ({ className }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
   </svg>
 );
-function CopyButton({ value }: { value: string }) {
+
+// ✅ UPDATED CopyButton with Activity Logs
+function CopyButton({ value, type, buyerId, companyName }: { 
+  value: string; 
+  type: 'phone' | 'email';
+  buyerId?: number;
+  companyName?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async (e: React.MouseEvent) => {
@@ -216,7 +217,24 @@ function CopyButton({ value }: { value: string }) {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
-      toast.success('Copied to clipboard');
+      
+      // ✅ Log copy activity based on type
+      const actionId = type === 'email' ? 48 : 49;
+      const actionName = type === 'email' ? 'Email' : 'Phone Number';
+      
+      await createActivityLog(
+        actionId,
+        1,
+        `Copied ${actionName}: ${value}${companyName ? ` (${companyName})` : ''}`,
+        {
+          copyType: type,
+          copiedValue: value,
+          buyer_id: buyerId,
+          company_name: companyName
+        }
+      );
+      
+      toast.success(`Copied to clipboard`);
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       console.error('Copy failed:', err);
@@ -228,14 +246,13 @@ function CopyButton({ value }: { value: string }) {
     <button
       onClick={handleCopy}
       className="shrink-0 p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors"
-      title="Copy"
+      title={`Copy ${type === 'email' ? 'email' : 'phone'}`}
     >
       {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
     </button>
   );
 }
 
-/* Main Page */
 export default function SearchPage() {
   const [rows, setRows] = useState<Buyer[]>([]);
   const [loading, setLoading] = useState(false);
@@ -250,57 +267,74 @@ export default function SearchPage() {
   const [emailOpen, setEmailOpen] = useState(false);
   const [detailBuyer, setDetailBuyer] = useState<Buyer | null>(null);
   const [submittingId, setSubmittingId] = useState<number | null>(null);
-const [revealingId, setRevealingId] = useState<number | null>(null);
+  const [revealingId, setRevealingId] = useState<number | null>(null);
+  
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-const revealContact = async (buyerId: number, type: 'phone' | 'email') => {
-  setRevealingId(buyerId);
-  try {
-    const res = await fetch(`${API}/buyers/${buyerId}/reveal-contact`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ seller_id: seller.id, reveal_type: type }),
-    });
-    const json = await res.json();
+  const revealContact = async (buyerId: number, type: 'phone' | 'email') => {
+    setRevealingId(buyerId);
+    try {
+      const res = await fetch(`${API}/buyers/${buyerId}/reveal-contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seller_id: seller.id, reveal_type: type }),
+      });
+      const json = await res.json();
 
-    if (json.success) {
-      setRows((prev) =>
-        prev.map((r) =>
-          r.buyer_id === buyerId
-            ? {
-                ...r,
-                contacts: type === 'phone' ? json.data.contacts : r.contacts,
-                emails: type === 'email' ? json.data.emails : r.emails,
-                phone_revealed: type === 'phone' ? true : r.phone_revealed,
-                email_revealed: type === 'email' ? true : r.email_revealed,
-              }
-            : r
-        )
-      );
-    } else if (json.error === 'LIMIT_REACHED') {
-      toast.error(json.message, { duration: 5000 });
-      // optional: trigger an "Upgrade plan" modal here
-    } else if (json.error === 'PLAN_EXPIRED') {
-      toast.error(json.message, { duration: 5000 });
-      // optional: redirect to billing/renewal page
-    } else {
-      toast.error(json.message || `Failed to reveal ${type}`);
+      if (json.success) {
+        const buyer = rows.find(r => r.buyer_id === buyerId);
+        
+        setRows((prev) =>
+          prev.map((r) =>
+            r.buyer_id === buyerId
+              ? {
+                  ...r,
+                  contacts: type === 'phone' ? json.data.contacts : r.contacts,
+                  emails: type === 'email' ? json.data.emails : r.emails,
+                  phone_revealed: type === 'phone' ? true : r.phone_revealed,
+                  email_revealed: type === 'email' ? true : r.email_revealed,
+                }
+              : r
+          )
+        );
+
+        if (type === 'phone') {
+          await createActivityLog(40, 1, `Revealed phone for: ${buyer?.company_name}`, {
+            buyer_id: buyerId,
+            company_name: buyer?.company_name,
+            phone: json.data.contacts
+          });
+        } else {
+          await createActivityLog(41, 1, `Revealed email for: ${buyer?.company_name}`, {
+            buyer_id: buyerId,
+            company_name: buyer?.company_name,
+            email: json.data.emails
+          });
+        }
+
+        toast.success(`${type === 'phone' ? 'Phone' : 'Email'} revealed!`);
+      } else {
+        toast.error(json.message || `Failed to reveal ${type}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(`Failed to reveal ${type}`);
+    } finally {
+      setRevealingId(null);
     }
-  } catch (err) {
-    console.error(err);
-    toast.error(`Failed to reveal ${type}`);
-  } finally {
-    setRevealingId(null);
-  }
-};
-  const perPage = 50;
+  };
 
-  // Initialize email config check hook
+  const perPage = 50;
   const { checkEmailConfig, modalOpen, modalMessage, setModalOpen } = useEmailConfigCheck();
 
-  /* Load Filters */
   useEffect(() => {
     loadFilters();
     createActivityLog(16, 1, 'Viewed search page');
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
   }, []);
 
   const loadFilters = async () => {
@@ -316,11 +350,12 @@ const revealContact = async (buyerId: number, type: 'phone' | 'email') => {
     }
   };
 
-  /* Fetch Data */
   useEffect(() => {
     fetchData();
   }, [page, query, countryFilter, productFilter]);
-const seller = JSON.parse(localStorage.getItem("seller"));
+  
+  const seller = JSON.parse(localStorage.getItem("seller") || "{}");
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -333,19 +368,8 @@ const seller = JSON.parse(localStorage.getItem("seller"));
       if (productFilter !== 'all') params.set('product', productFilter);
       const res = await fetch(`${API}/buyers?${params.toString()}`);
       const json = await res.json();
-console.log("buyers", JSON.stringify(json));
       setRows(json.data || []);
       setTotalCount(json.total || 0);
-
-      if (query) {
-        await createActivityLog(12, 1, `Searched buyers with text: ${query}`, { searchQuery: query });
-      }
-      if (countryFilter !== 'all') {
-        await createActivityLog(17, 1, `Filtered buyers by country: ${countryFilter}`, { country: countryFilter });
-      }
-      if (productFilter !== 'all') {
-        await createActivityLog(18, 1, `Filtered buyers by product: ${productFilter}`, { product: productFilter });
-      }
     } catch (err) {
       console.error(err);
       toast.error('Failed to fetch buyers');
@@ -354,7 +378,97 @@ console.log("buyers", JSON.stringify(json));
     }
   };
 
-  /* Select / Deselect */
+  const logSearch = (searchValue: string) => {
+    if (!searchValue || searchValue.length < 2) return;
+    
+    let actionId = 42;
+    let searchType = 'HSN';
+    const lowerValue = searchValue.toLowerCase();
+    
+    const companyMatch = rows.some(r => r.company_name?.toLowerCase().includes(lowerValue));
+    const productMatch = rows.some(r => r.product?.toLowerCase().includes(lowerValue));
+    const countryMatch = rows.some(r => r.country?.toLowerCase().includes(lowerValue));
+    
+    if (companyMatch) {
+      actionId = 43;
+      searchType = 'Company';
+    } else if (productMatch) {
+      actionId = 44;
+      searchType = 'Product';
+    } else if (countryMatch) {
+      actionId = 45;
+      searchType = 'Country';
+    }
+    
+    createActivityLog(actionId, 1, `Searched by ${searchType}: ${searchValue}`, {
+      searchType: searchType,
+      searchValue: searchValue
+    });
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    setPage(0);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (value && value.length >= 2) {
+      searchTimeoutRef.current = setTimeout(() => {
+        logSearch(value);
+      }, 500);
+    }
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      if (query && query.length >= 2) {
+        logSearch(query);
+      }
+    }
+  };
+
+  const handleCountryFilter = (value: string) => {
+    setPage(0);
+    setCountryFilter(value);
+    if (value !== 'all') {
+      createActivityLog(45, 1, `Filtered by country: ${value}`, {
+        filterType: 'country',
+        filterValue: value
+      });
+    }
+  };
+
+  const handleProductFilter = (value: string) => {
+    setPage(0);
+    setProductFilter(value);
+    if (value !== 'all') {
+      createActivityLog(44, 1, `Filtered by product: ${value}`, {
+        filterType: 'product',
+        filterValue: value
+      });
+    }
+  };
+
+  const handleCountryDropdown = (value: string) => {
+    createActivityLog(46, 1, `Selected country from dropdown: ${value}`, {
+      dropdownType: 'countries',
+      selectedValue: value
+    });
+  };
+
+  const handleProductDropdown = (value: string) => {
+    createActivityLog(47, 1, `Selected product from dropdown: ${value}`, {
+      dropdownType: 'products',
+      selectedValue: value
+    });
+  };
+
   const toggleSelect = (buyerId: number) => {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -373,27 +487,24 @@ console.log("buyers", JSON.stringify(json));
   };
 
   const storeResponse = async (buyer: Buyer, responseType: 'interested' | 'not_interested') => {
-     if (!buyer.email_revealed) {
-    toast.error('Please reveal this buyer\'s email before recording a response.');
-    return;
-  }
-   if (!buyer.phone_revealed) {
-    toast.error('Please reveal this buyer\'s email before recording a response.');
-    return;
-  }
-  setSubmittingId(buyer.buyer_id);
-   
-    
+    if (!buyer.email_revealed) {
+      toast.error('Please reveal email first.');
+      return;
+    }
+    if (!buyer.phone_revealed) {
+      toast.error('Please reveal phone first.');
+      return;
+    }
+    setSubmittingId(buyer.buyer_id);
+     
     try {
       const firstEmail = buyer.emails?.split(',')[0]?.trim();
-      
       if (!firstEmail) {
-        toast.error('No email found for this buyer');
+        toast.error('No email found');
         return;
       }
 
       const seller = JSON.parse(localStorage.getItem("seller") || "{}");
-
       const payload = {
         email: firstEmail,
         response: responseType,
@@ -403,7 +514,8 @@ console.log("buyers", JSON.stringify(json));
         productName: buyer.product,
         templateUsed: 'Manual Entry',
         buyer_id: buyer.buyer_id,
-        seller_id: seller.id || null
+        seller_id: seller.id || null,
+        hsn_code: buyer.hsn_code || '' 
       };
 
       const response = await fetch(`${API}/api/store-response`, {
@@ -415,18 +527,17 @@ console.log("buyers", JSON.stringify(json));
       const data = await response.json();
 
       if (data.success) {
-        toast.success(`${responseType === 'interested' ? '✓ Interested' : '✗ Not Interested'} response recorded!`);
+        toast.success(`${responseType === 'interested' ? '✓ Interested' : '✗ Not Interested'} recorded!`);
         
         const actionId = responseType === 'interested' ? 6 : 7;
-        await createActivityLog(
-          actionId,
-          1,
-          `${responseType === 'interested' ? 'Marked as Interested' : 'Marked as Not Interested'} for buyer: ${buyer.company_name} (${buyer.emails})`,
+        await createActivityLog(actionId, 1, 
+          `${responseType === 'interested' ? 'Interested' : 'Not Interested'}: ${buyer.company_name}`,
           {
             buyer_id: buyer.buyer_id,
             company_name: buyer.company_name,
             email: buyer.emails,
             product: buyer.product,
+            hsn_code: buyer.hsn_code,
             response: responseType
           }
         );
@@ -434,21 +545,18 @@ console.log("buyers", JSON.stringify(json));
         toast.error(data.error || 'Failed to record response');
       }
     } catch (error) {
-      console.error('Error storing response:', error);
+      console.error('Error:', error);
       toast.error('Failed to record response');
     } finally {
       setSubmittingId(null);
     }
   };
 
-  const getSelectedBuyers = () => {
-    return rows.filter(r => selected.has(r.buyer_id));
-  };
+  const getSelectedBuyers = () => rows.filter(r => selected.has(r.buyer_id));
 
   const getUniqueProducts = () => {
     const selectedBuyers = getSelectedBuyers();
-    const uniqueProducts = [...new Set(selectedBuyers.map(b => b.product).filter(Boolean))];
-    return uniqueProducts;
+    return [...new Set(selectedBuyers.map(b => b.product).filter(Boolean))];
   };
 
   const getProductToSend = () => {
@@ -465,43 +573,40 @@ console.log("buyers", JSON.stringify(json));
     return uniqueProducts.length > 1;
   };
 
-  // Filter recipients to only revealed emails
-const getRecipients = () => {
-  return getSelectedBuyers()
-    .filter((r) => r.email_revealed) // skip locked buyers entirely
-    .flatMap((r) =>
-      (r.emails || '')
-        .split(',')
-        .map((email) => ({
-          name: r.company_name,
-          company: r.company_name,
-          company_name: r.company_name,
-          email: email.trim(),
-          country: r.country,
-          product: r.product,
-          buyer_id: r.buyer_id,
-          templateUsed: 'Welcome Template',
-          contacts: r.contacts,
-        }))
-        .filter((recipient) => recipient.email)
-    );
-};
+  const getRecipients = () => {
+    return getSelectedBuyers()
+      .filter((r) => r.email_revealed)
+      .flatMap((r) =>
+        (r.emails || '')
+          .split(',')
+          .map((email) => ({
+            name: r.company_name,
+            company: r.company_name,
+            company_name: r.company_name,
+            email: email.trim(),
+            country: r.country,
+            product: r.product,
+            hsn_code: r.hsn_code || '',
+            buyer_id: r.buyer_id,
+            templateUsed: 'Welcome Template',
+            contacts: r.contacts,
+          }))
+          .filter((recipient) => recipient.email)
+      );
+  };
 
-// Count how many selected buyers are locked (email not revealed)
-const getLockedSelectedCount = () => {
-  return getSelectedBuyers().filter((r) => !r.email_revealed).length;
-};
+  const getLockedSelectedCount = () => {
+    return getSelectedBuyers().filter((r) => !r.email_revealed).length;
+  };
 
   const totalPages = Math.ceil(totalCount / perPage);
   const selectedCount = selected.size;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 p-6">
-      {/* Decorative gradient header */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
       
       <div className="max-w-7xl mx-auto">
-        {/* Header with animated gradient */}
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -512,53 +617,50 @@ const getLockedSelectedCount = () => {
               Find and connect with potential buyers worldwide
             </p>
           </div>
-        <Button 
-  onClick={async () => {
-    const selectedBuyers = getSelectedBuyers();
-    const lockedCount = selectedBuyers.filter((r) => !r.email_revealed).length;
-    const revealedCount = selectedBuyers.length - lockedCount;
+          <Button 
+            onClick={async () => {
+              const selectedBuyers = getSelectedBuyers();
+              const lockedCount = selectedBuyers.filter((r) => !r.email_revealed).length;
+              const revealedCount = selectedBuyers.length - lockedCount;
 
-    // Block entirely if none of the selected buyers have a revealed email
-    if (revealedCount === 0) {
-      toast.error(
-        lockedCount === 1
-          ? 'This buyer\'s email is locked. Reveal it first to send an email.'
-          : 'All selected buyers have locked emails. Reveal at least one to send an email.'
-      );
-      return;
-    }
+              if (revealedCount === 0) {
+                toast.error(
+                  lockedCount === 1
+                    ? 'This buyer\'s email is locked. Reveal it first to send an email.'
+                    : 'All selected buyers have locked emails. Reveal at least one to send an email.'
+                );
+                return;
+              }
 
-    // Some are locked — warn but still allow sending to the revealed ones
-    if (lockedCount > 0) {
-      toast.warning(
-        `${lockedCount} selected buyer${lockedCount > 1 ? 's have' : ' has'} a locked email and will be skipped.`
-      );
-    }
+              if (lockedCount > 0) {
+                toast.warning(
+                  `${lockedCount} selected buyer${lockedCount > 1 ? 's have' : ' has'} a locked email and will be skipped.`
+                );
+              }
 
-    const ok = await checkEmailConfig();
-    if (!ok) return;
+              const ok = await checkEmailConfig();
+              if (!ok) return;
 
-    setEmailOpen(true);
-    createActivityLog(6, 3, 'Opened email modal', { 
-      selected_count: selected.size,
-      revealed_count: revealedCount,
-      locked_skipped: lockedCount,
-    });
-  }} 
-  disabled={selectedCount === 0} 
-  className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
->
-  <Mail className="h-4 w-4" />
-  <span>Send Email</span>
-  {selectedCount > 0 && (
-    <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold">
-      {selectedCount}
-    </span>
-  )}
-</Button>
+              setEmailOpen(true);
+              createActivityLog(6, 3, 'Opened email modal', { 
+                selected_count: selected.size,
+                revealed_count: revealedCount,
+                locked_skipped: lockedCount,
+              });
+            }} 
+            disabled={selectedCount === 0} 
+            className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Mail className="h-4 w-4" />
+            <span>Send Email</span>
+            {selectedCount > 0 && (
+              <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold">
+                {selectedCount}
+              </span>
+            )}
+          </Button>
         </div>
 
-        {/* Enhanced Filters with glassmorphism */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 mb-6">
           <div className="flex flex-wrap gap-3 items-center">
             <div className="relative flex-1 min-w-[200px]">
@@ -566,14 +668,15 @@ const getLockedSelectedCount = () => {
               <Input
                 placeholder="Search HSN, Company, Product, Country..."
                 value={query}
-                onChange={(e) => { setPage(0); setQuery(e.target.value); }}
+                onChange={handleSearchChange}
+                onKeyDown={handleSearchKeyDown}
                 className="pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80"
               />
             </div>
 
             <div className="flex gap-2 flex-wrap">
               <div className="relative">
-                <Select value={countryFilter} onValueChange={(v) => { setPage(0); setCountryFilter(v); }}>
+                <Select value={countryFilter} onValueChange={handleCountryFilter}>
                   <SelectTrigger className="w-44 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80">
                     <Globe className="h-4 w-4 mr-2 text-blue-500" />
                     <SelectValue placeholder="Country" />
@@ -581,14 +684,20 @@ const getLockedSelectedCount = () => {
                   <SelectContent>
                     <SelectItem value="all">🌍 All Countries</SelectItem>
                     {countries.map((c) => (
-                      <SelectItem key={c.country} value={c.country}>{c.country}</SelectItem>
+                      <SelectItem 
+                        key={c.country} 
+                        value={c.country}
+                        onClick={() => handleCountryDropdown(c.country)}
+                      >
+                        {c.country}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="relative">
-                <Select value={productFilter} onValueChange={(v) => { setPage(0); setProductFilter(v); }}>
+                <Select value={productFilter} onValueChange={handleProductFilter}>
                   <SelectTrigger className="w-44 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80">
                     <Package className="h-4 w-4 mr-2 text-blue-500" />
                     <SelectValue placeholder="Product" />
@@ -596,7 +705,13 @@ const getLockedSelectedCount = () => {
                   <SelectContent>
                     <SelectItem value="all">📦 All Products</SelectItem>
                     {products.map((p) => (
-                      <SelectItem key={p.product} value={p.product}>{p.product}</SelectItem>
+                      <SelectItem 
+                        key={p.product} 
+                        value={p.product}
+                        onClick={() => handleProductDropdown(p.product)}
+                      >
+                        {p.product}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -605,7 +720,6 @@ const getLockedSelectedCount = () => {
           </div>
         </div>
 
-        {/* Pagination Info with stats */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-4 text-sm">
             <span className="text-muted-foreground">
@@ -644,7 +758,6 @@ const getLockedSelectedCount = () => {
           </div>
         </div>
 
-        {/* Table with modern design */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-64 gap-4">
@@ -715,9 +828,8 @@ const getLockedSelectedCount = () => {
                     </th>
                   </tr>
                 </thead>
-
                 <tbody>
-                  {rows.map((r, index) => (
+                  {rows.map((r) => (
                     <tr 
                       key={r.buyer_id} 
                       className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-200 ${
@@ -731,19 +843,17 @@ const getLockedSelectedCount = () => {
                           className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                         />
                       </td>
-
                       <td className="p-4 max-w-[120px] truncate">
                         <span className="font-medium text-gray-800" title={r.product}>
                           {r.product}
                         </span>
                       </td>
-
                       <td className="p-4">
                         <button
                           className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors font-medium text-xs"
                           onClick={() => {
                             setDetailBuyer(r);
-                            createActivityLog(7, 3, `Viewed buyer details: ${r.company_name} (HSN: ${r.hsn_code})`, {
+                            createActivityLog(7, 3, `Viewed buyer details: ${r.company_name}`, {
                               buyer_id: r.buyer_id,
                               company_name: r.company_name,
                               hsn_code: r.hsn_code
@@ -754,73 +864,78 @@ const getLockedSelectedCount = () => {
                           {r.hsn_code}
                         </button>
                       </td>
-
                       <td className="p-4">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs">
                           {r.country}
                         </span>
                       </td>
-
                       <td className="p-4 max-w-[150px] truncate font-medium text-gray-800" title={r.company_name}>
                         {r.company_name}
                       </td>
+                      
+                      {/* Contacts cell with CopyButton - logs action_id: 49 */}
+                      <td className="p-4 max-w-[140px]">
+                        {r.phone_revealed ? (
+                          <div className="flex items-center gap-1 min-w-0">
+                            <span className="text-gray-600 text-xs truncate min-w-0" title={r.contacts}>
+                              {r.contacts}
+                            </span>
+                            <CopyButton 
+                              value={r.contacts} 
+                              type="phone"
+                              buyerId={r.buyer_id}
+                              companyName={r.company_name}
+                            />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => revealContact(r.buyer_id, "phone")}
+                            disabled={revealingId === r.buyer_id}
+                            className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
+                          >
+                            {revealingId === r.buyer_id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <>
+                                <Lock className="h-3.5 w-3.5" />
+                                <span>Locked</span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </td>
 
-                     {/* Contacts cell */}
-{/* Contacts cell */}
-<td className="p-4 max-w-[140px]">
-  {r.phone_revealed ? (
-    <div className="flex items-center gap-1 min-w-0">
-      <span className="text-gray-600 text-xs truncate min-w-0" title={r.contacts}>
-        {r.contacts}
-      </span>
-      <CopyButton value={r.contacts} />
-    </div>
-  ) : (
-    <button
-      onClick={() => revealContact(r.buyer_id, "phone")}
-      disabled={revealingId === r.buyer_id}
-      className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
-      title="Click to reveal phone number"
-    >
-      {revealingId === r.buyer_id ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-      ) : (
-        <>
-          <Lock className="h-3.5 w-3.5" />
-          <span>Locked</span>
-        </>
-      )}
-    </button>
-  )}
-</td>
-
-{/* Emails cell */}
-<td className="p-4 max-w-[170px]">
-  {r.email_revealed ? (
-    <div className="flex items-center gap-1 min-w-0">
-      <span className="text-blue-600 text-xs truncate min-w-0" title={r.emails}>
-        {r.emails}
-      </span>
-      <CopyButton value={r.emails} />
-    </div>
-  ) : (
-    <button
-      onClick={() => revealContact(r.buyer_id, "email")}
-      disabled={revealingId === r.buyer_id}
-      className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
-      title="Click to reveal email"
-    >
-      {revealingId === r.buyer_id ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-      ) : (
-        <>
-          <Lock className="h-3.5 w-3.5" />
-          <span>Locked</span>
-        </>
-      )}
-    </button>
-  )}
-</td>
+                      {/* Emails cell with CopyButton - logs action_id: 48 */}
+                      <td className="p-4 max-w-[170px]">
+                        {r.email_revealed ? (
+                          <div className="flex items-center gap-1 min-w-0">
+                            <span className="text-blue-600 text-xs truncate min-w-0" title={r.emails}>
+                              {r.emails}
+                            </span>
+                            <CopyButton 
+                              value={r.emails} 
+                              type="email"
+                              buyerId={r.buyer_id}
+                              companyName={r.company_name}
+                            />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => revealContact(r.buyer_id, "email")}
+                            disabled={revealingId === r.buyer_id}
+                            className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
+                          >
+                            {revealingId === r.buyer_id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <>
+                                <Lock className="h-3.5 w-3.5" />
+                                <span>Locked</span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </td>
 
                       <td className="p-4">
                         <div className="flex gap-1.5">
@@ -862,7 +977,6 @@ const getLockedSelectedCount = () => {
           )}
         </div>
 
-        {/* Bottom pagination */}
         {rows.length > 0 && (
           <div className="flex justify-between items-center mt-4 text-sm text-muted-foreground">
             <span>
@@ -893,7 +1007,6 @@ const getLockedSelectedCount = () => {
         )}
       </div>
 
-      {/* Modals */}
       <BuyerDetailModal buyer={detailBuyer} onClose={() => setDetailBuyer(null)} />
       
       <EmailModal

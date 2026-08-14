@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,7 @@ import {
   Send,
   Reply,
   ThumbsUp,
+  Hash,
   ThumbsDown,
   AtSign,
   Phone,
@@ -134,6 +134,7 @@ interface TrackingCommunication {
   record_type: string;
   date: string | null;
   seller_id: string;
+  hsn_code: string;
 }
 
 interface BuyerInfo {
@@ -146,6 +147,7 @@ interface BuyerInfo {
   all_emails: string;
   all_contacts: string;
   seller_id: string;
+  hsn_code: string;
 }
 
 interface Summary {
@@ -245,7 +247,8 @@ export default function TrackingDetailPage() {
       comm.message?.toLowerCase().includes(q) ||
       comm.response?.toLowerCase().includes(q) ||
       comm.template_used?.toLowerCase().includes(q) ||
-      comm.display_status?.toLowerCase().includes(q);
+      comm.display_status?.toLowerCase().includes(q) ||
+      comm.hsn_code?.toLowerCase().includes(q);
   });
 
   const getStatusBadge = (communication: TrackingCommunication) => {
@@ -460,7 +463,7 @@ export default function TrackingDetailPage() {
         {/* Buyer Information Card with gradient */}
         <Card className="mb-6 bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/80 border-0 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
               <div className="flex items-start gap-3 group">
                 <div className="p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow">
                   <Building className="h-4 w-4 text-blue-600" />
@@ -501,6 +504,15 @@ export default function TrackingDetailPage() {
               </div>
               <div className="flex items-start gap-3 group">
                 <div className="p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow">
+                  <Hash className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">HSN Code</p>
+                  <p className="text-sm font-semibold text-gray-800">{buyerInfo.hsn_code || '-'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 group">
+                <div className="p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow">
                   <Globe className="h-4 w-4 text-blue-600" />
                 </div>
                 <div>
@@ -530,10 +542,10 @@ export default function TrackingDetailPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search communications..."
+                  placeholder="Search by subject, message, HSN code..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 w-48 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80"
+                  className="pl-9 w-56 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80"
                 />
               </div>
             </div>
@@ -546,6 +558,7 @@ export default function TrackingDetailPage() {
                     <TableHead className="font-semibold text-gray-700 w-12">#</TableHead>
                     <TableHead className="font-semibold text-gray-700">Type</TableHead>
                     <TableHead className="font-semibold text-gray-700">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700">HSN Code</TableHead>
                     <TableHead className="font-semibold text-gray-700">Subject</TableHead>
                     <TableHead className="font-semibold text-gray-700">Message Preview</TableHead>
                     <TableHead className="font-semibold text-gray-700">Template</TableHead>
@@ -571,6 +584,11 @@ export default function TrackingDetailPage() {
                           </div>
                         </TableCell>
                         <TableCell>{getStatusBadge(comm)}</TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                            {comm.hsn_code || '-'}
+                          </span>
+                        </TableCell>
                         <TableCell className="max-w-xs">
                           <p className="truncate font-medium text-gray-700 group-hover:text-blue-600 transition-colors">
                             {comm.subject || 'No Subject'}
@@ -614,7 +632,7 @@ export default function TrackingDetailPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12">
+                      <TableCell colSpan={9} className="text-center py-12">
                         <div className="flex flex-col items-center gap-3">
                           <div className="p-4 bg-gray-50 rounded-full">
                             <Mail className="h-10 w-10 text-gray-400" />
@@ -662,7 +680,7 @@ export default function TrackingDetailPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <DialogTitle className="text-xl font-bold flex items-center gap-2 text-gray-800">
-                      <div className="p-1.5 bg-gradient-to-r to-indigo-500 rounded-lg">
+                      <div className="p-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg">
                         {selectedMessage && getTypeIcon(selectedMessage)}
                       </div>
                       Message Details

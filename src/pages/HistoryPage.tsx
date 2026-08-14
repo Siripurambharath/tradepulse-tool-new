@@ -123,16 +123,85 @@ export default function HistoryPage() {
   const navigate = useNavigate();
   const perPage = 10;
   
+  // Ref for debounce
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const seller = JSON.parse(
     localStorage.getItem("seller") || "{}"
   );
   const sellerId = seller.id;
+
+  // ✅ Function to log search with debounce
+  const logSearch = (searchValue: string) => {
+    if (!searchValue || searchValue.length < 2) return;
+    
+    let actionId = 44; // Default: Product search
+    let searchType = 'Product';
+    
+    createActivityLog(actionId, 11, `Searched by ${searchType}: ${searchValue}`, {
+      searchType: searchType,
+      searchValue: searchValue
+    });
+  };
+
+  // ✅ Handle search with debounce
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    setPage(0);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (value && value.length >= 2) {
+      searchTimeoutRef.current = setTimeout(() => {
+        logSearch(value);
+      }, 500);
+    }
+  };
+
+  // ✅ Handle search on Enter key
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      if (query && query.length >= 2) {
+        logSearch(query);
+      }
+    }
+  };
+
+  // ✅ Handle product filter change with activity log
+  const handleProductFilterChange = (value: string) => {
+    setPage(0);
+    setProductFilter(value);
+    
+    // Action 47: Search TableDropdown Products
+    if (value !== 'all') {
+      createActivityLog(47, 11, `Selected product filter: ${value}`, {
+        filterType: 'product',
+        selectedValue: value
+      });
+    } else {
+      createActivityLog(47, 11, 'Cleared product filter', {
+        filterType: 'product',
+        selectedValue: 'all'
+      });
+    }
+  };
 
   // Load products for dropdown
   useEffect(() => {
     if (sellerId) {
       loadProducts();
     }
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
   }, [sellerId]);
 
   const loadProducts = async () => {
@@ -164,7 +233,6 @@ export default function HistoryPage() {
   // Fetch history with pagination
   const fetchHistory = useCallback(async () => {
     try {
-      // Only show full page loader on initial load (page 0 and no query)
       const isInitialLoad = page === 0 && !debouncedQuery && productFilter === 'all';
       if (isInitialLoad) {
         setIsLoading(true);
@@ -191,16 +259,9 @@ export default function HistoryPage() {
         createActivityLog(37, 11, 'Viewed history page');
       }
       
-      if (debouncedQuery) {
-        createActivityLog(35, 11, `Searched history with query: ${debouncedQuery}`, {
-          searchQuery: debouncedQuery
-        });
-      }
-      if (productFilter !== 'all') {
-        createActivityLog(38, 11, `Filtered history by product: ${productFilter}`, {
-          product: productFilter
-        });
-      }
+      // Note: Search logging is now handled by handleSearchChange with debounce
+      // Filter logging is handled by handleProductFilterChange
+      
     } catch (err) {
       console.error("History API Error:", err);
       setHistory([]);
@@ -231,11 +292,6 @@ export default function HistoryPage() {
       date: entry.date
     });
     navigate(`/history/${entry.id}`);
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPage(0);
-    setQuery(e.target.value);
   };
 
   const totalPages = pagination?.totalPages || Math.ceil(totalCount / perPage) || 1;
@@ -358,11 +414,12 @@ export default function HistoryPage() {
             placeholder="Search by product name..."
             value={query}
             onChange={handleSearchChange}
+            onKeyDown={handleSearchKeyDown}
             className="pl-10 bg-card border-muted-foreground/20 focus:border-primary/50 transition-colors"
           />
         </div>
 
-        <Select value={productFilter} onValueChange={(v) => { setPage(0); setProductFilter(v); }}>
+        <Select value={productFilter} onValueChange={handleProductFilterChange}>
           <SelectTrigger className="w-48 bg-card border-muted-foreground/20 focus:border-primary/50 transition-colors">
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-muted-foreground" />

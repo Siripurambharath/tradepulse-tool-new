@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,8 @@ import {
   Mail, Activity,
   BarChart3, Filter, ArrowUpRight,
   Building2, Package, Globe,
-  RefreshCw, ChevronLeft, ChevronRight
+  RefreshCw, ChevronLeft, ChevronRight,
+  Hash  
 } from 'lucide-react';
 import axios from 'axios';
 import { ACTIVITY_URL, API_URL } from '@/components/api';
@@ -93,6 +94,7 @@ interface TrackingItem {
   reply_date?: string;
   responded_at?: string;
   response?: string;
+  hsn_code: string; 
 }
 
 interface TrackingData {
@@ -145,6 +147,9 @@ export default function TrackingPage() {
 
   const statuses = ['sent', 'interested', 'not_interested'];
   const perPage = 10;
+  
+  // Ref for debounce
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const getSellerId = useCallback(() => {
     const sellerStr = localStorage.getItem('seller');
@@ -158,7 +163,105 @@ export default function TrackingPage() {
     }
   }, []);
 
-  // Fetch tracking data with pagination
+  // ✅ Function to log search with debounce
+  const logSearch = (searchValue: string) => {
+    if (!searchValue || searchValue.length < 2) return;
+    
+    let actionId = 42; // Default: HSN
+    let searchType = 'HSN';
+    const lowerValue = searchValue.toLowerCase();
+    
+    // Check against tracking data
+    const companyMatch = trackingData.sent.some(item => 
+      item.company_name?.toLowerCase().includes(lowerValue)
+    ) || trackingData.replied.some(item => 
+      item.company_name?.toLowerCase().includes(lowerValue)
+    ) || trackingData.interested.some(item => 
+      item.company_name?.toLowerCase().includes(lowerValue)
+    ) || trackingData.not_interested.some(item => 
+      item.company_name?.toLowerCase().includes(lowerValue)
+    );
+    
+    const productMatch = trackingData.sent.some(item => 
+      item.product_name?.toLowerCase().includes(lowerValue)
+    ) || trackingData.replied.some(item => 
+      item.product_name?.toLowerCase().includes(lowerValue)
+    ) || trackingData.interested.some(item => 
+      item.product_name?.toLowerCase().includes(lowerValue)
+    ) || trackingData.not_interested.some(item => 
+      item.product_name?.toLowerCase().includes(lowerValue)
+    );
+    
+    const countryMatch = trackingData.sent.some(item => 
+      item.country?.toLowerCase().includes(lowerValue)
+    ) || trackingData.replied.some(item => 
+      item.country?.toLowerCase().includes(lowerValue)
+    ) || trackingData.interested.some(item => 
+      item.country?.toLowerCase().includes(lowerValue)
+    ) || trackingData.not_interested.some(item => 
+      item.country?.toLowerCase().includes(lowerValue)
+    );
+    
+    const hsnMatch = trackingData.sent.some(item => 
+      item.hsn_code?.toLowerCase().includes(lowerValue)
+    ) || trackingData.replied.some(item => 
+      item.hsn_code?.toLowerCase().includes(lowerValue)
+    ) || trackingData.interested.some(item => 
+      item.hsn_code?.toLowerCase().includes(lowerValue)
+    ) || trackingData.not_interested.some(item => 
+      item.hsn_code?.toLowerCase().includes(lowerValue)
+    );
+    
+    if (companyMatch) {
+      actionId = 43;
+      searchType = 'Company';
+    } else if (productMatch) {
+      actionId = 44;
+      searchType = 'Product';
+    } else if (countryMatch) {
+      actionId = 45;
+      searchType = 'Country';
+    } else if (hsnMatch) {
+      actionId = 42;
+      searchType = 'HSN';
+    }
+    
+    createActivityLog(actionId, 5, `Searched by ${searchType}: ${searchValue}`, {
+      searchType: searchType,
+      searchValue: searchValue
+    });
+  };
+
+  // ✅ Handle search with debounce
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setPage(1);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (value && value.length >= 2) {
+      searchTimeoutRef.current = setTimeout(() => {
+        logSearch(value);
+      }, 500);
+    }
+  };
+
+  // ✅ Handle search on Enter key
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      if (searchQuery && searchQuery.length >= 2) {
+        logSearch(searchQuery);
+      }
+    }
+  };
+
+  // Fetch tracking data with pagination and search
   const fetchTrackingData = useCallback(async () => {
     try {
       setLoading(true);
@@ -171,14 +274,17 @@ export default function TrackingPage() {
         return;
       }
 
-      // Fetch tracking data with pagination
-      const response = await axios.get(`${API_URL}/api/tracking/page`, {
-        params: {
-          seller_id: sellerId,
-          page: page,
-          limit: perPage
-        }
-      });
+      const params: any = {
+        seller_id: sellerId,
+        page: page,
+        limit: perPage
+      };
+
+      if (searchQuery && searchQuery.trim() !== '') {
+        params.search = searchQuery.trim();
+      }
+
+      const response = await axios.get(`${API_URL}/api/tracking/page`, { params });
       
       if (response.data.success) {
         setTrackingData(response.data.data);
@@ -186,7 +292,6 @@ export default function TrackingPage() {
         setPagination(response.data.pagination);
       }
 
-      // Log activity
       createActivityLog(31, 5, 'Viewed tracking Table page');
 
     } catch (error: any) {
@@ -195,7 +300,7 @@ export default function TrackingPage() {
     } finally {
       setLoading(false);
     }
-  }, [getSellerId, page]);
+  }, [getSellerId, page, searchQuery]);
 
   // Fetch counts separately (only when needed)
   const fetchCounts = useCallback(async () => {
@@ -221,16 +326,20 @@ export default function TrackingPage() {
   useEffect(() => {
     fetchTrackingData();
     fetchCounts();
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
   }, [fetchTrackingData, fetchCounts]);
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when search changes
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, statusFilter]);
+  }, [searchQuery]);
 
-  // Memoized filtered data - FIXED: Filter by current_status only
+  // Memoized filtered data - Backend already filters by search
   const filteredData = useMemo(() => {
-    // Get data for the active tab - this already has the correct status
     let allData: TrackingItem[] = [];
     
     switch (activeTab) {
@@ -250,49 +359,23 @@ export default function TrackingPage() {
         allData = [];
     }
     
-    // Apply search filter
-    let filtered = allData;
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item => 
-        (item.company_name?.toLowerCase() || '').includes(query) ||
-        (item.country?.toLowerCase() || '').includes(query) ||
-        (item.product_name?.toLowerCase() || '').includes(query)
-      );
-    }
-    
-    // Apply status filter - FIXED: Only filter if statusFilter is not 'all'
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(item => item.current_status === statusFilter);
+      allData = allData.filter(item => item.current_status === statusFilter);
     }
     
-    return filtered;
-  }, [searchQuery, statusFilter, activeTab, trackingData]);
+    return allData;
+  }, [activeTab, trackingData, statusFilter]);
 
-  // Debounced activity log for search
-  useEffect(() => {
-    if (searchQuery) {
-      const timeoutId = setTimeout(() => {
-        createActivityLog(28, 5, `Searched tracking data with query: ${searchQuery}`, {
-          searchQuery: searchQuery,
-          activeTab: activeTab
-        });
-      }, 500);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [searchQuery, activeTab]);
+  // ✅ Debounced activity log for search - REMOVED (now handled by handleSearchChange)
+  // Kept for backward compatibility but won't duplicate logs
 
-  // Debounced activity log for filter
+  // ✅ Log filter activity when status filter changes
   useEffect(() => {
     if (statusFilter !== 'all') {
-      const timeoutId = setTimeout(() => {
-        createActivityLog(29, 5, `Filtered tracking data by status: ${statusFilter}`, {
-          statusFilter: statusFilter,
-          activeTab: activeTab
-        });
-      }, 500);
-      return () => clearTimeout(timeoutId);
+      createActivityLog(29, 5, `Filtered tracking data by status: ${statusFilter}`, {
+        statusFilter: statusFilter,
+        activeTab: activeTab
+      });
     }
   }, [statusFilter, activeTab]);
 
@@ -501,9 +584,10 @@ export default function TrackingPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500" />
               <Input
-                placeholder="Search company, product or country..."
+                placeholder="Search by company, product, country or HSN code..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
+                onKeyDown={handleSearchKeyDown}
                 className="pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80"
               />
             </div>
@@ -518,6 +602,7 @@ export default function TrackingPage() {
                   {statuses.map(s => (
                     <SelectItem key={s} value={s}>
                       {s === 'sent' && '📤 Sent'}
+                      {s === 'replied' && '💬 Replied'}
                       {s === 'interested' && '👍 Interested'}
                       {s === 'not_interested' && '👎 Not Interested'}
                     </SelectItem>
@@ -571,7 +656,7 @@ export default function TrackingPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Sent Tab - FIXED: Only shows items with current_status = 'sent' */}
+          {/* Sent Tab */}
           <TabsContent value="sent">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
@@ -594,6 +679,12 @@ export default function TrackingPage() {
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-blue-500" />
                           Product
+                        </div>
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700">
+                        <div className="flex items-center gap-2">
+                          <Hash className="h-4 w-4 text-blue-500" />
+                          HSN Code
                         </div>
                       </th>
                       <th className="p-4 text-left font-semibold text-gray-700">
@@ -635,6 +726,11 @@ export default function TrackingPage() {
                         <td className="p-4">
                           <span className="text-gray-600">{item.product_name}</span>
                         </td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                            {item.hsn_code || '-'}
+                          </span>
+                        </td>
                         <td className="p-4">{getStatusBadge(item.current_status)}</td>
                         <td className="p-4 text-center">
                           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full">
@@ -658,7 +754,7 @@ export default function TrackingPage() {
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="text-center py-12">
+                        <td colSpan={7} className="text-center py-12">
                           <div className="flex flex-col items-center gap-3">
                             <div className="p-4 bg-gray-50 rounded-full">
                               <Mail className="h-10 w-10 text-gray-400" />
@@ -688,7 +784,7 @@ export default function TrackingPage() {
             </div>
           </TabsContent>
 
-          {/* Replied Tab - FIXED: Only shows items with current_status = 'replied' */}
+          {/* Replied Tab */}
           <TabsContent value="replied">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
@@ -711,6 +807,12 @@ export default function TrackingPage() {
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-emerald-500" />
                           Product
+                        </div>
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700">
+                        <div className="flex items-center gap-2">
+                          <Hash className="h-4 w-4 text-emerald-500" />
+                          HSN Code
                         </div>
                       </th>
                       <th className="p-4 text-left font-semibold text-gray-700">
@@ -752,6 +854,11 @@ export default function TrackingPage() {
                         <td className="p-4">
                           <span className="text-gray-600">{item.product_name}</span>
                         </td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                            {item.hsn_code || '-'}
+                          </span>
+                        </td>
                         <td className="p-4">{getStatusBadge(item.current_status)}</td>
                         <td className="p-4 text-center">
                           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full">
@@ -775,7 +882,7 @@ export default function TrackingPage() {
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="text-center py-12">
+                        <td colSpan={7} className="text-center py-12">
                           <div className="flex flex-col items-center gap-3">
                             <div className="p-4 bg-gray-50 rounded-full">
                               <Reply className="h-10 w-10 text-gray-400" />
@@ -805,7 +912,7 @@ export default function TrackingPage() {
             </div>
           </TabsContent>
 
-          {/* Interested Tab - FIXED: Only shows items with current_status = 'interested' */}
+          {/* Interested Tab */}
           <TabsContent value="interested">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
@@ -828,6 +935,12 @@ export default function TrackingPage() {
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-emerald-500" />
                           Product
+                        </div>
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700">
+                        <div className="flex items-center gap-2">
+                          <Hash className="h-4 w-4 text-emerald-500" />
+                          HSN Code
                         </div>
                       </th>
                       <th className="p-4 text-left font-semibold text-gray-700">
@@ -869,6 +982,11 @@ export default function TrackingPage() {
                         <td className="p-4">
                           <span className="text-gray-600">{item.product_name}</span>
                         </td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                            {item.hsn_code || '-'}
+                          </span>
+                        </td>
                         <td className="p-4">{getStatusBadge(item.current_status)}</td>
                         <td className="p-4 text-center">
                           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full">
@@ -892,7 +1010,7 @@ export default function TrackingPage() {
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="text-center py-12">
+                        <td colSpan={7} className="text-center py-12">
                           <div className="flex flex-col items-center gap-3">
                             <div className="p-4 bg-gray-50 rounded-full">
                               <ThumbsUp className="h-10 w-10 text-gray-400" />
@@ -922,7 +1040,7 @@ export default function TrackingPage() {
             </div>
           </TabsContent>
 
-          {/* Not Interested Tab - FIXED: Only shows items with current_status = 'not_interested' */}
+          {/* Not Interested Tab */}
           <TabsContent value="not_interested">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
@@ -945,6 +1063,12 @@ export default function TrackingPage() {
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-red-500" />
                           Product
+                        </div>
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700">
+                        <div className="flex items-center gap-2">
+                          <Hash className="h-4 w-4 text-red-500" />
+                          HSN Code
                         </div>
                       </th>
                       <th className="p-4 text-left font-semibold text-gray-700">
@@ -986,6 +1110,11 @@ export default function TrackingPage() {
                         <td className="p-4">
                           <span className="text-gray-600">{item.product_name}</span>
                         </td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                            {item.hsn_code || '-'}
+                          </span>
+                        </td>
                         <td className="p-4">{getStatusBadge(item.current_status)}</td>
                         <td className="p-4 text-center">
                           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-full">
@@ -1009,7 +1138,7 @@ export default function TrackingPage() {
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="text-center py-12">
+                        <td colSpan={7} className="text-center py-12">
                           <div className="flex flex-col items-center gap-3">
                             <div className="p-4 bg-gray-50 rounded-full">
                               <ThumbsDown className="h-10 w-10 text-gray-400" />

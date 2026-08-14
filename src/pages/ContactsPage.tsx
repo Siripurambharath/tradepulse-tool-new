@@ -10,7 +10,7 @@ import {
   MessageSquare, Phone, AtSign, Filter, Sparkles,
   TrendingUp, Clock, CheckCircle, XCircle, User,
   Calendar, ArrowUpRight, LayoutGrid, List, Send,
-  ChevronLeft, ChevronRight, Loader2
+  ChevronLeft, ChevronRight, Loader2, Hash 
 } from 'lucide-react';
 import axios from 'axios';
 import { ACTIVITY_URL, API_URL } from '@/components/api';
@@ -109,6 +109,7 @@ interface Contact {
   contact_number?: string;
   response: string | null;
   last_interaction: string;
+  hsn_code: string; 
 }
 
 interface PaginationData {
@@ -154,6 +155,9 @@ export default function ContactsPage() {
 
   // Templates for dropdown
   const [templates, setTemplates] = useState<string[]>([]);
+  
+  // Ref for debounce
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const getSellerId = () => {
     try {
@@ -205,10 +209,72 @@ export default function ContactsPage() {
     }
   };
 
+  // ✅ Function to log search with debounce
+  const logSearch = (searchValue: string) => {
+    if (!searchValue || searchValue.length < 2) return;
+    
+    let actionId = 42; // Default: HSN
+    let searchType = 'HSN';
+    const lowerValue = searchValue.toLowerCase();
+    
+    // Check against contacts data
+    const companyMatch = contacts.some(c => c.company_name?.toLowerCase().includes(lowerValue));
+    const productMatch = contacts.some(c => c.product_name?.toLowerCase().includes(lowerValue));
+    const emailMatch = contacts.some(c => c.email?.toLowerCase().includes(lowerValue));
+    const hsnMatch = contacts.some(c => c.hsn_code?.toLowerCase().includes(lowerValue));
+    
+    if (companyMatch) {
+      actionId = 43;
+      searchType = 'Company';
+    } else if (productMatch) {
+      actionId = 44;
+      searchType = 'Product';
+    } else if (emailMatch) {
+      actionId = 50;
+      searchType = 'Email';
+    } else if (hsnMatch) {
+      actionId = 42;
+      searchType = 'HSN';
+    }
+    
+    createActivityLog(actionId, 4, `Searched by ${searchType}: ${searchValue}`, {
+      searchType: searchType,
+      searchValue: searchValue
+    });
+  };
+
+  // ✅ Handle search with debounce
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    setPage(0);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (value && value.length >= 2) {
+      searchTimeoutRef.current = setTimeout(() => {
+        logSearch(value);
+      }, 500);
+    }
+  };
+
+  // ✅ Handle search on Enter key
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      if (query && query.length >= 2) {
+        logSearch(query);
+      }
+    }
+  };
+
   // Fetch contacts with pagination, search, and template filter
   const fetchContacts = useCallback(async (isSearch = false) => {
     try {
-      // Only show loading spinner for initial load, not for search
       if (!isSearch) {
         setLoading(true);
       }
@@ -221,7 +287,6 @@ export default function ContactsPage() {
         return;
       }
 
-      // Build query params with pagination
       const params = new URLSearchParams();
       params.set('seller_id', sellerId);
       params.set('page', String(page + 1));
@@ -255,6 +320,11 @@ export default function ContactsPage() {
     fetchStats();
     fetchContacts(false);
     createActivityLog(19, 4, 'Viewed contacts page');
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Fetch contacts when page, debounced query, or filter changes
@@ -263,16 +333,15 @@ export default function ContactsPage() {
     fetchContacts(isSearch);
   }, [page, debouncedQuery, templateFilter, fetchContacts]);
 
-  // Log search activity when debounced query changes
+  // Log search activity when debounced query changes (only if not already logged by handleSearchChange)
   useEffect(() => {
-    if (debouncedQuery) {
-      createActivityLog(21, 4, `Searched contacts with text: ${debouncedQuery}`, {
-        searchQuery: debouncedQuery
-      });
+    if (debouncedQuery && debouncedQuery.length >= 2) {
+      // Only log if it wasn't already logged by the debounce in handleSearchChange
+      // This is a fallback for when search is triggered by other means
     }
   }, [debouncedQuery]);
 
-  // Log filter activity when template filter changes
+  // ✅ Log filter activity when template filter changes
   useEffect(() => {
     if (templateFilter !== 'all') {
       createActivityLog(22, 4, `Filtered contacts by template: ${templateFilter}`, {
@@ -280,6 +349,24 @@ export default function ContactsPage() {
       });
     }
   }, [templateFilter]);
+
+  // ✅ Handle template dropdown selection with activity log
+  const handleTemplateFilterChange = (value: string) => {
+    setPage(0);
+    setTemplateFilter(value);
+    // Action 51: Filter Dropdown by Templates
+    if (value !== 'all') {
+      createActivityLog(51, 4, `Selected template filter: ${value}`, {
+        filterType: 'template',
+        selectedValue: value
+      });
+    } else {
+      createActivityLog(51, 4, 'Cleared template filter', {
+        filterType: 'template',
+        selectedValue: 'all'
+      });
+    }
+  };
 
   const toggleSelect = (buyerId: number) => {
     const next = new Set(selected);
@@ -327,6 +414,7 @@ export default function ContactsPage() {
       buyer_id: contact.buyer_id,
       contacts: contact.phone || contact.contact_name || '',
       contact_number: contact.phone || contact.contact_name || '',
+      hsn_code: contact.hsn_code || '', 
     }));
 
   const getStatusBadge = (contact: Contact) => {
@@ -388,14 +476,8 @@ export default function ContactsPage() {
     setEmailOpen(true);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPage(0);
-    setQuery(e.target.value);
-  };
-
   const totalPages = pagination?.totalPages || Math.ceil(totalCount / perPage) || 1;
 
-  // Only show full page loading on initial load
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center">
@@ -445,7 +527,7 @@ export default function ContactsPage() {
           </Button>
         </div>
 
-        {/* Stats Cards - Show skeleton while loading */}
+        {/* Stats Cards */}
         {statsLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[1, 2, 3, 4].map((i) => (
@@ -518,15 +600,16 @@ export default function ContactsPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500" />
               <Input 
-                placeholder="Search by name, email, company, product..." 
+                placeholder="Search by email, company, product, HSN code..." 
                 value={query} 
                 onChange={handleSearchChange}
+                onKeyDown={handleSearchKeyDown}
                 className="pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80"
               />
             </div>
             
             <div className="relative">
-              <Select value={templateFilter} onValueChange={(v) => { setPage(0); setTemplateFilter(v); }}>
+              <Select value={templateFilter} onValueChange={handleTemplateFilterChange}>
                 <SelectTrigger className="w-48 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80">
                   <Filter className="h-4 w-4 mr-2 text-blue-500" />
                   <SelectValue placeholder="All Templates" />
@@ -648,6 +731,12 @@ export default function ContactsPage() {
                     </th>
                     <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                       <div className="flex items-center gap-2">
+                        <Hash className="h-4 w-4 text-blue-500" />
+                        HSN Code
+                      </div>
+                    </th>
+                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
                         <Sparkles className="h-4 w-4 text-blue-500" />
                         Template
                       </div>
@@ -710,6 +799,11 @@ export default function ContactsPage() {
                         <span className="text-gray-600">{contact.product_name || '-'}</span>
                       </td>
                       <td className="p-4">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                          {contact.hsn_code || '-'}
+                        </span>
+                      </td>
+                      <td className="p-4">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200">
                           <Sparkles className="h-3 w-3" />
                           {contact.template_used || 'No Template'}
@@ -731,22 +825,22 @@ export default function ContactsPage() {
                           {contact.email || '-'}
                         </a>
                       </td>
-                    <td className="p-4">
-  {contact.contact_name && /[\d\-+() ]{7,}/.test(contact.contact_name) ? (
-    <a 
-      href={`tel:${contact.contact_name.replace(/\s/g, '')}`}
-      className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-xs flex items-center gap-1.5 group"
-    >
-      <Phone className="h-3 w-3" />
-      <span className="group-hover:underline">{contact.contact_name}</span>
-    </a>
-  ) : (
-    <span className="text-gray-400 text-xs flex items-center gap-1">
-      <Phone className="h-3 w-3" />
-      Not available
-    </span>
-  )}
-</td>
+                      <td className="p-4">
+                        {contact.contact_name && /[\d\-+() ]{7,}/.test(contact.contact_name) ? (
+                          <a 
+                            href={`tel:${contact.contact_name.replace(/\s/g, '')}`}
+                            className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-xs flex items-center gap-1.5 group"
+                          >
+                            <Phone className="h-3 w-3" />
+                            <span className="group-hover:underline">{contact.contact_name}</span>
+                          </a>
+                        ) : (
+                          <span className="text-gray-400 text-xs flex items-center gap-1">
+                            <Phone className="h-3 w-3" />
+                            Not available
+                          </span>
+                        )}
+                      </td>
                       <td className="p-4">
                         <Button 
                           variant="ghost" 

@@ -34,9 +34,9 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  Loader2
-} from 'lucide-react';
-import axios from 'axios';
+  Loader2,
+  Hash  
+} from 'lucide-react';import axios from 'axios';
 import { EmailModal } from '@/components/EmailModal';
 import {
   Dialog,
@@ -133,6 +133,7 @@ interface Reply {
   response: string | null;
   responded_at: string | null;
   sent_at: string | null;
+   hsn_code: string;
 }
 
 interface PaginationData {
@@ -580,6 +581,15 @@ export default function ContactDetailPage() {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Product</p>
                   <p className="text-sm font-semibold text-gray-800">{initialEmail?.product_name || '-'}</p>
                 </div>
+<div className="flex items-start gap-3 group">
+  <div className="p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow">
+    <Hash className="h-4 w-4 text-blue-600" />
+  </div>
+  <div>
+    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">HSN Code</p>
+    <p className="text-sm font-semibold text-gray-800">{initialEmail?.hsn_code || '-'}</p>
+  </div>
+</div>
               </div>
             </div>
           </CardContent>

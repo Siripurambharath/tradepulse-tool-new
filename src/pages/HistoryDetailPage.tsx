@@ -308,7 +308,7 @@ export default function HistoryDetailPage() {
 
       {/* Search and Table */}
       <div className="bg-card rounded-2xl border border-border shadow-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-border bg-gradient-to-r from-primary/5 to-transparent flex flex-wrap items-center justify-between gap-3">
+        {/* <div className="px-6 py-4 border-b border-border bg-gradient-to-r from-primary/5 to-transparent flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Building2 className="h-5 w-5 text-primary" />
             Company Details
@@ -325,7 +325,7 @@ export default function HistoryDetailPage() {
             />
           </div>
         </div>
-        
+         */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
