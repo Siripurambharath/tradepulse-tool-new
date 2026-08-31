@@ -126,21 +126,21 @@ function BuyerDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-2 sm:p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden transform transition-all"
+        className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-lg mx-2 sm:mx-4 overflow-hidden transform transition-all max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-5">
+        <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-6 py-3 sm:py-5">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 text-blue-100 text-xs font-medium uppercase tracking-wider mb-1">
                 <Hash className="h-3.5 w-3.5" />
                 HSN Code
               </div>
-              <h2 className="text-2xl font-bold text-white">{buyer.hsn_code}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">{buyer.hsn_code}</h2>
             </div>
             <button
               onClick={onClose}
@@ -151,7 +151,7 @@ function BuyerDetailModal({
           </div>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           {fields.map(({ label, value, icon }) =>
             value ? (
               <div key={label} className="flex items-start gap-3 group">
@@ -182,7 +182,7 @@ function BuyerDetailModal({
           )}
         </div>
 
-        <div className="px-6 py-4 bg-gray-50/50 border-t flex justify-end">
+        <div className="px-4 sm:px-6 py-4 bg-gray-50/50 border-t flex justify-end">
           <Button 
             variant="outline" 
             size="sm" 
@@ -203,7 +203,6 @@ const Calendar = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// ✅ UPDATED CopyButton with Activity Logs
 function CopyButton({ value, type, buyerId, companyName }: { 
   value: string; 
   type: 'phone' | 'email';
@@ -218,7 +217,6 @@ function CopyButton({ value, type, buyerId, companyName }: {
       await navigator.clipboard.writeText(value);
       setCopied(true);
       
-      // ✅ Log copy activity based on type
       const actionId = type === 'email' ? 48 : 49;
       const actionName = type === 'email' ? 'Email' : 'Phone Number';
       
@@ -274,6 +272,7 @@ export default function SearchPage() {
   const revealContact = async (buyerId: number, type: 'phone' | 'email') => {
     setRevealingId(buyerId);
     try {
+      const seller = JSON.parse(localStorage.getItem("seller") || "{}");
       const res = await fetch(`${API}/buyers/${buyerId}/reveal-contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -603,18 +602,20 @@ export default function SearchPage() {
   const selectedCount = selected.size;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 p-1.5 sm:p-4">
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
       
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+      <div className="max-w-full sm:max-w-7xl mx-auto px-0.5 sm:px-2">
+        {/* Header - Responsive */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-3 sm:mb-6">
+          <div className="space-y-0.5">
+            <h1 className="text-lg sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Search Buyers
             </h1>
-            <p className="text-sm text-muted-foreground flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Find and connect with potential buyers worldwide
+            <p className="text-[10px] sm:text-sm text-muted-foreground flex items-center gap-1.5">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+              <span className="hidden sm:inline">Find and connect with potential buyers worldwide</span>
+              <span className="sm:hidden">Find buyers worldwide</span>
             </p>
           </div>
           <Button 
@@ -649,36 +650,37 @@ export default function SearchPage() {
               });
             }} 
             disabled={selectedCount === 0} 
-            className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="gap-1 sm:gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4"
           >
-            <Mail className="h-4 w-4" />
+            <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span>Send Email</span>
             {selectedCount > 0 && (
-              <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-semibold">
+              <span className="bg-white/20 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold">
                 {selectedCount}
               </span>
             )}
           </Button>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 mb-6">
-          <div className="flex flex-wrap gap-3 items-center">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500" />
+        {/* Search and Filters - Responsive */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-white/50 p-1.5 sm:p-3 mb-2.5 sm:mb-5">
+          <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-3 items-stretch sm:items-center">
+            <div className="relative flex-1 min-w-[120px] sm:min-w-[200px]">
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500" />
               <Input
                 placeholder="Search HSN, Company, Product, Country..."
                 value={query}
                 onChange={handleSearchChange}
                 onKeyDown={handleSearchKeyDown}
-                className="pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80"
+                className="pl-8 sm:pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-lg sm:rounded-xl bg-white/80 w-full h-8 sm:h-10 text-[11px] sm:text-sm"
               />
             </div>
 
-            <div className="flex gap-2 flex-wrap">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
+              <div className="relative w-full sm:w-36 lg:w-44">
                 <Select value={countryFilter} onValueChange={handleCountryFilter}>
-                  <SelectTrigger className="w-44 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80">
-                    <Globe className="h-4 w-4 mr-2 text-blue-500" />
+                  <SelectTrigger className="w-full border-gray-200 focus:border-blue-400 rounded-lg sm:rounded-xl bg-white/80 h-8 sm:h-10 text-[11px] sm:text-sm">
+                    <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-blue-500 shrink-0" />
                     <SelectValue placeholder="Country" />
                   </SelectTrigger>
                   <SelectContent>
@@ -696,10 +698,10 @@ export default function SearchPage() {
                 </Select>
               </div>
 
-              <div className="relative">
+              <div className="relative w-full sm:w-36 lg:w-44">
                 <Select value={productFilter} onValueChange={handleProductFilter}>
-                  <SelectTrigger className="w-44 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80">
-                    <Package className="h-4 w-4 mr-2 text-blue-500" />
+                  <SelectTrigger className="w-full border-gray-200 focus:border-blue-400 rounded-lg sm:rounded-xl bg-white/80 h-8 sm:h-10 text-[11px] sm:text-sm">
+                    <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-blue-500 shrink-0" />
                     <SelectValue placeholder="Product" />
                   </SelectTrigger>
                   <SelectContent>
@@ -720,30 +722,31 @@ export default function SearchPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-4 text-sm">
+        {/* Stats and Pagination - Responsive */}
+        <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-3 mb-2.5 sm:mb-4">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-4 text-[10px] sm:text-sm">
             <span className="text-muted-foreground">
               Showing <span className="font-semibold text-foreground">{rows.length}</span> of{' '}
               <span className="font-semibold text-foreground">{totalCount}</span> buyers
             </span>
             {selectedCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
-                <Checkbox checked className="h-3 w-3" />
+              <span className="inline-flex items-center gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1 bg-blue-50 text-blue-700 rounded-full text-[9px] sm:text-xs font-medium border border-blue-200">
+                <Checkbox checked className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 {selectedCount} selected
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               disabled={page === 0} 
               onClick={() => setPage((p) => p - 1)}
-              className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-7 sm:h-9 px-1.5 sm:px-3"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
-            <div className="px-4 py-1.5 bg-white rounded-lg border text-sm font-medium shadow-sm">
+            <div className="px-1.5 sm:px-4 py-1 bg-white rounded-lg border text-[10px] sm:text-sm font-medium shadow-sm whitespace-nowrap">
               Page <span className="text-blue-600">{page + 1}</span> / {totalPages || 1}
             </div>
             <Button 
@@ -751,80 +754,82 @@ export default function SearchPage() {
               size="sm" 
               disabled={page + 1 >= totalPages} 
               onClick={() => setPage((p) => p + 1)}
-              className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-7 sm:h-9 px-1.5 sm:px-3"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        {/* Table - Responsive with horizontal scroll on mobile */}
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-64 gap-4">
+            <div className="flex flex-col items-center justify-center h-48 sm:h-64 gap-3 sm:gap-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full blur-xl opacity-20 animate-pulse" />
-                <Loader2 className="h-12 w-12 animate-spin text-blue-600 relative" />
+                <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-blue-600 relative" />
               </div>
-              <p className="text-sm text-muted-foreground animate-pulse">Loading buyers...</p>
+              <p className="text-xs sm:text-sm text-muted-foreground animate-pulse">Loading buyers...</p>
             </div>
           ) : rows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 gap-3">
-              <div className="p-4 bg-gray-50 rounded-full">
-                <Search className="h-10 w-10 text-gray-400" />
+            <div className="flex flex-col items-center justify-center h-48 sm:h-64 gap-2 sm:gap-3 px-4">
+              <div className="p-3 sm:p-4 bg-gray-50 rounded-full">
+                <Search className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
               </div>
-              <p className="text-muted-foreground font-medium">No Buyers Found</p>
-              <p className="text-sm text-muted-foreground/70">Try adjusting your filters or search terms</p>
+              <p className="text-sm sm:text-base text-muted-foreground font-medium">No Buyers Found</p>
+              <p className="text-[10px] sm:text-sm text-muted-foreground/70 text-center">Try adjusting your filters or search terms</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-[10px] sm:text-sm min-w-[650px] sm:min-w-[800px]">
                 <thead>
                   <tr className="bg-gradient-to-r from-gray-50/80 to-blue-50/80 border-b border-gray-200">
-                    <th className="p-4 text-center w-12">
+                    <th className="p-1.5 sm:p-3 text-center w-8 sm:w-12">
                       <Checkbox
                         checked={selected.size === rows.length && rows.length > 0}
                         onCheckedChange={selectAll}
                         className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                       />
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-blue-500" />
-                        Product
+                    <th className="p-1.5 sm:p-3 text-left font-semibold text-gray-700 whitespace-nowrap">
+                      <div className="flex items-center gap-0.5 sm:gap-2">
+                        <Package className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 shrink-0" />
+                        <span className="text-[9px] sm:text-sm">Product</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Hash className="h-4 w-4 text-blue-500" />
-                        HSN Code
+                    <th className="p-1.5 sm:p-3 text-left font-semibold text-gray-700 whitespace-nowrap">
+                      <div className="flex items-center gap-0.5 sm:gap-2">
+                        <Hash className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 shrink-0" />
+                        <span className="text-[9px] sm:text-sm">HSN</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-blue-500" />
-                        Country
+                    <th className="p-1.5 sm:p-3 text-left font-semibold text-gray-700 whitespace-nowrap">
+                      <div className="flex items-center gap-0.5 sm:gap-2">
+                        <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 shrink-0" />
+                        <span className="text-[9px] sm:text-sm">Country</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-blue-500" />
-                        Company
+                    <th className="p-1.5 sm:p-3 text-left font-semibold text-gray-700 whitespace-nowrap">
+                      <div className="flex items-center gap-0.5 sm:gap-2">
+                        <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 shrink-0" />
+                        <span className="hidden sm:inline text-[9px] sm:text-sm">Company</span>
+                        <span className="sm:hidden text-[9px]">Co.</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-blue-500" />
-                        Contacts
+                    <th className="p-1.5 sm:p-3 text-left font-semibold text-gray-700 whitespace-nowrap">
+                      <div className="flex items-center gap-0.5 sm:gap-2">
+                        <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 shrink-0" />
+                        <span className="text-[9px] sm:text-sm">Phone</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <AtSign className="h-4 w-4 text-blue-500" />
-                        Emails
+                    <th className="p-1.5 sm:p-3 text-left font-semibold text-gray-700 whitespace-nowrap">
+                      <div className="flex items-center gap-0.5 sm:gap-2">
+                        <AtSign className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 shrink-0" />
+                        <span className="text-[9px] sm:text-sm">Email</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      Actions
+                    <th className="p-1.5 sm:p-3 text-center font-semibold text-gray-700 whitespace-nowrap">
+                      <span className="text-[9px] sm:text-sm">Actions</span>
                     </th>
                   </tr>
                 </thead>
@@ -836,21 +841,21 @@ export default function SearchPage() {
                         selected.has(r.buyer_id) ? 'bg-blue-50/30' : ''
                       }`}
                     >
-                      <td className="p-4 text-center">
+                      <td className="p-1.5 sm:p-3 text-center">
                         <Checkbox
                           checked={selected.has(r.buyer_id)}
                           onCheckedChange={() => toggleSelect(r.buyer_id)}
                           className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                         />
                       </td>
-                      <td className="p-4 max-w-[120px] truncate">
-                        <span className="font-medium text-gray-800" title={r.product}>
+                      <td className="p-1.5 sm:p-3 max-w-[60px] sm:max-w-[120px] truncate">
+                        <span className="font-medium text-gray-800 text-[9px] sm:text-sm" title={r.product}>
                           {r.product}
                         </span>
                       </td>
-                      <td className="p-4">
+                      <td className="p-1.5 sm:p-3">
                         <button
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors font-medium text-xs"
+                          className="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2.5 py-0.5 sm:py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors font-medium text-[8px] sm:text-xs"
                           onClick={() => {
                             setDetailBuyer(r);
                             createActivityLog(7, 3, `Viewed buyer details: ${r.company_name}`, {
@@ -860,24 +865,24 @@ export default function SearchPage() {
                             });
                           }}
                         >
-                          <Hash className="h-3 w-3" />
+                          <Hash className="h-2 w-2 sm:h-3 sm:w-3" />
                           {r.hsn_code}
                         </button>
                       </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs">
+                      <td className="p-1.5 sm:p-3">
+                        <span className="inline-flex items-center gap-1 px-1 sm:px-2.5 py-0.5 sm:py-1 bg-gray-50 rounded-lg text-[8px] sm:text-xs">
                           {r.country}
                         </span>
                       </td>
-                      <td className="p-4 max-w-[150px] truncate font-medium text-gray-800" title={r.company_name}>
+                      <td className="p-1.5 sm:p-3 max-w-[70px] sm:max-w-[150px] truncate font-medium text-gray-800 text-[9px] sm:text-sm" title={r.company_name}>
                         {r.company_name}
                       </td>
                       
-                      {/* Contacts cell with CopyButton - logs action_id: 49 */}
-                      <td className="p-4 max-w-[140px]">
+                      {/* Contacts cell */}
+                      <td className="p-1.5 sm:p-3 max-w-[70px] sm:max-w-[140px]">
                         {r.phone_revealed ? (
-                          <div className="flex items-center gap-1 min-w-0">
-                            <span className="text-gray-600 text-xs truncate min-w-0" title={r.contacts}>
+                          <div className="flex items-center gap-0.5 sm:gap-1 min-w-0">
+                            <span className="text-gray-600 text-[8px] sm:text-xs truncate min-w-0" title={r.contacts}>
                               {r.contacts}
                             </span>
                             <CopyButton 
@@ -891,25 +896,25 @@ export default function SearchPage() {
                           <button
                             onClick={() => revealContact(r.buyer_id, "phone")}
                             disabled={revealingId === r.buyer_id}
-                            className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
+                            className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
                           >
                             {revealingId === r.buyer_id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <Loader2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-spin" />
                             ) : (
                               <>
-                                <Lock className="h-3.5 w-3.5" />
-                                <span>Locked</span>
+                                <Lock className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
+                                <span className="hidden sm:inline">Locked</span>
                               </>
                             )}
                           </button>
                         )}
                       </td>
 
-                      {/* Emails cell with CopyButton - logs action_id: 48 */}
-                      <td className="p-4 max-w-[170px]">
+                      {/* Emails cell */}
+                      <td className="p-1.5 sm:p-3 max-w-[80px] sm:max-w-[170px]">
                         {r.email_revealed ? (
-                          <div className="flex items-center gap-1 min-w-0">
-                            <span className="text-blue-600 text-xs truncate min-w-0" title={r.emails}>
+                          <div className="flex items-center gap-0.5 sm:gap-1 min-w-0">
+                            <span className="text-blue-600 text-[8px] sm:text-xs truncate min-w-0" title={r.emails}>
                               {r.emails}
                             </span>
                             <CopyButton 
@@ -923,49 +928,49 @@ export default function SearchPage() {
                           <button
                             onClick={() => revealContact(r.buyer_id, "email")}
                             disabled={revealingId === r.buyer_id}
-                            className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
+                            className="inline-flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap"
                           >
                             {revealingId === r.buyer_id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <Loader2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-spin" />
                             ) : (
                               <>
-                                <Lock className="h-3.5 w-3.5" />
-                                <span>Locked</span>
+                                <Lock className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
+                                <span className="hidden sm:inline">Locked</span>
                               </>
                             )}
                           </button>
                         )}
                       </td>
 
-                      <td className="p-4">
-                        <div className="flex gap-1.5">
+                      <td className="p-1.5 sm:p-3">
+                        <div className="flex flex-col sm:flex-row gap-0.5 sm:gap-1.5">
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-8 px-2.5 gap-1.5 text-xs bg-green-50 hover:bg-green-100 text-green-700 hover:text-green-800 rounded-lg border border-green-200"
+                            className="h-5 sm:h-7 px-1 sm:px-2 gap-0.5 sm:gap-1 text-[8px] sm:text-xs bg-green-50 hover:bg-green-100 text-green-700 hover:text-green-800 rounded-lg border border-green-200"
                             onClick={() => storeResponse(r, 'interested')}
                             disabled={submittingId === r.buyer_id}
                           >
                             {submittingId === r.buyer_id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
+                              <Loader2 className="h-2 w-2 sm:h-3 sm:w-3 animate-spin" />
                             ) : (
-                              <ThumbsUp className="h-3 w-3" />
+                              <ThumbsUp className="h-2 w-2 sm:h-3 sm:w-3" />
                             )}
-                            Interested
+                            <span className="text-[7px] sm:text-[10px]">Interested</span>
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-8 px-2.5 gap-1.5 text-xs bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 rounded-lg border border-red-200"
+                            className="h-5 sm:h-7 px-1 sm:px-2 gap-0.5 sm:gap-1 text-[8px] sm:text-xs bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 rounded-lg border border-red-200"
                             onClick={() => storeResponse(r, 'not_interested')}
                             disabled={submittingId === r.buyer_id}
                           >
                             {submittingId === r.buyer_id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
+                              <Loader2 className="h-2 w-2 sm:h-3 sm:w-3 animate-spin" />
                             ) : (
-                              <ThumbsDown className="h-3 w-3" />
+                              <ThumbsDown className="h-2 w-2 sm:h-3 sm:w-3" />
                             )}
-                            Not Interested
+                            <span className="text-[7px] sm:text-[10px]">Not Interested</span>
                           </Button>
                         </div>
                       </td>
@@ -977,21 +982,23 @@ export default function SearchPage() {
           )}
         </div>
 
+        {/* Bottom Pagination - Responsive */}
         {rows.length > 0 && (
-          <div className="flex justify-between items-center mt-4 text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-3 mt-2.5 sm:mt-4 text-[10px] sm:text-sm text-muted-foreground">
             <span>
               Showing {page * perPage + 1} - {Math.min((page + 1) * perPage, totalCount)} of {totalCount}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
                 disabled={page === 0} 
                 onClick={() => setPage((p) => p - 1)}
+                className="h-7 sm:h-9 px-1.5 sm:px-3"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
-              <div className="px-3 py-1 bg-white rounded-lg border text-xs font-medium">
+              <div className="px-1.5 sm:px-3 py-1 bg-white rounded-lg border text-[10px] sm:text-xs font-medium">
                 {page + 1} / {totalPages || 1}
               </div>
               <Button 
@@ -999,8 +1006,9 @@ export default function SearchPage() {
                 size="sm" 
                 disabled={page + 1 >= totalPages} 
                 onClick={() => setPage((p) => p + 1)}
+                className="h-7 sm:h-9 px-1.5 sm:px-3"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>

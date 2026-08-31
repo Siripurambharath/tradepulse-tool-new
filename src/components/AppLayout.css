@@ -29,3 +29,14 @@ main > *:first-child {
     padding-right: 0.5rem;
   }
 }
+
+
+/* Extra small screens (phone) */
+@media (max-width: 480px) {
+  .xs\:inline {
+    display: inline !important;
+  }
+  .xs\:hidden {
+    display: none !important;
+  }
+}

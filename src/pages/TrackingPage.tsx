@@ -366,9 +366,6 @@ export default function TrackingPage() {
     return allData;
   }, [activeTab, trackingData, statusFilter]);
 
-  // ✅ Debounced activity log for search - REMOVED (now handled by handleSearchChange)
-  // Kept for backward compatibility but won't duplicate logs
-
   // ✅ Log filter activity when status filter changes
   useEffect(() => {
     if (statusFilter !== 'all') {
@@ -456,13 +453,13 @@ export default function TrackingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center p-4 sm:p-6">
         <div className="text-center">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full blur-xl opacity-20 animate-pulse" />
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto relative" />
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-blue-200 border-t-blue-600 mx-auto relative" />
           </div>
-          <p className="mt-6 text-sm font-medium text-muted-foreground animate-pulse">
+          <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-medium text-muted-foreground animate-pulse">
             Loading tracking data...
           </p>
         </div>
@@ -472,15 +469,15 @@ export default function TrackingPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-w-md w-full text-center">
-          <div className="p-4 bg-gradient-to-r from-red-50 to-rose-50 rounded-full w-fit mx-auto mb-4">
-            <AlertCircle className="h-12 w-12 text-red-500" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center p-4 sm:p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8 max-w-md w-full text-center mx-4">
+          <div className="p-3 sm:p-4 bg-gradient-to-r from-red-50 to-rose-50 rounded-full w-fit mx-auto mb-3 sm:mb-4">
+            <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-red-500" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">Error Loading Data</h3>
-          <p className="text-sm text-muted-foreground mb-6">{error}</p>
-          <Button onClick={() => { setPage(1); fetchTrackingData(); }} className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600">
-            <RefreshCw className="h-4 w-4" />
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1 sm:mb-2">Error Loading Data</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">{error}</p>
+          <Button onClick={() => { setPage(1); fetchTrackingData(); }} className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-sm sm:text-base">
+            <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Try Again
           </Button>
         </div>
@@ -489,25 +486,26 @@ export default function TrackingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 p-3 sm:p-4 md:p-6">
       {/* Decorative gradient header */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
       
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg">
-              <BarChart3 className="h-6 w-6 text-white" />
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+            <div className="p-2 sm:p-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg">
+              <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 Email Tracking Dashboard
               </h1>
-              <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                <Activity className="h-4 w-4" />
-                Track all email communications and buyer responses
-                <span className="text-xs text-muted-foreground ml-2">
+              <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1 sm:gap-2 mt-0.5 sm:mt-1">
+                <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Track all email communications and buyer responses</span>
+                <span className="xs:hidden">Track email communications</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground ml-1 sm:ml-2">
                   ({pagination.totalItems} total buyers)
                 </span>
               </p>
@@ -515,86 +513,86 @@ export default function TrackingPage() {
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <Card 
-            className={`cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 bg-gradient-to-br from-blue-50 to-indigo-50 ${activeTab === 'sent' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
-            onClick={() => handleCardClick('sent')}
-          >
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="p-2.5 bg-white rounded-xl shadow-sm w-fit mx-auto mb-3">
-                  <Send className="h-5 w-5 text-blue-600" />
-                </div>
-                <p className="text-3xl font-bold text-blue-700">{counts.sent}</p>
-                <p className="text-xs font-medium text-blue-600/70 uppercase tracking-wider mt-1">Sent</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className={`cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 bg-gradient-to-br from-emerald-50 to-green-50 ${activeTab === 'replied' ? 'ring-2 ring-emerald-500 shadow-lg' : ''}`}
-            onClick={() => handleCardClick('replied')}
-          >
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="p-2.5 bg-white rounded-xl shadow-sm w-fit mx-auto mb-3">
-                  <Reply className="h-5 w-5 text-emerald-600" />
-                </div>
-                <p className="text-3xl font-bold text-emerald-700">{counts.replied}</p>
-                <p className="text-xs font-medium text-emerald-600/70 uppercase tracking-wider mt-1">Replied</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className={`cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 bg-gradient-to-br from-emerald-50 to-teal-50 ${activeTab === 'interested' ? 'ring-2 ring-emerald-500 shadow-lg' : ''}`}
-            onClick={() => handleCardClick('interested')}
-          >
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="p-2.5 bg-white rounded-xl shadow-sm w-fit mx-auto mb-3">
-                  <ThumbsUp className="h-5 w-5 text-emerald-600" />
-                </div>
-                <p className="text-3xl font-bold text-emerald-700">{counts.interested}</p>
-                <p className="text-xs font-medium text-emerald-600/70 uppercase tracking-wider mt-1">Interested</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className={`cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 bg-gradient-to-br from-red-50 to-rose-50 ${activeTab === 'not_interested' ? 'ring-2 ring-red-500 shadow-lg' : ''}`}
-            onClick={() => handleCardClick('not_interested')}
-          >
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="p-2.5 bg-white rounded-xl shadow-sm w-fit mx-auto mb-3">
-                  <ThumbsDown className="h-5 w-5 text-red-600" />
-                </div>
-                <p className="text-3xl font-bold text-red-700">{counts.not_interested}</p>
-                <p className="text-xs font-medium text-red-600/70 uppercase tracking-wider mt-1">Not Interested</p>
-              </div>
-            </CardContent>
-          </Card>
+    {/* Summary Cards - Reduced height for mobile */}
+<div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 mb-3 sm:mb-4 md:mb-6">
+  <Card 
+    className={`cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 bg-gradient-to-br from-blue-50 to-indigo-50 ${activeTab === 'sent' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+    onClick={() => handleCardClick('sent')}
+  >
+    <CardContent className="pt-2 sm:pt-3 md:pt-4 pb-2 sm:pb-3 md:pb-4">
+      <div className="text-center">
+        <div className="p-1 sm:p-1.5 md:p-2 bg-white rounded-lg sm:rounded-xl shadow-sm w-fit mx-auto mb-0.5 sm:mb-1 md:mb-2">
+          <Send className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-blue-600" />
         </div>
+        <p className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-blue-700">{counts.sent}</p>
+        <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-blue-600/70 uppercase tracking-wider mt-0 sm:mt-0.5">Sent</p>
+      </div>
+    </CardContent>
+  </Card>
+  
+  <Card 
+    className={`cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 bg-gradient-to-br from-emerald-50 to-green-50 ${activeTab === 'replied' ? 'ring-2 ring-emerald-500 shadow-lg' : ''}`}
+    onClick={() => handleCardClick('replied')}
+  >
+    <CardContent className="pt-2 sm:pt-3 md:pt-4 pb-2 sm:pb-3 md:pb-4">
+      <div className="text-center">
+        <div className="p-1 sm:p-1.5 md:p-2 bg-white rounded-lg sm:rounded-xl shadow-sm w-fit mx-auto mb-0.5 sm:mb-1 md:mb-2">
+          <Reply className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-emerald-600" />
+        </div>
+        <p className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-emerald-700">{counts.replied}</p>
+        <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-emerald-600/70 uppercase tracking-wider mt-0 sm:mt-0.5">Replied</p>
+      </div>
+    </CardContent>
+  </Card>
+  
+  <Card 
+    className={`cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 bg-gradient-to-br from-emerald-50 to-teal-50 ${activeTab === 'interested' ? 'ring-2 ring-emerald-500 shadow-lg' : ''}`}
+    onClick={() => handleCardClick('interested')}
+  >
+    <CardContent className="pt-2 sm:pt-3 md:pt-4 pb-2 sm:pb-3 md:pb-4">
+      <div className="text-center">
+        <div className="p-1 sm:p-1.5 md:p-2 bg-white rounded-lg sm:rounded-xl shadow-sm w-fit mx-auto mb-0.5 sm:mb-1 md:mb-2">
+          <ThumbsUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-emerald-600" />
+        </div>
+        <p className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-emerald-700">{counts.interested}</p>
+        <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-emerald-600/70 uppercase tracking-wider mt-0 sm:mt-0.5">Interested</p>
+      </div>
+    </CardContent>
+  </Card>
+  
+  <Card 
+    className={`cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 bg-gradient-to-br from-red-50 to-rose-50 ${activeTab === 'not_interested' ? 'ring-2 ring-red-500 shadow-lg' : ''}`}
+    onClick={() => handleCardClick('not_interested')}
+  >
+    <CardContent className="pt-2 sm:pt-3 md:pt-4 pb-2 sm:pb-3 md:pb-4">
+      <div className="text-center">
+        <div className="p-1 sm:p-1.5 md:p-2 bg-white rounded-lg sm:rounded-xl shadow-sm w-fit mx-auto mb-0.5 sm:mb-1 md:mb-2">
+          <ThumbsDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-red-600" />
+        </div>
+        <p className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-red-700">{counts.not_interested}</p>
+        <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-red-600/70 uppercase tracking-wider mt-0 sm:mt-0.5">Not Int.</p>
+      </div>
+    </CardContent>
+  </Card>
+</div>
 
         {/* Search and Filter Bar */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 mb-6">
-          <div className="flex flex-wrap gap-3 items-center">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500" />
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
+            <div className="relative flex-1 min-w-[150px] sm:min-w-[200px]">
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500" />
               <Input
                 placeholder="Search by company, product, country or HSN code..."
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyDown={handleSearchKeyDown}
-                className="pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80"
+                className="pl-8 sm:pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80 text-sm sm:text-base h-9 sm:h-10"
               />
             </div>
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80">
-                  <Filter className="h-4 w-4 mr-2 text-blue-500" />
+                <SelectTrigger className="w-full sm:w-48 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80 h-9 sm:h-10 text-sm sm:text-base">
+                  <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-blue-500" />
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
@@ -610,52 +608,55 @@ export default function TrackingPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
-              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-100">
-                <Activity className="h-3.5 w-3.5 text-blue-500" />
-                Showing: <span className="font-semibold text-gray-700">{filteredData.length}</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground sm:ml-auto">
+              <span className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-white rounded-lg shadow-sm border border-gray-100">
+                <Activity className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-500" />
+                <span className="hidden xs:inline">Showing:</span>
+                <span className="font-semibold text-gray-700">{filteredData.length}</span>
               </span>
             </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 gap-2 bg-transparent p-0 mb-6">
-            <TabsTrigger 
-              value="sent" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-xl py-3 gap-2 bg-white/50 border border-gray-200"
-            >
-              <Send className="h-4 w-4" />
-              Sent
-              <Badge className="ml-1 bg-white/20 text-white border-0">{counts.sent}</Badge>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="replied" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-xl py-3 gap-2 bg-white/50 border border-gray-200"
-            >
-              <Reply className="h-4 w-4" />
-              Replied
-              <Badge className="ml-1 bg-white/20 text-white border-0">{counts.replied}</Badge>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="interested" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-xl py-3 gap-2 bg-white/50 border border-gray-200"
-            >
-              <ThumbsUp className="h-4 w-4" />
-              Interested
-              <Badge className="ml-1 bg-white/20 text-white border-0">{counts.interested}</Badge>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="not_interested" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-xl py-3 gap-2 bg-white/50 border border-gray-200"
-            >
-              <ThumbsDown className="h-4 w-4" />
-              Not Interested
-              <Badge className="ml-1 bg-white/20 text-white border-0">{counts.not_interested}</Badge>
-            </TabsTrigger>
-          </TabsList>
+<Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 bg-transparent p-0 mb-10 sm:mb-4 md:mb-6">
+    <TabsTrigger 
+      value="sent" 
+      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-xl py-2 sm:py-3 px-1 sm:px-3 gap-1 sm:gap-2 bg-white/50 border border-gray-200 text-[10px] sm:text-xs md:text-sm flex-1 min-w-0"
+    >
+      <Send className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+      <span className="truncate">Sent</span>
+      <Badge className="ml-0.5 sm:ml-1 bg-white/20 text-white border-0 text-[10px] sm:text-xs flex-shrink-0">{counts.sent}</Badge>
+    </TabsTrigger>
+    <TabsTrigger 
+      value="replied" 
+      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-xl py-2 sm:py-3 px-1 sm:px-3 gap-1 sm:gap-2 bg-white/50 border border-gray-200 text-[10px] sm:text-xs md:text-sm flex-1 min-w-0"
+    >
+      <Reply className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+      <span className="truncate">Replied</span>
+      <Badge className="ml-0.5 sm:ml-1 bg-white/20 text-white border-0 text-[10px] sm:text-xs flex-shrink-0">{counts.replied}</Badge>
+    </TabsTrigger>
+    <TabsTrigger 
+      value="interested" 
+      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-xl py-2 sm:py-3 px-1 sm:px-3 gap-1 sm:gap-2 bg-white/50 border border-gray-200 text-[10px] sm:text-xs md:text-sm flex-1 min-w-0"
+    >
+      <ThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+      <span className="truncate">Interested</span>
+      <Badge className="ml-0.5 sm:ml-1 bg-white/20 text-white border-0 text-[10px] sm:text-xs flex-shrink-0">{counts.interested}</Badge>
+    </TabsTrigger>
+    <TabsTrigger 
+      value="not_interested" 
+      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-xl py-2 sm:py-3 px-1 sm:px-3 gap-1 sm:gap-2 bg-white/50 border border-gray-200 text-[10px] sm:text-xs md:text-sm flex-1 min-w-0"
+    >
+      <ThumbsDown className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+      <span className="hidden xs:inline truncate">Not Interested</span>
+      <span className="xs:hidden truncate">Not Int.</span>
+      <Badge className="ml-0.5 sm:ml-1 bg-white/20 text-white border-0 text-[10px] sm:text-xs flex-shrink-0">{counts.not_interested}</Badge>
+    </TabsTrigger>
+  </TabsList>
 
+ 
           {/* Sent Tab */}
           <TabsContent value="sent">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
@@ -663,43 +664,43 @@ export default function TrackingPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border-b border-gray-200">
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-blue-500" />
                           Company
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Globe className="h-4 w-4 text-blue-500" />
                           Country
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-blue-500" />
                           Product
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Hash className="h-4 w-4 text-blue-500" />
                           HSN Code
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Activity className="h-4 w-4 text-blue-500" />
                           Status
                         </div>
                       </th>
-                      <th className="p-4 text-center font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-center font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
                           <MessageSquare className="h-4 w-4 text-blue-500" />
                           Interactions
                         </div>
                       </th>
-                      <th className="p-4 text-center font-semibold text-gray-700">Actions</th>
+                      <th className="p-3 sm:p-4 text-center font-semibold text-gray-700 whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -710,39 +711,43 @@ export default function TrackingPage() {
                           index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
                         }`}
                       >
-                        <td className="p-4">
+                        <td className="p-3 sm:p-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center text-blue-600 font-semibold text-xs">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center text-blue-600 font-semibold text-xs flex-shrink-0">
                               {item.company_name?.charAt(0) || 'C'}
                             </div>
-                            <span className="font-medium text-gray-800">{item.company_name}</span>
+                            <span className="font-medium text-gray-800 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[150px]">
+                              {item.company_name}
+                            </span>
                           </div>
                         </td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs">
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs whitespace-nowrap">
                             {item.country}
                           </span>
                         </td>
-                        <td className="p-4">
-                          <span className="text-gray-600">{item.product_name}</span>
+                        <td className="p-3 sm:p-4">
+                          <span className="text-gray-600 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[120px] block">
+                            {item.product_name}
+                          </span>
                         </td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium whitespace-nowrap">
                             {item.hsn_code || '-'}
                           </span>
                         </td>
-                        <td className="p-4">{getStatusBadge(item.current_status)}</td>
-                        <td className="p-4 text-center">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full">
+                        <td className="p-3 sm:p-4">{getStatusBadge(item.current_status)}</td>
+                        <td className="p-3 sm:p-4 text-center">
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full whitespace-nowrap">
                             <MessageSquare className="h-3.5 w-3.5 text-blue-500" />
                             <span className="font-bold text-blue-700">{item.interaction_count || 0}</span>
                           </div>
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-3 sm:p-4 text-center">
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="gap-1.5 h-9 px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 rounded-lg transition-colors"
+                            className="gap-1.5 h-8 sm:h-9 px-3 sm:px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 rounded-lg transition-colors text-xs sm:text-sm"
                             onClick={() => viewDetails(item)}
                           >
                             <Eye className="h-3.5 w-3.5" />
@@ -754,13 +759,13 @@ export default function TrackingPage() {
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="text-center py-12">
-                          <div className="flex flex-col items-center gap-3">
-                            <div className="p-4 bg-gray-50 rounded-full">
-                              <Mail className="h-10 w-10 text-gray-400" />
+                        <td colSpan={7} className="text-center py-8 sm:py-10 md:py-12">
+                          <div className="flex flex-col items-center gap-2 sm:gap-3">
+                            <div className="p-3 sm:p-4 bg-gray-50 rounded-full">
+                              <Mail className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                             </div>
-                            <p className="text-muted-foreground font-medium">No sent emails found</p>
-                            <p className="text-sm text-muted-foreground/70">Start sending emails to track them here</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground font-medium">No sent emails found</p>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground/70">Start sending emails to track them here</p>
                           </div>
                         </td>
                       </tr>
@@ -769,12 +774,12 @@ export default function TrackingPage() {
                 </table>
               </div>
               {filteredData.length > 0 && (
-                <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-blue-50/50">
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-blue-50/50">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Showing <span className="font-semibold text-foreground">{filteredData.length}</span> sent emails
                   </p>
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-100">
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">
                       <Send className="h-3.5 w-3.5 text-blue-500" />
                       Total: <span className="font-semibold text-gray-700">{counts.sent}</span>
                     </span>
@@ -791,43 +796,43 @@ export default function TrackingPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gradient-to-r from-emerald-50/80 to-green-50/80 border-b border-gray-200">
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-emerald-500" />
                           Company
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Globe className="h-4 w-4 text-emerald-500" />
                           Country
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-emerald-500" />
                           Product
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Hash className="h-4 w-4 text-emerald-500" />
                           HSN Code
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Activity className="h-4 w-4 text-emerald-500" />
                           Status
                         </div>
                       </th>
-                      <th className="p-4 text-center font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-center font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
                           <MessageSquare className="h-4 w-4 text-emerald-500" />
                           Interactions
                         </div>
                       </th>
-                      <th className="p-4 text-center font-semibold text-gray-700">Actions</th>
+                      <th className="p-3 sm:p-4 text-center font-semibold text-gray-700 whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -838,39 +843,43 @@ export default function TrackingPage() {
                           index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
                         }`}
                       >
-                        <td className="p-4">
+                        <td className="p-3 sm:p-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-100 to-green-100 flex items-center justify-center text-emerald-600 font-semibold text-xs">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-emerald-100 to-green-100 flex items-center justify-center text-emerald-600 font-semibold text-xs flex-shrink-0">
                               {item.company_name?.charAt(0) || 'C'}
                             </div>
-                            <span className="font-medium text-gray-800">{item.company_name}</span>
+                            <span className="font-medium text-gray-800 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[150px]">
+                              {item.company_name}
+                            </span>
                           </div>
                         </td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs">
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs whitespace-nowrap">
                             {item.country}
                           </span>
                         </td>
-                        <td className="p-4">
-                          <span className="text-gray-600">{item.product_name}</span>
+                        <td className="p-3 sm:p-4">
+                          <span className="text-gray-600 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[120px] block">
+                            {item.product_name}
+                          </span>
                         </td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium whitespace-nowrap">
                             {item.hsn_code || '-'}
                           </span>
                         </td>
-                        <td className="p-4">{getStatusBadge(item.current_status)}</td>
-                        <td className="p-4 text-center">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full">
+                        <td className="p-3 sm:p-4">{getStatusBadge(item.current_status)}</td>
+                        <td className="p-3 sm:p-4 text-center">
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full whitespace-nowrap">
                             <MessageSquare className="h-3.5 w-3.5 text-emerald-500" />
                             <span className="font-bold text-emerald-700">{item.interaction_count || 0}</span>
                           </div>
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-3 sm:p-4 text-center">
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="gap-1.5 h-9 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 rounded-lg transition-colors"
+                            className="gap-1.5 h-8 sm:h-9 px-3 sm:px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 rounded-lg transition-colors text-xs sm:text-sm"
                             onClick={() => viewDetails(item)}
                           >
                             <Eye className="h-3.5 w-3.5" />
@@ -882,13 +891,13 @@ export default function TrackingPage() {
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="text-center py-12">
-                          <div className="flex flex-col items-center gap-3">
-                            <div className="p-4 bg-gray-50 rounded-full">
-                              <Reply className="h-10 w-10 text-gray-400" />
+                        <td colSpan={7} className="text-center py-8 sm:py-10 md:py-12">
+                          <div className="flex flex-col items-center gap-2 sm:gap-3">
+                            <div className="p-3 sm:p-4 bg-gray-50 rounded-full">
+                              <Reply className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                             </div>
-                            <p className="text-muted-foreground font-medium">No replied emails found</p>
-                            <p className="text-sm text-muted-foreground/70">Replies will appear here once received</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground font-medium">No replied emails found</p>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground/70">Replies will appear here once received</p>
                           </div>
                         </td>
                       </tr>
@@ -897,12 +906,12 @@ export default function TrackingPage() {
                 </table>
               </div>
               {filteredData.length > 0 && (
-                <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-emerald-50/50">
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-emerald-50/50">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Showing <span className="font-semibold text-foreground">{filteredData.length}</span> replied emails
                   </p>
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-100">
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">
                       <Reply className="h-3.5 w-3.5 text-emerald-500" />
                       Total: <span className="font-semibold text-gray-700">{counts.replied}</span>
                     </span>
@@ -919,43 +928,43 @@ export default function TrackingPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gradient-to-r from-emerald-50/80 to-teal-50/80 border-b border-gray-200">
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-emerald-500" />
                           Company
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Globe className="h-4 w-4 text-emerald-500" />
                           Country
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-emerald-500" />
                           Product
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Hash className="h-4 w-4 text-emerald-500" />
                           HSN Code
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Activity className="h-4 w-4 text-emerald-500" />
                           Status
                         </div>
                       </th>
-                      <th className="p-4 text-center font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-center font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
                           <MessageSquare className="h-4 w-4 text-emerald-500" />
                           Interactions
                         </div>
                       </th>
-                      <th className="p-4 text-center font-semibold text-gray-700">Actions</th>
+                      <th className="p-3 sm:p-4 text-center font-semibold text-gray-700 whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -966,39 +975,43 @@ export default function TrackingPage() {
                           index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
                         }`}
                       >
-                        <td className="p-4">
+                        <td className="p-3 sm:p-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-100 to-teal-100 flex items-center justify-center text-emerald-600 font-semibold text-xs">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-emerald-100 to-teal-100 flex items-center justify-center text-emerald-600 font-semibold text-xs flex-shrink-0">
                               {item.company_name?.charAt(0) || 'C'}
                             </div>
-                            <span className="font-medium text-gray-800">{item.company_name}</span>
+                            <span className="font-medium text-gray-800 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[150px]">
+                              {item.company_name}
+                            </span>
                           </div>
                         </td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs">
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs whitespace-nowrap">
                             {item.country}
                           </span>
                         </td>
-                        <td className="p-4">
-                          <span className="text-gray-600">{item.product_name}</span>
+                        <td className="p-3 sm:p-4">
+                          <span className="text-gray-600 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[120px] block">
+                            {item.product_name}
+                          </span>
                         </td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium whitespace-nowrap">
                             {item.hsn_code || '-'}
                           </span>
                         </td>
-                        <td className="p-4">{getStatusBadge(item.current_status)}</td>
-                        <td className="p-4 text-center">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full">
+                        <td className="p-3 sm:p-4">{getStatusBadge(item.current_status)}</td>
+                        <td className="p-3 sm:p-4 text-center">
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full whitespace-nowrap">
                             <MessageSquare className="h-3.5 w-3.5 text-emerald-500" />
                             <span className="font-bold text-emerald-700">{item.interaction_count || 0}</span>
                           </div>
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-3 sm:p-4 text-center">
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="gap-1.5 h-9 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 rounded-lg transition-colors"
+                            className="gap-1.5 h-8 sm:h-9 px-3 sm:px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 rounded-lg transition-colors text-xs sm:text-sm"
                             onClick={() => viewDetails(item)}
                           >
                             <Eye className="h-3.5 w-3.5" />
@@ -1010,13 +1023,13 @@ export default function TrackingPage() {
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="text-center py-12">
-                          <div className="flex flex-col items-center gap-3">
-                            <div className="p-4 bg-gray-50 rounded-full">
-                              <ThumbsUp className="h-10 w-10 text-gray-400" />
+                        <td colSpan={7} className="text-center py-8 sm:py-10 md:py-12">
+                          <div className="flex flex-col items-center gap-2 sm:gap-3">
+                            <div className="p-3 sm:p-4 bg-gray-50 rounded-full">
+                              <ThumbsUp className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                             </div>
-                            <p className="text-muted-foreground font-medium">No interested responses</p>
-                            <p className="text-sm text-muted-foreground/70">Interested buyers will appear here</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground font-medium">No interested responses</p>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground/70">Interested buyers will appear here</p>
                           </div>
                         </td>
                       </tr>
@@ -1025,12 +1038,12 @@ export default function TrackingPage() {
                 </table>
               </div>
               {filteredData.length > 0 && (
-                <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-emerald-50/50">
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-emerald-50/50">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Showing <span className="font-semibold text-foreground">{filteredData.length}</span> interested responses
                   </p>
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-100">
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">
                       <ThumbsUp className="h-3.5 w-3.5 text-emerald-500" />
                       Total: <span className="font-semibold text-gray-700">{counts.interested}</span>
                     </span>
@@ -1047,43 +1060,43 @@ export default function TrackingPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gradient-to-r from-red-50/80 to-rose-50/80 border-b border-gray-200">
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-red-500" />
                           Company
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Globe className="h-4 w-4 text-red-500" />
                           Country
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Package className="h-4 w-4 text-red-500" />
                           Product
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Hash className="h-4 w-4 text-red-500" />
                           HSN Code
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Activity className="h-4 w-4 text-red-500" />
                           Status
                         </div>
                       </th>
-                      <th className="p-4 text-center font-semibold text-gray-700">
+                      <th className="p-3 sm:p-4 text-center font-semibold text-gray-700 whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
                           <MessageSquare className="h-4 w-4 text-red-500" />
                           Interactions
                         </div>
                       </th>
-                      <th className="p-4 text-center font-semibold text-gray-700">Actions</th>
+                      <th className="p-3 sm:p-4 text-center font-semibold text-gray-700 whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1094,39 +1107,43 @@ export default function TrackingPage() {
                           index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
                         }`}
                       >
-                        <td className="p-4">
+                        <td className="p-3 sm:p-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-100 to-rose-100 flex items-center justify-center text-red-600 font-semibold text-xs">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-red-100 to-rose-100 flex items-center justify-center text-red-600 font-semibold text-xs flex-shrink-0">
                               {item.company_name?.charAt(0) || 'C'}
                             </div>
-                            <span className="font-medium text-gray-800">{item.company_name}</span>
+                            <span className="font-medium text-gray-800 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[150px]">
+                              {item.company_name}
+                            </span>
                           </div>
                         </td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs">
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg text-xs whitespace-nowrap">
                             {item.country}
                           </span>
                         </td>
-                        <td className="p-4">
-                          <span className="text-gray-600">{item.product_name}</span>
+                        <td className="p-3 sm:p-4">
+                          <span className="text-gray-600 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[120px] block">
+                            {item.product_name}
+                          </span>
                         </td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium whitespace-nowrap">
                             {item.hsn_code || '-'}
                           </span>
                         </td>
-                        <td className="p-4">{getStatusBadge(item.current_status)}</td>
-                        <td className="p-4 text-center">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-full">
+                        <td className="p-3 sm:p-4">{getStatusBadge(item.current_status)}</td>
+                        <td className="p-3 sm:p-4 text-center">
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-full whitespace-nowrap">
                             <MessageSquare className="h-3.5 w-3.5 text-red-500" />
                             <span className="font-bold text-red-700">{item.interaction_count || 0}</span>
                           </div>
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-3 sm:p-4 text-center">
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="gap-1.5 h-9 px-4 bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 rounded-lg transition-colors"
+                            className="gap-1.5 h-8 sm:h-9 px-3 sm:px-4 bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 rounded-lg transition-colors text-xs sm:text-sm"
                             onClick={() => viewDetails(item)}
                           >
                             <Eye className="h-3.5 w-3.5" />
@@ -1138,13 +1155,13 @@ export default function TrackingPage() {
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="text-center py-12">
-                          <div className="flex flex-col items-center gap-3">
-                            <div className="p-4 bg-gray-50 rounded-full">
-                              <ThumbsDown className="h-10 w-10 text-gray-400" />
+                        <td colSpan={7} className="text-center py-8 sm:py-10 md:py-12">
+                          <div className="flex flex-col items-center gap-2 sm:gap-3">
+                            <div className="p-3 sm:p-4 bg-gray-50 rounded-full">
+                              <ThumbsDown className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                             </div>
-                            <p className="text-muted-foreground font-medium">No not interested responses</p>
-                            <p className="text-sm text-muted-foreground/70">Buyers who are not interested will appear here</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground font-medium">No not interested responses</p>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground/70">Buyers who are not interested will appear here</p>
                           </div>
                         </td>
                       </tr>
@@ -1153,12 +1170,12 @@ export default function TrackingPage() {
                 </table>
               </div>
               {filteredData.length > 0 && (
-                <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-red-50/50">
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-red-50/50">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Showing <span className="font-semibold text-foreground">{filteredData.length}</span> not interested responses
                   </p>
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-100">
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">
                       <ThumbsDown className="h-3.5 w-3.5 text-red-500" />
                       Total: <span className="font-semibold text-gray-700">{counts.not_interested}</span>
                     </span>
@@ -1171,21 +1188,21 @@ export default function TrackingPage() {
 
         {/* Pagination Controls */}
         {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200">
+            <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
               Page {pagination.currentPage} of {pagination.totalPages}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => goToPage(pagination.currentPage - 1)}
                 disabled={pagination.currentPage <= 1}
-                className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-8 sm:h-9 px-2.5 sm:px-3"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
-              <div className="flex gap-1">
+              <div className="flex gap-0.5 sm:gap-1">
                 {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                   let pageNum;
                   if (pagination.totalPages <= 5) {
@@ -1203,10 +1220,11 @@ export default function TrackingPage() {
                       variant={pageNum === pagination.currentPage ? "default" : "outline"}
                       size="sm"
                       onClick={() => goToPage(pageNum)}
-                      className={pageNum === pagination.currentPage ? 
-                        "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" : 
-                        "hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                      }
+                      className={`h-8 sm:h-9 w-8 sm:w-9 p-0 text-xs ${
+                        pageNum === pagination.currentPage ? 
+                          "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" : 
+                          "hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                      }`}
                     >
                       {pageNum}
                     </Button>
@@ -1218,12 +1236,12 @@ export default function TrackingPage() {
                 size="sm"
                 onClick={() => goToPage(pagination.currentPage + 1)}
                 disabled={pagination.currentPage >= pagination.totalPages}
-                className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-8 sm:h-9 px-2.5 sm:px-3"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground order-3">
               {pagination.itemsPerPage} per page
             </div>
           </div>

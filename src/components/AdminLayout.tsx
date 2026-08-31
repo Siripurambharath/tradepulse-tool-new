@@ -2,7 +2,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Globe, Sun, Moon, Search, Sparkles, ChevronDown, LogOut } from 'lucide-react';
+import { Globe, Sun, Moon, Search, Sparkles, ChevronDown, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -15,10 +15,22 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import logo from '@/asstes/globplselogo-removebg-preview.png';
 
 export const AdminLayout = () => {
   const navigate = useNavigate();
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Handle logout
   const handleLogout = () => {
@@ -72,90 +84,72 @@ export const AdminLayout = () => {
       <div className="min-h-screen flex w-full">
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Header with sidebar offset */}
+          {/* Header with sidebar offset - NO BORDER LINE */}
           <header 
-            className="h-14 flex items-center justify-between px-4 shrink-0 fixed top-0 right-0 z-50 bg-card"
+            className="h-12 sm:h-14 flex items-center justify-between px-2 sm:px-3 md:px-4 shrink-0 fixed top-0 right-0 z-40 bg-card"
             style={{ 
-              left: 'var(--sidebar-width, 240px)',
-              borderBottom: '1px solid #40A2E3',
-              width: 'calc(100% - var(--sidebar-width, 240px))'
+              left: isMobile ? '0' : 'var(--sidebar-width, 240px)',
+              width: isMobile ? '100%' : 'calc(100% - var(--sidebar-width, 240px))'
             }}
           >
-            <div className="flex items-center gap-3 flex-1">
-              <SidebarTrigger className="text-muted-foreground" />
-              
-              {/* <div className="relative flex-1 max-w-xl">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#499A13' }} />
-                <Input
-                  placeholder="Search buyers, RFQs, products, documents..."
-                  className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1 text-sm focus-visible:ring-[#499A13]"
-                />
-              </div> */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              {/* Sidebar trigger - hidden on mobile since we use hamburger */}
+              <div className="hidden md:flex items-center">
+                <SidebarTrigger className="text-muted-foreground" />
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8 px-3 text-xs font-medium hover:bg-[#499A13]/10"
-                style={{ 
-                  borderColor: '#499A13',
-                  color: '#499A13'
-                }}
-              >
-                <Sparkles className="h-3 w-3 mr-1" style={{ color: '#499A13' }} />
-                Upgrade
-              </Button> */}
+            {/* Center - Logo on mobile only */}
+            <div className="md:hidden absolute left-1/2 -translate-x-1/2 flex items-center">
+              <img 
+                src={logo}
+                alt="Logo" 
+                className="h-6 sm:h-7 w-auto object-contain"
+              />
+            </div>
 
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
               {/* User Profile Dropdown with Logout */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <div className="flex items-center gap-2 ml-2 cursor-pointer hover:opacity-80 transition-opacity">
-                    <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+                    <div className="flex items-center gap-1 sm:gap-1.5">
                       <div 
-                        className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-medium text-white"
+                        className="h-7 w-7 sm:h-7 sm:w-7 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-medium text-white flex-shrink-0"
                         style={{ backgroundColor: '#499A13' }}
                       >
                         {adminInfo.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-sm font-medium">{adminInfo.name}</span>
-                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="hidden sm:inline text-xs sm:text-sm font-medium max-w-[40px] sm:max-w-[60px] truncate">{adminInfo.name}</span>
+                      <ChevronDown className="hidden sm:block h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
                     </div>
                   </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-48 sm:w-56">
                   <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{adminInfo.name}</p>
-                      <p className="text-xs text-muted-foreground">{adminInfo.email}</p>
-                      <p className="text-xs text-muted-foreground capitalize">Role: {adminInfo.role}</p>
+                    <div className="flex flex-col space-y-0.5 sm:space-y-1">
+                      <p className="text-xs sm:text-sm font-medium truncate">{adminInfo.name}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{adminInfo.email}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground capitalize">Role: {adminInfo.role}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={handleLogout}
-                    className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                    className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer text-xs sm:text-sm"
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
+                    <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-          
-              {/* <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setDark(d => !d)}
-                className="h-8 w-8 ml-1"
-              >
-                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button> */}
             </div>
           </header>
           
-          <main className="flex-1 overflow-auto pt-14 p-6 bg-background">
-            <Outlet />
+          <main className="flex-1 overflow-auto pt-12 sm:pt-14 p-1.5 sm:p-3 md:p-4 lg:p-6 bg-background min-h-[calc(100vh-48px)] sm:min-h-[calc(100vh-56px)]">
+            <div className="max-w-full">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

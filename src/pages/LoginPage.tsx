@@ -99,21 +99,21 @@ export default function LoginPage() {
   ) => {
     try {
       const response = await fetch(`${BASE_URL}/api/store-user`, {
-  method: "PUT",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    id: userId,
-    email,
-    password,
-    role,
-    name,
-    phone,
-    package_id,
-    pack_exp_date,
-  }),
-});
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: userId,
+          email,
+          password,
+          role,
+          name,
+          phone,
+          package_id,
+          pack_exp_date,
+        }),
+      });
 
       return await response.json();
     } catch (e) {
@@ -150,9 +150,9 @@ export default function LoginPage() {
     }
 
     try {
-      // const response = await fetch(`https://globpulsebita.gfeworldwide.com/api/seller/login`, {
-              const response = await fetch(`https://www.globpulse.com/api/seller/login`, {
+            // const response = await fetch(`https://globpulsebita.gfeworldwide.com/api/seller/login`, {
 
+      const response = await fetch(`https://www.globpulse.com/api/seller/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -165,16 +165,16 @@ export default function LoginPage() {
       if (data.status === true && data.token) {
         // Store user only if not exists with all parameters
         if (data.seller && data.seller.id) {
-         await storeUserIfNotExists(
-  data.seller.id.toString(),
-  data.seller.email,
-  password,
-  "seller",
-  data.seller.name,
-  data.seller.phone,        // ✅ fixed
-  data.seller.package_id,
-  data.seller.pack_exp_date
-);
+          await storeUserIfNotExists(
+            data.seller.id.toString(),
+            data.seller.email,
+            password,
+            "seller",
+            data.seller.name,
+            data.seller.phone,
+            data.seller.package_id,
+            data.seller.pack_exp_date
+          );
         }
 
         // Save login details
@@ -203,9 +203,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0B1849] via-[#FFFCFB] to-[#276F27] flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#0B1849] via-[#FFFCFB] to-[#276F27] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
 
-      {/* S-Curve Background Design */}
+      {/* S-Curve Background Design - exactly same as desktop */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Top S-Curve - Dark Navy Blue (#0B1849) with Light Blue (#4BB8FA) and Bright Green (#499A13) accents */}
         <div
@@ -252,8 +252,8 @@ export default function LoginPage() {
       <div className="relative w-full max-w-7xl bg-white rounded-3xl shadow-2xl overflow-hidden z-10">
         <div className="grid lg:grid-cols-2 items-center">
 
-          {/* Left Section */}
-          <div className="relative p-10">
+          {/* Left Section - exactly same as desktop */}
+          <div className="relative p-10 hidden lg:block">
             {/* Decorative Background - using Bright Green */}
             <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-[#499A13] to-[#0B1849] rounded-br-[120px] opacity-15"></div>
 
@@ -274,64 +274,75 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Right Section */}
-          <div className="flex justify-center p-10">
+          {/* Right Section - Full width on mobile, half on desktop */}
+          <div className="flex justify-center p-6 sm:p-8 md:p-10 lg:p-10">
             <div className="w-full max-w-md">
-              <h2 className="text-3xl font-bold text-center text-[#0B1849] mb-2">
+              {/* Mobile Logo - visible only on mobile/tablet */}
+              <div className="flex justify-center mb-4 lg:hidden">
+                <img
+                  src={logo}
+                  alt="Company Logo"
+                  className="h-12 w-auto object-contain"
+                />
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl lg:text-3xl font-bold text-center text-[#0B1849] mb-1 sm:mb-2 lg:mb-2">
                 USER LOGIN
               </h2>
-              <p className="text-center text-sm text-[#276F27] mb-10">Welcome back! Sign in to your account</p>
+              <p className="text-center text-xs sm:text-sm lg:text-sm text-[#276F27] mb-6 sm:mb-8 lg:mb-10">
+                Welcome back! Sign in to your account
+              </p>
 
               <form onSubmit={handleLogin}>
                 {/* Email - with icon */}
-                <div className="relative mb-5">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4BB8FA]">
-                    <Mail size={18} />
+                <div className="relative mb-4 sm:mb-5 lg:mb-5">
+                  <div className="absolute left-3 sm:left-4 lg:left-4 top-1/2 -translate-y-1/2 text-[#4BB8FA]">
+                    <Mail size={16} className="sm:w-[18px] sm:h-[18px] lg:w-[18px] lg:h-[18px]" />
                   </div>
                   <input
                     type="email"
                     placeholder="Email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="w-full bg-[#0B1849] text-white placeholder-gray-400 rounded-full py-3 pl-12 pr-5 outline-none focus:ring-2 focus:ring-[#499A13] transition-all"
+                    className="w-full bg-[#0B1849] text-white placeholder-gray-400 rounded-full py-2.5 sm:py-3 lg:py-3 pl-10 sm:pl-12 lg:pl-12 pr-4 sm:pr-5 lg:pr-5 outline-none focus:ring-2 focus:ring-[#499A13] transition-all text-sm sm:text-base lg:text-base"
                     required
                   />
                 </div>
 
                 {/* Password - with icon */}
-                <div className="relative mb-4">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4BB8FA]">
-                    <Lock size={18} />
+                <div className="relative mb-3 sm:mb-4 lg:mb-4">
+                  <div className="absolute left-3 sm:left-4 lg:left-4 top-1/2 -translate-y-1/2 text-[#4BB8FA]">
+                    <Lock size={16} className="sm:w-[18px] sm:h-[18px] lg:w-[18px] lg:h-[18px]" />
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    className="w-full bg-[#0B1849] text-white placeholder-gray-400 rounded-full py-3 pl-12 pr-12 outline-none focus:ring-2 focus:ring-[#499A13] transition-all"
+                    className="w-full bg-[#0B1849] text-white placeholder-gray-400 rounded-full py-2.5 sm:py-3 lg:py-3 pl-10 sm:pl-12 lg:pl-12 pr-10 sm:pr-12 lg:pr-12 outline-none focus:ring-2 focus:ring-[#499A13] transition-all text-sm sm:text-base lg:text-base"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4BB8FA] hover:text-[#499A13] transition-colors"
+                    className="absolute right-3 sm:right-4 lg:right-4 top-1/2 -translate-y-1/2 text-[#4BB8FA] hover:text-[#499A13] transition-colors"
                   >
                     {showPassword ? (
-                      <EyeOff size={18} />
+                      <EyeOff size={16} className="sm:w-[18px] sm:h-[18px] lg:w-[18px] lg:h-[18px]" />
                     ) : (
-                      <Eye size={18} />
+                      <Eye size={16} className="sm:w-[18px] sm:h-[18px] lg:w-[18px] lg:h-[18px]" />
                     )}
                   </button>
                 </div>
 
                 {/* Error Message */}
                 {error && (
-                  <p className="text-sm text-red-500 text-center mb-4">{error}</p>
+                  <p className="text-xs sm:text-sm lg:text-sm text-red-500 text-center mb-3 sm:mb-4 lg:mb-4">{error}</p>
                 )}
 
                 <button
                   type="submit"
-                  className="w-full bg-[#0B1849] hover:bg-[#499A13] text-white rounded-full py-3 font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#0B1849] hover:bg-[#499A13] text-white rounded-full py-2.5 sm:py-3 lg:py-3 font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base lg:text-base"
                   disabled={loading}
                 >
                   {loading ? "Signing in..." : "Login"}

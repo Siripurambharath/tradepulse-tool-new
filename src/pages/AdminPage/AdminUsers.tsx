@@ -22,7 +22,7 @@ interface User {
   email_config: number;
   name: string;
   phone: string;
-    phone_number: string; // Add this line
+  phone_number: string;
   package_id: string;
 }
 
@@ -148,9 +148,7 @@ const Adminusers = () => {
     if (debouncedSearchQuery) {
       searchUsers();
     } else {
-      // If search is cleared, fetch all users
       fetchUsers();
-      // Clear cache when search is cleared
       searchCache.current.clear();
     }
   }, [debouncedSearchQuery, currentPage, itemsPerPage, fetchUsers, searchUsers]);
@@ -158,7 +156,6 @@ const Adminusers = () => {
   // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Clear cache when page changes
     searchCache.current.clear();
   };
 
@@ -169,12 +166,12 @@ const Adminusers = () => {
     searchCache.current.clear();
   };
 
-const handleEmailClick = (userId: string) => {
-  navigate(`/admin/users/${userId}?tab=userDetails`);
-};
+  const handleEmailClick = (userId: string) => {
+    navigate(`/admin/users/${userId}?tab=userDetails`);
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentPage(1); // Reset to first page on search
+    setCurrentPage(1);
     setSearchQuery(e.target.value);
   };
 
@@ -226,16 +223,14 @@ const handleEmailClick = (userId: string) => {
 
   const StatCard = ({ icon: Icon, label, value, color }: any) => (
     <Card className="border-0 shadow-lg hover:shadow-2xl transition-all duration-500 group cursor-default bg-white/80 backdrop-blur-sm">
-      <CardContent className="pt-6 pb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className={`p-3.5 rounded-2xl bg-gradient-to-br ${color} shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-              <Icon className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-800 leading-tight">{value}</p>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">{label}</p>
-            </div>
+      <CardContent className="pt-3 sm:pt-4 md:pt-6 pb-3 sm:pb-4 md:pb-6">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+          <div className={`p-2 sm:p-3 md:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br ${color} shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+            <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 leading-tight">{value}</p>
+            <p className="text-[9px] sm:text-[10px] md:text-xs text-slate-500 font-medium uppercase tracking-wider">{label}</p>
           </div>
         </div>
       </CardContent>
@@ -245,13 +240,13 @@ const handleEmailClick = (userId: string) => {
   // Show full page loader only on initial load
   if (loading) {
     return (
-      <div className="w-full min-h-screen bg-gradient-to-br from-slate-100 via-white to-indigo-50/20 flex items-center justify-center">
+      <div className="w-full min-h-screen bg-gradient-to-br from-slate-100 via-white to-indigo-50/20 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full blur-xl opacity-20 animate-pulse" />
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-200 border-t-indigo-600 mx-auto relative" />
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-indigo-200 border-t-indigo-600 mx-auto relative" />
           </div>
-          <p className="mt-6 text-sm font-medium text-slate-500 animate-pulse">
+          <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-medium text-slate-500 animate-pulse">
             Loading users...
           </p>
         </div>
@@ -261,29 +256,32 @@ const handleEmailClick = (userId: string) => {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-100 via-white to-indigo-50/20">
-      <div className="w-full p-8 space-y-6">
+      <div className="w-full px-0 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8 space-y-4 sm:space-y-5 md:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-xl shadow-indigo-500/30">
-                  <Users className="h-7 w-7 text-white" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="w-full sm:w-auto">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="relative flex-shrink-0">
+                <div className="p-2 sm:p-2.5 md:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-xl shadow-indigo-500/30">
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full ring-2 ring-white animate-pulse"></div>
+                <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-emerald-400 rounded-full ring-2 ring-white animate-pulse"></div>
               </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent tracking-tight">
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent tracking-tight truncate">
                   Users
                 </h1>
-                <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-2">
-                  <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-                  Manage and monitor all registered users
+                <p className="text-[10px] sm:text-xs md:text-sm text-slate-500 mt-0.5 flex items-center gap-1 sm:gap-2 truncate">
+                  <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-indigo-400 flex-shrink-0" />
+                  <span className="hidden xs:inline">Manage and monitor all registered users</span>
+                  <span className="xs:hidden">Manage users</span>
                 </p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          
+          {/* Reload Button - Hidden on mobile (hidden below sm) */}
+          <div className="hidden sm:block w-full sm:w-auto">
             <Button 
               onClick={() => {
                 searchCache.current.clear();
@@ -292,16 +290,16 @@ const handleEmailClick = (userId: string) => {
               }} 
               disabled={loading || isSearching} 
               variant="default"
-              className="gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-xl"
+              className="gap-1.5 sm:gap-2 w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-xl text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4"
             >
-              <RefreshCw className={`h-4 w-4 ${loading || isSearching ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${loading || isSearching ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        {/* Stats Cards - Mobile Responsive */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
           <StatCard 
             icon={Users} 
             label="Total Users" 
@@ -322,30 +320,29 @@ const handleEmailClick = (userId: string) => {
           />
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar - Mobile Responsive */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500">
-          <CardContent className="pt-6 pb-6">
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="relative flex-1 min-w-[250px]">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <CardContent className="pt-4 sm:pt-5 md:pt-6 pb-4 sm:pb-5 md:pb-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
+              <div className="relative flex-1 min-w-[150px]">
+                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" />
                 <Input
                   placeholder="Search by user ID or email..."
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  className="pl-11 border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 transition-all duration-300 h-11 rounded-xl bg-slate-50/50"
+                  className="pl-8 sm:pl-11 border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 transition-all duration-300 h-9 sm:h-10 md:h-11 rounded-lg sm:rounded-xl bg-slate-50/50 text-xs sm:text-sm"
                 />
-                {/* Search indicator */}
                 {searchQuery && (
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2">
                     {isSearching ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+                      <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-indigo-500" />
                     ) : (
-                      <span className="text-xs text-emerald-500 font-medium">✓</span>
+                      <span className="text-[10px] sm:text-xs text-emerald-500 font-medium">✓</span>
                     )}
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
+              <div className="flex items-center gap-2 text-[10px] sm:text-sm text-slate-500 flex-shrink-0">
                 <span>{isSearching ? 'Searching...' : `${users.length} users found`}</span>
               </div>
             </div>
@@ -354,36 +351,36 @@ const handleEmailClick = (userId: string) => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm">
             {error}
           </div>
         )}
 
-        {/* Results count and pagination info */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-500">
+        {/* Results count and pagination info - Mobile Responsive */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="text-[10px] sm:text-sm text-slate-500">
               Showing <span className="font-semibold text-slate-700">{users.length}</span> of{' '}
               <span className="font-semibold text-slate-700">{totalCount}</span> users
             </span>
             {isSearching && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-xs font-medium border border-amber-200">
-                <Loader2 className="h-3 w-3 animate-spin" />
+              <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 bg-amber-50 text-amber-700 rounded-full text-[8px] sm:text-xs font-medium border border-amber-200">
+                <Loader2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 animate-spin" />
                 Searching...
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               disabled={currentPage === 1} 
               onClick={() => handlePageChange(currentPage - 1)}
-              className="hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
+              className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-xs"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
-            <div className="px-4 py-1.5 bg-white rounded-lg border text-sm font-medium shadow-sm">
+            <div className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 bg-white rounded-lg border text-[10px] sm:text-sm font-medium shadow-sm">
               Page <span className="text-indigo-600">{currentPage}</span> / {totalPages || 1}
             </div>
             <Button 
@@ -391,166 +388,173 @@ const handleEmailClick = (userId: string) => {
               size="sm" 
               disabled={currentPage >= totalPages} 
               onClick={() => handlePageChange(currentPage + 1)}
-              className="hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
+              className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-xs"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
 
-    {/* Users Table */}
-<Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
-  <CardContent className="pt-0 p-0">
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="bg-gradient-to-r from-slate-50/80 to-indigo-50/80 border-b border-slate-200/60">
-            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">#</th>
-            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">User ID</th>
-            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">Name</th>
-            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">Email</th>
-            <th className="p-5 text-left font-semibold text-slate-600 text-xs uppercase tracking-wider">Phone</th>
-            <th className="p-5 text-center font-semibold text-slate-600 text-xs uppercase tracking-wider">Email Sent</th>
-            <th className="p-5 text-center font-semibold text-slate-600 text-xs uppercase tracking-wider">Email Config</th>
-          </tr>
-        </thead>
-        <tbody>
-          {isSearching ? (
-            <tr>
-              <td colSpan={8} className="text-center py-20">
-                <div className="flex flex-col items-center gap-4">
-                  <Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
-                  <p className="text-slate-500 text-sm font-medium">Searching users...</p>
-                </div>
-              </td>
-            </tr>
-          ) : users.length === 0 ? (
-            <tr>
-              <td colSpan={8} className="text-center py-20">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                    <Users className="h-10 w-10 text-slate-400" />
-                  </div>
-                  <div>
-                    <p className="text-slate-600 text-sm font-medium">No users found</p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      {searchQuery ? 'Try adjusting your search terms' : 'No users registered yet'}
-                    </p>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ) : (
-            users.map((user, index) => {
-              const isHovered = hoveredRow === user.user_id;
-              return (
-                <tr 
-                  key={user.user_id} 
-                  className="border-b last:border-b-0 hover:bg-gradient-to-r hover:from-indigo-50/40 hover:to-transparent transition-all duration-300 group"
-                  onMouseEnter={() => setHoveredRow(user.user_id)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                >
-                  <td className="p-5 font-medium text-slate-400 text-xs">
-                    {(currentPage - 1) * itemsPerPage + index + 1}
-                  </td>
-                  <td className="p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center ring-2 ring-white shadow-md group-hover:ring-indigo-300 transition-all duration-300">
-                          <User className="h-4.5 w-4.5 text-indigo-600" />
+        {/* Users Table - Fixed font sizes */}
+        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+          <CardContent className="pt-0 p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs sm:text-sm">
+                <thead>
+                  <tr className="bg-gradient-to-r from-slate-50/80 to-indigo-50/80 border-b border-slate-200/60">
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-600 text-[10px] sm:text-xs uppercase tracking-wider">#</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-600 text-[10px] sm:text-xs uppercase tracking-wider">User ID</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-600 text-[10px] sm:text-xs uppercase tracking-wider">Name</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-600 text-[10px] sm:text-xs uppercase tracking-wider">Email</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-600 text-[10px] sm:text-xs uppercase tracking-wider">Phone</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-center font-semibold text-slate-600 text-[10px] sm:text-xs uppercase tracking-wider">Email Sent</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-center font-semibold text-slate-600 text-[10px] sm:text-xs uppercase tracking-wider">Email Config</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {isSearching ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-12 sm:py-16 md:py-20">
+                        <div className="flex flex-col items-center gap-3 sm:gap-4">
+                          <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 animate-spin text-indigo-500" />
+                          <p className="text-xs sm:text-sm text-slate-500 font-medium">Searching users...</p>
                         </div>
-                        {isHovered && (
-                          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-white animate-pulse"></div>
-                        )}
-                      </div>
-                      <span className="font-mono text-xs text-slate-700 font-medium">{user.id}</span>
-                    </div>
-                  </td>
-                  <td className="p-5">
-                    <span className="font-medium text-slate-700">
-                      {user.name || <span className="text-slate-400 italic text-xs">Not set</span>}
-                    </span>
-                  </td>
-                  <td className="p-5">
-                    <button
-                      onClick={() => handleEmailClick(user.id)}
-                      className="text-indigo-600 hover:text-indigo-800 transition-all duration-200 flex items-center gap-2 group/email"
-                    >
-                      <Mail className="h-4 w-4 group-hover/email:scale-110 transition-transform duration-200" />
-                      <span className="hover:underline underline-offset-2 font-medium">{user.email}</span>
-                      <span className="text-[10px] text-slate-400 opacity-0 group-hover/email:opacity-100 transition-all duration-200 ml-1">
-                        →
-                      </span>
-                    </button>
-                  </td>
-                  <td className="p-5">
-                    <span className="font-medium text-slate-700">
-                      {user.phone_number || <span className="text-slate-400 italic text-xs">N/A</span>}
-                    </span>
-                  </td>
-                  <td className="p-5 text-center">{getStatusBadge(user.email_sent, 'sent')}</td>
-                  <td className="p-5 text-center">{getStatusBadge(user.email_config, 'config')}</td>
-                </tr>
-              );
-            })
-          )}
-        </tbody>
-      </table>
-    </div>
+                      </td>
+                    </tr>
+                  ) : users.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-12 sm:py-16 md:py-20">
+                        <div className="flex flex-col items-center gap-3 sm:gap-4">
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                            <Users className="h-8 w-8 sm:h-10 sm:w-10 text-slate-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm sm:text-base text-slate-600 font-medium">No users found</p>
+                            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                              {searchQuery ? 'Try adjusting your search terms' : 'No users registered yet'}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    users.map((user, index) => {
+                      const isHovered = hoveredRow === user.user_id;
+                      return (
+                        <tr 
+                          key={user.user_id} 
+                          className="border-b last:border-b-0 hover:bg-gradient-to-r hover:from-indigo-50/40 hover:to-transparent transition-all duration-300 group"
+                          onMouseEnter={() => setHoveredRow(user.user_id)}
+                          onMouseLeave={() => setHoveredRow(null)}
+                        >
+                          <td className="p-2 sm:p-3 md:p-4 font-medium text-slate-400 text-xs sm:text-sm">
+                            {(currentPage - 1) * itemsPerPage + index + 1}
+                          </td>
+                          <td className="p-2 sm:p-3 md:p-4">
+                            <div className="flex items-center gap-1.5 sm:gap-3">
+                              <div className="relative flex-shrink-0">
+                                <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center ring-2 ring-white shadow-md group-hover:ring-indigo-300 transition-all duration-300">
+                                  <User className="h-3 w-3 sm:h-4 sm:w-4 text-indigo-600" />
+                                </div>
+                              </div>
+                              <span className="font-mono text-xs sm:text-sm text-slate-700 font-medium truncate max-w-[40px] sm:max-w-[80px] md:max-w-[120px]">
+                                {user.id}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-2 sm:p-3 md:p-4">
+                            <span className="font-medium text-slate-700 text-xs sm:text-sm truncate block max-w-[50px] sm:max-w-[120px] md:max-w-[180px]">
+                              {user.name || <span className="text-slate-400 italic text-xs">N/A</span>}
+                            </span>
+                          </td>
+                          <td className="p-2 sm:p-3 md:p-4">
+                            <button
+                              onClick={() => handleEmailClick(user.id)}
+                              className="text-indigo-600 hover:text-indigo-800 transition-all duration-200 flex items-center gap-1 sm:gap-2 group/email"
+                            >
+                              <Mail className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 group-hover/email:scale-110 transition-transform duration-200 flex-shrink-0" />
+                              <span className="hover:underline underline-offset-2 font-medium text-xs sm:text-sm truncate max-w-[50px] sm:max-w-[120px] md:max-w-[180px]">
+                                {user.email}
+                              </span>
+                            </button>
+                          </td>
+                          <td className="p-2 sm:p-3 md:p-4">
+                            <span className="font-medium text-slate-700 text-xs sm:text-sm">
+                              {user.phone_number || <span className="text-slate-400 italic text-xs">N/A</span>}
+                            </span>
+                          </td>
+                          <td className="p-2 sm:p-3 md:p-4 text-center">
+                            <div className="scale-90 sm:scale-100 origin-center">
+                              {getStatusBadge(user.email_sent, 'sent')}
+                            </div>
+                          </td>
+                          <td className="p-2 sm:p-3 md:p-4 text-center">
+                            <div className="scale-90 sm:scale-100 origin-center">
+                              {getStatusBadge(user.email_config, 'config')}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-    {/* Pagination Controls */}
-    {users.length > 0 && (
-      <div className="border-t border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-indigo-50/30 px-6 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-600">Rows per page:</span>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400"
-            >
-              {itemsPerPageOptions.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600">
-              {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}
-            </span>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              disabled={currentPage === 1} 
-              onClick={() => handlePageChange(currentPage - 1)}
-              className="hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              disabled={currentPage >= totalPages} 
-              onClick={() => handlePageChange(currentPage + 1)}
-              className="hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    )}
-  </CardContent>
-</Card>
-        {/* Footer Stats */}
-        <div className="flex items-center justify-between text-xs text-slate-400 px-2 flex-wrap gap-2">
-          <div className="flex items-center gap-4">
+            {/* Pagination Controls - Mobile Responsive */}
+            {users.length > 0 && (
+              <div className="border-t border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-indigo-50/30 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center sm:justify-start">
+                    <span className="text-xs sm:text-sm text-slate-600">Rows:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                      className="border border-slate-200 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400"
+                    >
+                      {itemsPerPageOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs sm:text-sm text-slate-600">
+                      {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}
+                    </span>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={currentPage === 1} 
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-xs"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={currentPage >= totalPages} 
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-xs"
+                    >
+                      <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Footer Stats - Mobile Responsive */}
+        <div className="flex flex-col sm:flex-row items-center justify-between text-[10px] sm:text-xs text-slate-400 px-2 gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-center sm:justify-start">
             <span>Showing {users.length} users</span>
-            <span className="w-px h-4 bg-slate-200"></span>
-            <span>Last updated: {new Date().toLocaleString()}</span>
+            <span className="hidden xs:inline w-px h-4 bg-slate-200"></span>
+            <span className="text-center">Updated: {new Date().toLocaleString()}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Zap className="h-3.5 w-3.5 text-indigo-400" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-indigo-400" />
             <span>Premium Dashboard</span>
           </div>
         </div>

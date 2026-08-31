@@ -420,15 +420,15 @@ export default function ContactsPage() {
   const getStatusBadge = (contact: Contact) => {
     if (contact.status === 'sent') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200">
-          <CheckCircle className="h-3 w-3" />
+        <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200">
+          <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
           Sent
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-gray-50 to-slate-50 text-gray-600 border border-gray-200">
-        <Clock className="h-3 w-3" />
+      <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gradient-to-r from-gray-50 to-slate-50 text-gray-600 border border-gray-200">
+        <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
         Pending
       </span>
     );
@@ -437,24 +437,24 @@ export default function ContactsPage() {
   const getResponseBadge = (contact: Contact) => {
     if (contact.response === 'interested') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200">
-          <TrendingUp className="h-3 w-3" />
+        <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200">
+          <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
           Interested
         </span>
       );
     }
     if (contact.response === 'not_interested') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200">
-          <XCircle className="h-3 w-3" />
+        <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200">
+          <XCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
           Not Interested
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-gray-50 to-slate-50 text-gray-500 border border-gray-200">
-        <Clock className="h-3 w-3" />
-        Pending Response
+      <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gradient-to-r from-gray-50 to-slate-50 text-gray-500 border border-gray-200">
+        <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+        Pending
       </span>
     );
   };
@@ -480,13 +480,13 @@ export default function ContactsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full blur-xl opacity-20 animate-pulse" />
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto relative" />
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-blue-200 border-t-blue-600 mx-auto relative" />
           </div>
-          <p className="mt-6 text-sm font-medium text-muted-foreground animate-pulse">
+          <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-medium text-muted-foreground animate-pulse">
             Loading contacts...
           </p>
         </div>
@@ -495,32 +495,34 @@ export default function ContactsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 p-3 sm:p-4 md:p-6">
       {/* Decorative header gradient */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
       
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-3">
-              <Users className="h-8 w-8 text-blue-600" />
+        <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
+          <div className="space-y-0.5 sm:space-y-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
+              <Users className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-600" />
               Contacts
             </h1>
-            <p className="text-sm text-muted-foreground flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Manage and communicate with your contacts
+            <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1 sm:gap-2">
+              <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Manage and communicate with your contacts</span>
+              <span className="xs:hidden">Manage your contacts</span>
             </p>
           </div>
           <Button 
             onClick={handleEmailModalOpen} 
             disabled={selected.size === 0} 
-            className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="gap-1.5 sm:gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2"
           >
-            <Send className="h-4 w-4" />
-            <span>Send Email</span>
+            <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Send Email</span>
+            <span className="xs:hidden">Send</span>
             {selected.size > 0 && (
-              <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-xs font-semibold">
+              <span className="bg-white/20 px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold">
                 {selected.size}
               </span>
             )}
@@ -529,65 +531,65 @@ export default function ContactsPage() {
 
         {/* Stats Cards */}
         {statsLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 animate-pulse">
+              <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 animate-pulse">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="h-3 w-20 bg-gray-200 rounded"></div>
-                    <div className="h-8 w-12 bg-gray-200 rounded mt-2"></div>
+                    <div className="h-2 sm:h-3 w-14 sm:w-20 bg-gray-200 rounded"></div>
+                    <div className="h-6 sm:h-7 md:h-8 w-10 sm:w-12 bg-gray-200 rounded mt-1 sm:mt-2"></div>
                   </div>
-                  <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gray-200 rounded-xl"></div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Contacts</p>
-                  <p className="text-2xl font-bold text-gray-800 mt-1">{stats.total}</p>
+                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Total</p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mt-0.5 sm:mt-1">{stats.total}</p>
                 </div>
-                <div className="p-3 bg-blue-50 rounded-xl">
-                  <Users className="h-5 w-5 text-blue-600" />
+                <div className="p-1.5 sm:p-2 md:p-3 bg-blue-50 rounded-xl">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Interested</p>
-                  <p className="text-2xl font-bold text-emerald-600 mt-1">{stats.interested}</p>
+                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Interested</p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-600 mt-0.5 sm:mt-1">{stats.interested}</p>
                 </div>
-                <div className="p-3 bg-emerald-50 rounded-xl">
-                  <TrendingUp className="h-5 w-5 text-emerald-600" />
+                <div className="p-1.5 sm:p-2 md:p-3 bg-emerald-50 rounded-xl">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Not Interested</p>
-                  <p className="text-2xl font-bold text-red-600 mt-1">{stats.not_interested}</p>
+                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Not Interested</p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-600 mt-0.5 sm:mt-1">{stats.not_interested}</p>
                 </div>
-                <div className="p-3 bg-red-50 rounded-xl">
-                  <XCircle className="h-5 w-5 text-red-600" />
+                <div className="p-1.5 sm:p-2 md:p-3 bg-red-50 rounded-xl">
+                  <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
                 </div>
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending Response</p>
-                  <p className="text-2xl font-bold text-amber-600 mt-1">{stats.pending}</p>
+                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending</p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-amber-600 mt-0.5 sm:mt-1">{stats.pending}</p>
                 </div>
-                <div className="p-3 bg-amber-50 rounded-xl">
-                  <Clock className="h-5 w-5 text-amber-600" />
+                <div className="p-1.5 sm:p-2 md:p-3 bg-amber-50 rounded-xl">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
                 </div>
               </div>
             </div>
@@ -595,31 +597,31 @@ export default function ContactsPage() {
         )}
 
         {/* Filters with glassmorphism */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 mb-6">
-          <div className="flex flex-wrap gap-3 items-center">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500" />
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
+            <div className="relative flex-1 min-w-[150px]">
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500" />
               <Input 
-                placeholder="Search by email, company, product, HSN code..." 
+                placeholder="Search contacts..." 
                 value={query} 
                 onChange={handleSearchChange}
                 onKeyDown={handleSearchKeyDown}
-                className="pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80"
+                className="pl-8 sm:pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80 text-sm sm:text-base h-9 sm:h-10"
               />
             </div>
             
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <Select value={templateFilter} onValueChange={handleTemplateFilterChange}>
-                <SelectTrigger className="w-48 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80">
-                  <Filter className="h-4 w-4 mr-2 text-blue-500" />
+                <SelectTrigger className="w-full sm:w-48 border-gray-200 focus:border-blue-400 rounded-xl bg-white/80 h-9 sm:h-10 text-sm sm:text-base">
+                  <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-blue-500" />
                   <SelectValue placeholder="All Templates" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">📋 All Templates</SelectItem>
                   {templates.map((t) => (
                     <SelectItem key={t} value={t}>
-                      <span className="flex items-center gap-2">
-                        <Sparkles className="h-3 w-3 text-blue-500" />
+                      <span className="flex items-center gap-1.5 sm:gap-2">
+                        <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-blue-500" />
                         {t}
                       </span>
                     </SelectItem>
@@ -629,58 +631,58 @@ export default function ContactsPage() {
             </div>
 
             {/* View toggle */}
-            <div className="flex gap-1 p-1 bg-gray-100 rounded-xl ml-auto">
+            <div className="flex gap-1 p-1 bg-gray-100 rounded-xl ml-auto sm:ml-0">
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-2 rounded-lg transition-all duration-200 ${
+                className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
                   viewMode === 'table' 
                     ? 'bg-white shadow-sm text-blue-600' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
                 title="Table View"
               >
-                <LayoutGrid className="h-4 w-4" />
+                <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-all duration-200 ${
+                className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
                   viewMode === 'grid' 
                     ? 'bg-white shadow-sm text-blue-600' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
                 title="Grid View"
               >
-                <List className="h-4 w-4" />
+                <List className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Results count and pagination info */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="text-[10px] sm:text-sm text-muted-foreground">
               Showing <span className="font-semibold text-foreground">{contacts.length}</span> of{' '}
               <span className="font-semibold text-foreground">{totalCount}</span> contacts
             </span>
             {selected.size > 0 && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
-                <Checkbox checked className="h-3 w-3" />
+              <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1.5 bg-blue-50 text-blue-700 rounded-full text-[10px] sm:text-xs font-medium border border-blue-200">
+                <Checkbox checked className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 {selected.size} selected
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               disabled={page === 0} 
               onClick={() => setPage(p => p - 1)}
-              className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
-            <div className="px-4 py-1.5 bg-white rounded-lg border text-sm font-medium shadow-sm">
+            <div className="px-2 sm:px-3 md:px-4 py-0.5 sm:py-1.5 bg-white rounded-lg border text-[10px] sm:text-sm font-medium shadow-sm">
               Page <span className="text-blue-600">{page + 1}</span> / {totalPages || 1}
             </div>
             <Button 
@@ -688,9 +690,9 @@ export default function ContactsPage() {
               size="sm" 
               disabled={page + 1 >= totalPages} 
               onClick={() => setPage(p => p + 1)}
-              className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
@@ -698,76 +700,65 @@ export default function ContactsPage() {
         {/* Table with modern design */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           {contacts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div className="p-4 bg-gray-50 rounded-full">
-                <Search className="h-10 w-10 text-gray-400" />
+            <div className="flex flex-col items-center justify-center py-12 sm:py-16 gap-2 sm:gap-3">
+              <div className="p-3 sm:p-4 bg-gray-50 rounded-full">
+                <Search className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
               </div>
-              <p className="text-muted-foreground font-medium">No contacts found</p>
-              <p className="text-sm text-muted-foreground/70">Try adjusting your search or filters</p>
+              <p className="text-xs sm:text-sm text-muted-foreground font-medium">No contacts found</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground/70">Try adjusting your search or filters</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-[10px] sm:text-sm">
                 <thead>
                   <tr className="bg-gradient-to-r from-gray-50/80 to-blue-50/80 border-b border-gray-200">
-                    <th className="p-4 w-12">
+                    <th className="p-2 sm:p-3 md:p-4 w-8 sm:w-12">
                       <Checkbox 
                         checked={selected.size === contacts.length && contacts.length > 0} 
                         onCheckedChange={selectAll}
-                        className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                        className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-3.5 w-3.5 sm:h-4 sm:w-4"
                       />
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-blue-500" />
-                        Company
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                        <span className="hidden xs:inline">Company</span>
+                        <span className="xs:hidden">Co.</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-blue-500" />
-                        Product
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Package className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                        <span className="hidden sm:inline">Product</span>
+                        <span className="sm:hidden">Prod</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Hash className="h-4 w-4 text-blue-500" />
-                        HSN Code
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Hash className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                        <span className="hidden lg:inline">HSN</span>
+                        <span className="lg:hidden">HSN</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-blue-500" />
-                        Template
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                        <span className="hidden lg:inline">Template</span>
+                        <span className="lg:hidden">Tmpl</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4 text-blue-500" />
-                        Interactions
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                        <span className="hidden md:inline">Interactions</span>
+                        <span className="md:hidden">Int.</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      Status
-                    </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      Response
-                    </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <AtSign className="h-4 w-4 text-blue-500" />
-                        Email
-                      </div>
-                    </th>
-                    <th className="p-10 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-blue-500" />
-                        Phone
-                      </div>
-                    </th>
-                    <th className="p-4 text-left font-semibold text-gray-700 whitespace-nowrap">
-                      Actions
-                    </th>
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs hidden sm:table-cell">Status</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs hidden md:table-cell">Response</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs hidden md:table-cell">Email</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs hidden lg:table-cell">Phone</th>
+                    <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 whitespace-nowrap text-[10px] sm:text-xs">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -778,79 +769,82 @@ export default function ContactsPage() {
                         selected.has(contact.buyer_id) ? 'bg-blue-50/30' : ''
                       }`}
                     >
-                      <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                      <td className="p-2 sm:p-3 md:p-4" onClick={(e) => e.stopPropagation()}>
                         <Checkbox 
                           checked={selected.has(contact.buyer_id)} 
                           onCheckedChange={() => toggleSelect(contact.buyer_id)}
-                          className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                          className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-3.5 w-3.5 sm:h-4 sm:w-4"
                         />
                       </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center text-blue-600 font-semibold text-xs">
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center text-blue-600 font-semibold text-[8px] sm:text-xs flex-shrink-0">
                             {contact.company_name?.charAt(0) || 'C'}
                           </div>
-                          <span className="font-medium text-gray-800">
+                          <span className="font-medium text-gray-800 text-[10px] sm:text-sm truncate max-w-[60px] sm:max-w-[100px] md:max-w-[150px]">
                             {contact.company_name || '-'}
                           </span>
                         </div>
                       </td>
-                      <td className="p-4">
-                        <span className="text-gray-600">{contact.product_name || '-'}</span>
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <span className="text-gray-600 text-[10px] sm:text-sm truncate max-w-[50px] sm:max-w-[80px] md:max-w-[120px] block">
+                          {contact.product_name || '-'}
+                        </span>
                       </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <span className="inline-flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-blue-50 text-blue-700 rounded-lg text-[8px] sm:text-xs font-medium">
                           {contact.hsn_code || '-'}
                         </span>
                       </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200">
-                          <Sparkles className="h-3 w-3" />
-                          {contact.template_used || 'No Template'}
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <span className="inline-flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 rounded-full text-[8px] sm:text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 max-w-[60px] sm:max-w-[80px] md:max-w-[120px]">
+                          <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 flex-shrink-0" />
+                          <span className="truncate">{contact.template_used || 'No Template'}</span>
                         </span>
                       </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 font-bold text-sm">
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <span className="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 font-bold text-[10px] sm:text-sm">
                           {contact.interaction_count}
                         </span>
                       </td>
-                      <td className="p-4">
+                      <td className="p-2 sm:p-3 md:p-4 hidden sm:table-cell">
                         {getStatusBadge(contact)}
                       </td>
-                      <td className="p-4">
+                      <td className="p-2 sm:p-3 md:p-4 hidden md:table-cell">
                         {getResponseBadge(contact)}
                       </td>
-                      <td className="p-4">
-                        <a href={`mailto:${contact.email}`} className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-xs">
+                      <td className="p-2 sm:p-3 md:p-4 hidden md:table-cell">
+                        <a href={`mailto:${contact.email}`} className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-[10px] sm:text-xs truncate max-w-[80px] md:max-w-[120px] block">
                           {contact.email || '-'}
                         </a>
                       </td>
-                      <td className="p-4">
+                      <td className="p-2 sm:p-3 md:p-4 hidden lg:table-cell">
                         {contact.contact_name && /[\d\-+() ]{7,}/.test(contact.contact_name) ? (
                           <a 
                             href={`tel:${contact.contact_name.replace(/\s/g, '')}`}
-                            className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-xs flex items-center gap-1.5 group"
+                            className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-[10px] sm:text-xs flex items-center gap-1 group"
                           >
-                            <Phone className="h-3 w-3" />
-                            <span className="group-hover:underline">{contact.contact_name}</span>
+                            <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                            <span className="group-hover:underline truncate max-w-[60px] sm:max-w-[80px]">{contact.contact_name}</span>
                           </a>
                         ) : (
-                          <span className="text-gray-400 text-xs flex items-center gap-1">
-                            <Phone className="h-3 w-3" />
-                            Not available
+                          <span className="text-gray-400 text-[10px] sm:text-xs flex items-center gap-1">
+                            <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                            <span className="hidden sm:inline">Not available</span>
+                            <span className="sm:hidden">N/A</span>
                           </span>
                         )}
                       </td>
-                      <td className="p-4">
+                      <td className="p-2 sm:p-3 md:p-4">
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="gap-1.5 h-9 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 rounded-lg transition-colors"
+                          className="gap-0.5 sm:gap-1.5 h-7 sm:h-8 md:h-9 px-1.5 sm:px-2 md:px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 rounded-lg transition-colors text-[10px] sm:text-xs"
                           onClick={() => viewContactDetails(contact.buyer_id)}
                         >
-                          <Eye className="h-3.5 w-3.5" />
-                          View
-                          <ArrowUpRight className="h-3 w-3" />
+                          <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                          <span className="hidden xs:inline">View</span>
+                          <ArrowUpRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                         </Button>
                       </td>
                     </tr>
@@ -863,21 +857,21 @@ export default function ContactsPage() {
 
         {/* Bottom section with pagination */}
         {contacts.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 mt-4">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mt-3 sm:mt-4">
+            <div className="text-[10px] sm:text-sm text-muted-foreground">
               Showing {page * perPage + 1} - {Math.min((page + 1) * perPage, totalCount)} of {totalCount} contacts
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
                 disabled={page === 0} 
                 onClick={() => setPage(p => p - 1)}
-                className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
-              <div className="px-3 py-1 bg-white rounded-lg border text-xs font-medium">
+              <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white rounded-lg border text-[10px] sm:text-xs font-medium">
                 {page + 1} / {totalPages || 1}
               </div>
               <Button 
@@ -885,9 +879,9 @@ export default function ContactsPage() {
                 size="sm" 
                 disabled={page + 1 >= totalPages} 
                 onClick={() => setPage(p => p + 1)}
-                className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>

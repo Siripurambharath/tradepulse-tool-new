@@ -301,34 +301,34 @@ export default function HistoryPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="relative">
-          <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-          <p className="mt-4 text-sm text-muted-foreground">Loading history...</p>
+          <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">Loading history...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8">
       {/* Header Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 border border-primary/10">
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 sm:p-6 md:p-8 border border-primary/10">
         <div className="relative z-10">
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                <Clock className="h-8 w-8 text-primary" />
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2 sm:gap-3">
+                <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
                 History
               </h1>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
                 Track your past activities and interactions
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 bg-background/50 rounded-full backdrop-blur-sm">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+              <div className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-background/50 rounded-full backdrop-blur-sm">
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                   {new Date().toLocaleDateString('en-US', { 
-                    month: 'long', 
+                    month: 'short', 
                     day: 'numeric', 
                     year: 'numeric' 
                   })}
@@ -341,65 +341,65 @@ export default function HistoryPage() {
 
       {/* Stats Cards - Show skeleton while loading */}
       {statsLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="p-6 border-0 shadow-sm animate-pulse">
+            <Card key={i} className="p-3 sm:p-4 md:p-6 border-0 shadow-sm animate-pulse">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="h-3 w-20 bg-gray-200 rounded"></div>
-                  <div className="h-8 w-12 bg-gray-200 rounded mt-2"></div>
+                  <div className="h-2 w-14 sm:h-3 sm:w-20 bg-gray-200 rounded"></div>
+                  <div className="h-6 w-10 sm:h-7 sm:w-12 bg-gray-200 rounded mt-1 sm:mt-2"></div>
                 </div>
-                <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gray-200 rounded-xl"></div>
               </div>
             </Card>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 shadow-sm">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
+          <Card className="p-3 sm:p-4 md:p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Total History</p>
-                <p className="text-3xl font-bold mt-1">{stats.totalEntries}</p>
+                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground font-medium">Total History</p>
+                <p className="text-lg sm:text-2xl md:text-3xl font-bold mt-0.5 sm:mt-1">{stats.totalEntries}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Clock className="h-6 w-6 text-primary" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 shadow-sm">
+          <Card className="p-3 sm:p-4 md:p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Companies Contacted</p>
-                <p className="text-3xl font-bold mt-1">{stats.totalCompanies}</p>
+                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground font-medium">Companies</p>
+                <p className="text-lg sm:text-2xl md:text-3xl font-bold mt-0.5 sm:mt-1">{stats.totalCompanies}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-500" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-blue-500" />
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 shadow-sm">
+          <Card className="p-3 sm:p-4 md:p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Replied</p>
-                <p className="text-3xl font-bold mt-1">{stats.totalReplied}</p>
+                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground font-medium">Replied</p>
+                <p className="text-lg sm:text-2xl md:text-3xl font-bold mt-0.5 sm:mt-1">{stats.totalReplied}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                <MessageSquare className="h-6 w-6 text-emerald-500" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-emerald-500" />
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 shadow-sm">
+          <Card className="p-3 sm:p-4 md:p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-0 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Response Rate</p>
-                <p className="text-3xl font-bold mt-1">{stats.responseRate}%</p>
+                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground font-medium">Response Rate</p>
+                <p className="text-lg sm:text-2xl md:text-3xl font-bold mt-0.5 sm:mt-1">{stats.responseRate}%</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-purple-500" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-purple-500" />
               </div>
             </div>
           </Card>
@@ -407,22 +407,22 @@ export default function HistoryPage() {
       )}
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <div className="relative flex-1 min-w-[150px] sm:min-w-[200px]">
+          <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by product name..."
+            placeholder="Search by product..."
             value={query}
             onChange={handleSearchChange}
             onKeyDown={handleSearchKeyDown}
-            className="pl-10 bg-card border-muted-foreground/20 focus:border-primary/50 transition-colors"
+            className="pl-8 sm:pl-10 bg-card border-muted-foreground/20 focus:border-primary/50 transition-colors text-sm sm:text-base h-9 sm:h-10"
           />
         </div>
 
         <Select value={productFilter} onValueChange={handleProductFilterChange}>
-          <SelectTrigger className="w-48 bg-card border-muted-foreground/20 focus:border-primary/50 transition-colors">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
+          <SelectTrigger className="w-full sm:w-48 bg-card border-muted-foreground/20 focus:border-primary/50 transition-colors h-9 sm:h-10 text-sm sm:text-base">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
               <SelectValue placeholder="All Products" />
             </div>
           </SelectTrigger>
@@ -438,24 +438,24 @@ export default function HistoryPage() {
       </div>
 
       {/* Results count and pagination info */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="text-xs sm:text-sm text-muted-foreground">
             Showing <span className="font-semibold text-foreground">{history.length}</span> of{' '}
             <span className="font-semibold text-foreground">{totalCount}</span> entries
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Button 
             variant="outline" 
             size="sm" 
             disabled={page === 0} 
             onClick={() => setPage((p) => p - 1)}
-            className="hover:bg-primary/10 transition-colors"
+            className="hover:bg-primary/10 transition-colors h-8 sm:h-9 px-2.5 sm:px-3"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
-          <div className="px-4 py-1.5 bg-card rounded-lg border text-sm font-medium shadow-sm">
+          <div className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 bg-card rounded-lg border text-xs sm:text-sm font-medium shadow-sm">
             Page <span className="text-primary">{page + 1}</span> / {totalPages || 1}
           </div>
           <Button 
@@ -463,28 +463,28 @@ export default function HistoryPage() {
             size="sm" 
             disabled={page + 1 >= totalPages} 
             onClick={() => setPage((p) => p + 1)}
-            className="hover:bg-primary/10 transition-colors"
+            className="hover:bg-primary/10 transition-colors h-8 sm:h-9 px-2.5 sm:px-3"
           >
-            <ChevronRightIcon className="h-4 w-4" />
+            <ChevronRightIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
         </div>
       </div>
 
       {/* List */}
       {history.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-24 h-24 rounded-full bg-muted/20 flex items-center justify-center mb-4">
-            <Search className="h-10 w-10 text-muted-foreground/40" />
+        <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-muted/20 flex items-center justify-center mb-3 sm:mb-4">
+            <Search className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 text-muted-foreground/40" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No history found</h3>
-          <p className="text-sm text-muted-foreground max-w-sm">
+          <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1 sm:mb-2">No history found</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-sm px-4">
             {query || productFilter !== 'all' 
               ? "Try adjusting your filters or search terms"
               : "Your history will appear here once you start interacting with companies"}
           </p>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {history.map((entry, index) => {
             const date = new Date(entry.date);
             const companies = entry.companies || [];
@@ -500,20 +500,20 @@ export default function HistoryPage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 
-                <div className="relative p-5">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 group-hover:from-primary/30 group-hover:to-primary/10 transition-all duration-300">
-                        <TrendingUp className="h-6 w-6 text-primary" />
+                <div className="relative p-3 sm:p-4 md:p-5">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0 w-full sm:w-auto">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 group-hover:from-primary/30 group-hover:to-primary/10 transition-all duration-300">
+                        <TrendingUp className="h-5 w-5 sm:h-5.5 sm:w-5.5 md:h-6 md:w-6 text-primary" />
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-foreground text-lg truncate">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                          <h3 className="font-semibold text-foreground text-sm sm:text-base md:text-lg truncate max-w-[180px] sm:max-w-[280px] md:max-w-none">
                             {entry.product}
                           </h3>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded-full">
-                            <Calendar className="h-3 w-3" />
+                          <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground bg-muted/30 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                            <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                             <span>{date.toLocaleDateString('en-US', { 
                               month: 'short', 
                               day: 'numeric', 
@@ -521,50 +521,64 @@ export default function HistoryPage() {
                             })}</span>
                           </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-4 mt-1 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5" />
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 mt-0.5 sm:mt-1 text-xs sm:text-sm text-muted-foreground">
+                          <span className="flex items-center gap-0.5 sm:gap-1">
+                            <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             {companies.length} companies
                           </span>
                           {opened > 0 && (
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3.5 w-3.5" />
+                            <span className="flex items-center gap-0.5 sm:gap-1">
+                              <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                               {opened} opened
                             </span>
                           )}
                           {replied > 0 && (
-                            <span className="flex items-center gap-1">
-                              <MessageSquare className="h-3.5 w-3.5" />
+                            <span className="flex items-center gap-0.5 sm:gap-1">
+                              <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                               {replied} replied
                             </span>
                           )}
                           {companies.length > 0 && (
-                            <span className="flex items-center gap-1 px-2 py-0.5 bg-muted/30 rounded-full">
-                              <TrendingUp className="h-3 w-3" />
-                              {responseRate}% response
+                            <span className="flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 bg-muted/30 rounded-full">
+                              <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                              {responseRate}%
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 ml-auto flex-shrink-0">
+                    <div className="flex items-center gap-2 sm:gap-3 ml-auto flex-shrink-0 w-full sm:w-auto justify-between sm:justify-end">
                       {companies.length > 0 && (
-                        <div className="hidden sm:flex flex-col items-end gap-1 min-w-[80px]">
-                          <div className="w-24 h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                        <div className="flex sm:hidden flex-col items-end gap-0.5 flex-1 max-w-[100px]">
+                          <div className="w-full h-1 bg-muted/30 rounded-full overflow-hidden">
                             <div 
                               className="h-full bg-gradient-to-r from-primary to-emerald-400 rounded-full transition-all duration-1000"
                               style={{ width: `${responseRate}%` }}
                             />
                           </div>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] text-muted-foreground">
+                            {responseRate}% response
+                          </span>
+                        </div>
+                      )}
+                      
+                      {companies.length > 0 && (
+                        <div className="hidden sm:flex flex-col items-end gap-1 min-w-[70px] md:min-w-[80px]">
+                          <div className="w-16 sm:w-20 md:w-24 h-1 sm:h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-primary to-emerald-400 rounded-full transition-all duration-1000"
+                              style={{ width: `${responseRate}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] sm:text-xs text-muted-foreground">
                             Response rate
                           </span>
                         </div>
                       )}
                       
-                      <div className="w-8 h-8 rounded-full bg-muted/20 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-muted/20 flex items-center justify-center group-hover:bg-primary/10 transition-colors flex-shrink-0">
+                        <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
                     </div>
                   </div>
@@ -577,21 +591,21 @@ export default function HistoryPage() {
 
       {/* Bottom pagination */}
       {history.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
+          <div className="text-xs sm:text-sm text-muted-foreground">
             Showing {page * perPage + 1} - {Math.min((page + 1) * perPage, totalCount)} of {totalCount} entries
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               disabled={page === 0} 
               onClick={() => setPage((p) => p - 1)}
-              className="hover:bg-primary/10 transition-colors"
+              className="hover:bg-primary/10 transition-colors h-8 sm:h-9 px-2.5 sm:px-3"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
-            <div className="px-3 py-1 bg-card rounded-lg border text-xs font-medium">
+            <div className="px-2 sm:px-3 py-1 bg-card rounded-lg border text-xs sm:text-sm font-medium">
               {page + 1} / {totalPages || 1}
             </div>
             <Button 
@@ -599,9 +613,9 @@ export default function HistoryPage() {
               size="sm" 
               disabled={page + 1 >= totalPages} 
               onClick={() => setPage((p) => p + 1)}
-              className="hover:bg-primary/10 transition-colors"
+              className="hover:bg-primary/10 transition-colors h-8 sm:h-9 px-2.5 sm:px-3"
             >
-              <ChevronRightIcon className="h-4 w-4" />
+              <ChevronRightIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
