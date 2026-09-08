@@ -38,6 +38,7 @@ import AdminTrackingPagIndetail from "./pages/AdminPage/AdminTrackingPagIndetail
 import { AdminSidebar } from "./components/AdminSidebar";
 import AdminUsersManagement from "./pages/AdminPage/AdminUsersManagement";
 import SsoCallback from "./pages/SsoCallback";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -79,6 +80,7 @@ const App = () => (
             
               <Route path="/admin/history" element={<AdminHistoryPage />} />
               <Route path="/admin/historydetail/:id" element={<AdminHistoryDetail />} />
+            
             
             </Route>
 
