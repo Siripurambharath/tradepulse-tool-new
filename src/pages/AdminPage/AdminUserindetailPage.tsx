@@ -213,22 +213,22 @@ const AdminUserindetailPage = () => {
 
   const getStatusBadge = (status: string) => {
     if (status === 'SUCCESS') {
-      return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200 text-[10px] sm:text-xs">✓ Success</Badge>;
+      return <Badge className="bg-[#8EE147]/20 text-[#8EE147] hover:bg-[#8EE147]/20 border-[#8EE147]/30 text-[10px] sm:text-xs">✓ Success</Badge>;
     }
-    return <Badge variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 text-[10px] sm:text-xs">{status}</Badge>;
+    return <Badge variant="secondary" className="bg-amber-500/20 text-amber-400 hover:bg-amber-500/20 border-amber-500/30 text-[10px] sm:text-xs">{status}</Badge>;
   };
 
   const getActionBadge = (actionName: string) => {
     const colors: Record<string, string> = {
-      'LOGIN': 'text-blue-600',
-      'Products Table': 'text-purple-600',
-      'Contacts Table': 'text-indigo-600',
-      'Tracking Table': 'text-cyan-600',
-      'Analytics Dashboard Page': 'text-emerald-600',
-      'History Page': 'text-amber-600',
-      'Email Configuration Page': 'text-pink-600',
+      'LOGIN': 'text-[#8EE147]',
+      'Products Table': 'text-[#8EE147]',
+      'Contacts Table': 'text-[#8EE147]',
+      'Tracking Table': 'text-[#8EE147]',
+      'Analytics Dashboard Page': 'text-[#8EE147]',
+      'History Page': 'text-[#8EE147]',
+      'Email Configuration Page': 'text-[#8EE147]',
     };
-    return <span className={`font-medium text-xs sm:text-sm ${colors[actionName] || 'text-slate-600'}`}>{actionName}</span>;
+    return <span className={`font-medium text-xs sm:text-sm ${colors[actionName] || 'text-slate-300'}`}>{actionName}</span>;
   };
 
   const formatDate = (dateString: string) => {
@@ -248,13 +248,13 @@ const AdminUserindetailPage = () => {
 
   if (loading) {
     return (
-      <div className="w-full min-h-screen bg-gradient-to-br from-slate-100 via-white to-indigo-50/20 flex items-center justify-center p-4">
+      <div className="w-full min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#0E223B' }}>
         <div className="text-center">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full blur-xl opacity-20 animate-pulse" />
-            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-indigo-200 border-t-indigo-600 mx-auto relative" />
+            <div className="absolute inset-0 rounded-full blur-xl opacity-20 animate-pulse" style={{ background: 'linear-gradient(to right, #8EE147, #6EC035)' }} />
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 mx-auto relative" style={{ borderColor: '#8EE14720', borderTopColor: '#8EE147' }} />
           </div>
-          <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-medium text-slate-500 animate-pulse">
+          <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-medium animate-pulse" style={{ color: '#94A3B8' }}>
             Loading activity logs...
           </p>
         </div>
@@ -263,17 +263,20 @@ const AdminUserindetailPage = () => {
   }
 
   return (
-    <div className="w-full bg-gradient-to-br from-slate-100 via-white to-indigo-50/20">
-      <div className="w-full px-0 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-5 md:space-y-6">
+    <div className="w-full min-h-screen p-3 sm:p-4 md:p-6" style={{ backgroundColor: '#0E223B' }}>
+      {/* Decorative gradient header */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8EE147] via-[#6EC035] to-[#5AA82E]" />
+      
+      <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div>
             <div className="flex items-center gap-2 sm:gap-3">
               <Button 
                 onClick={handleBack} 
-                variant="outline" 
+                variant="ghost"
                 size="sm"
-                className="gap-1.5 sm:gap-2 hover:bg-indigo-50/50 transition-all duration-300 h-7 sm:h-8 md:h-9 text-xs sm:text-sm"
+                className="gap-1.5 sm:gap-2 hover:bg-[#8EE147]/10 hover:text-[#8EE147] transition-all duration-300 h-7 sm:h-8 md:h-9 text-xs sm:text-sm text-slate-300"
               >
                 <ArrowLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span className="hidden xs:inline">Back to Users</span>
@@ -281,20 +284,20 @@ const AdminUserindetailPage = () => {
               </Button>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-3">
-              <div className="p-2 sm:p-2.5 md:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-xl shadow-indigo-500/30">
-                <Activity className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-white" />
+              <div className="p-2 sm:p-2.5 md:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#8EE147] to-[#6EC035] shadow-xl shadow-[#8EE147]/30">
+                <Activity className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-[#0E223B]" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent truncate">
+                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#8EE147] to-[#6EC035] bg-clip-text text-transparent truncate">
                   User Activity Log
                 </h1>
                 <div className="flex items-center gap-2 sm:gap-3 mt-0.5 flex-wrap">
                   {sellerId && (
-                    <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs">
+                    <Badge className="bg-[#8EE147]/20 text-[#8EE147] border-[#8EE147]/30 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs">
                       User ID: {sellerId}
                     </Badge>
                   )}
-                  <span className="text-[10px] sm:text-xs md:text-sm text-slate-500">
+                  <span className="text-[10px] sm:text-xs md:text-sm text-slate-400">
                     {totalCount > 0 
                       ? `${totalCount} activity records found`
                       : 'No activity records found'}
@@ -314,7 +317,7 @@ const AdminUserindetailPage = () => {
               }} 
               disabled={loading || isSearching} 
               variant="default"
-              className="gap-1.5 sm:gap-2 w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 shadow-lg shadow-indigo-500/30 text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4"
+              className="gap-1.5 sm:gap-2 w-full sm:w-auto bg-gradient-to-r from-[#8EE147] to-[#6EC035] hover:from-[#7DD13A] hover:to-[#5AA82E] text-[#0E223B] shadow-lg shadow-[#8EE147]/30 text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4"
             >
               <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${loading || isSearching ? 'animate-spin' : ''}`} />
               Refresh
@@ -322,82 +325,82 @@ const AdminUserindetailPage = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Dark Theme */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500">
+          <Card className="border border-white/10 shadow-lg bg-[#0E223B]/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500">
             <CardContent className="pt-3 sm:pt-4 md:pt-6 pb-3 sm:pb-4 md:pb-6">
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                <div className="p-2 sm:p-2.5 md:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
-                  <Activity className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-white" />
+                <div className="p-2 sm:p-2.5 md:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#8EE147] to-[#6EC035] shadow-lg">
+                  <Activity className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-[#0E223B]" />
                 </div>
                 <div>
-                  <p className="text-base sm:text-lg md:text-2xl font-bold text-slate-800">{totalCount}</p>
-                  <p className="text-[8px] sm:text-[9px] md:text-xs text-slate-500 font-medium uppercase tracking-wider">Total Activities</p>
+                  <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{totalCount}</p>
+                  <p className="text-[8px] sm:text-[9px] md:text-xs text-slate-400 font-medium uppercase tracking-wider">Total Activities</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500">
+          <Card className="border border-white/10 shadow-lg bg-[#0E223B]/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500">
             <CardContent className="pt-3 sm:pt-4 md:pt-6 pb-3 sm:pb-4 md:pb-6">
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                <div className="p-2 sm:p-2.5 md:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg">
-                  <User className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-white" />
+                <div className="p-2 sm:p-2.5 md:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#8EE147] to-[#6EC035] shadow-lg">
+                  <User className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-[#0E223B]" />
                 </div>
                 <div>
-                  <p className="text-base sm:text-lg md:text-2xl font-bold text-slate-800">{new Set(logs.map(l => l.user_name)).size}</p>
-                  <p className="text-[8px] sm:text-[9px] md:text-xs text-slate-500 font-medium uppercase tracking-wider">Users</p>
+                  <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{new Set(logs.map(l => l.user_name)).size}</p>
+                  <p className="text-[8px] sm:text-[9px] md:text-xs text-slate-400 font-medium uppercase tracking-wider">Users</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500">
+          <Card className="border border-white/10 shadow-lg bg-[#0E223B]/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500">
             <CardContent className="pt-3 sm:pt-4 md:pt-6 pb-3 sm:pb-4 md:pb-6">
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                <div className="p-2 sm:p-2.5 md:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg">
-                  <Globe className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-white" />
+                <div className="p-2 sm:p-2.5 md:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#8EE147] to-[#6EC035] shadow-lg">
+                  <Globe className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-[#0E223B]" />
                 </div>
                 <div>
-                  <p className="text-base sm:text-lg md:text-2xl font-bold text-slate-800">{modules.length}</p>
-                  <p className="text-[8px] sm:text-[9px] md:text-xs text-slate-500 font-medium uppercase tracking-wider">Modules</p>
+                  <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{modules.length}</p>
+                  <p className="text-[8px] sm:text-[9px] md:text-xs text-slate-400 font-medium uppercase tracking-wider">Modules</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500">
+          <Card className="border border-white/10 shadow-lg bg-[#0E223B]/80 backdrop-blur-sm hover:shadow-xl transition-all duration-500">
             <CardContent className="pt-3 sm:pt-4 md:pt-6 pb-3 sm:pb-4 md:pb-6">
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                <div className="p-2 sm:p-2.5 md:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg">
-                  <Clock className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-white" />
+                <div className="p-2 sm:p-2.5 md:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#8EE147] to-[#6EC035] shadow-lg">
+                  <Clock className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-[#0E223B]" />
                 </div>
                 <div>
-                  <p className="text-base sm:text-lg md:text-2xl font-bold text-slate-800">{actions.length}</p>
-                  <p className="text-[8px] sm:text-[9px] md:text-xs text-slate-500 font-medium uppercase tracking-wider">Actions</p>
+                  <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{actions.length}</p>
+                  <p className="text-[8px] sm:text-[9px] md:text-xs text-slate-400 font-medium uppercase tracking-wider">Actions</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filters Section */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-white/50 p-3 sm:p-4">
+        {/* Filters Section - Dark Theme */}
+        <div className="bg-[#0E223B]/70 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-white/10 p-3 sm:p-4">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
             <div className="relative flex-1 min-w-[150px]">
-              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-indigo-500" />
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
               <Input
                 placeholder="Search by description, user, action..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="pl-8 sm:pl-10 border-gray-200 focus:border-indigo-400 focus:ring-indigo-400/20 rounded-lg sm:rounded-xl bg-white/80 h-8 sm:h-9 md:h-10 text-xs sm:text-sm"
+                className="pl-8 sm:pl-10 border-white/10 focus:border-[#8EE147] focus:ring-[#8EE147]/20 rounded-lg sm:rounded-xl bg-white/5 text-white placeholder:text-slate-500 h-8 sm:h-9 md:h-10 text-xs sm:text-sm"
               />
               {searchQuery && (
                 <div className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2">
                   {isSearching ? (
-                    <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-indigo-500" />
+                    <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-[#8EE147]" />
                   ) : (
-                    <span className="text-[10px] sm:text-xs text-emerald-500 font-medium">✓</span>
+                    <span className="text-[10px] sm:text-xs text-[#8EE147] font-medium">✓</span>
                   )}
                 </div>
               )}
@@ -405,16 +408,16 @@ const AdminUserindetailPage = () => {
 
             <div className="flex gap-2">
               <Select value={moduleFilter} onValueChange={handleModuleChange}>
-                <SelectTrigger className="w-[130px] sm:w-48 border-gray-200 focus:border-indigo-400 rounded-lg sm:rounded-xl bg-white/80 h-8 sm:h-9 md:h-10 text-xs sm:text-sm">
-                  <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-indigo-500" />
+                <SelectTrigger className="w-[130px] sm:w-48 border-white/10 focus:border-[#8EE147] rounded-lg sm:rounded-xl bg-white/5 text-white h-8 sm:h-9 md:h-10 text-xs sm:text-sm">
+                  <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-[#8EE147]" />
                   <SelectValue placeholder="Modules" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">📋 All Modules</SelectItem>
+                <SelectContent className="bg-[#0E223B] border-white/10 text-white">
+                  <SelectItem value="all" className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">📋 All Modules</SelectItem>
                   {modules.map((module) => (
-                    <SelectItem key={module} value={module}>
+                    <SelectItem key={module} value={module} className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">
                       <span className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                        <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-indigo-400" />
+                        <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
                         {module}
                       </span>
                     </SelectItem>
@@ -423,16 +426,16 @@ const AdminUserindetailPage = () => {
               </Select>
 
               <Select value={actionFilter} onValueChange={handleActionChange}>
-                <SelectTrigger className="w-[130px] sm:w-48 border-gray-200 focus:border-indigo-400 rounded-lg sm:rounded-xl bg-white/80 h-8 sm:h-9 md:h-10 text-xs sm:text-sm">
-                  <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-indigo-500" />
+                <SelectTrigger className="w-[130px] sm:w-48 border-white/10 focus:border-[#8EE147] rounded-lg sm:rounded-xl bg-white/5 text-white h-8 sm:h-9 md:h-10 text-xs sm:text-sm">
+                  <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-[#8EE147]" />
                   <SelectValue placeholder="Actions" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">🎯 All Actions</SelectItem>
+                <SelectContent className="bg-[#0E223B] border-white/10 text-white">
+                  <SelectItem value="all" className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">🎯 All Actions</SelectItem>
                   {actions.map((action) => (
-                    <SelectItem key={action} value={action}>
+                    <SelectItem key={action} value={action} className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">
                       <span className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                        <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-purple-400" />
+                        <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
                         {action}
                       </span>
                     </SelectItem>
@@ -445,194 +448,194 @@ const AdminUserindetailPage = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm">
+          <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm">
             {error}
           </div>
         )}
 
-        {/* Results count and pagination info */}
+        {/* Results count and pagination info - Dark Theme */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className="text-[10px] sm:text-sm text-slate-500">
-              Showing <span className="font-semibold text-slate-700">{logs.length}</span> of{' '}
-              <span className="font-semibold text-slate-700">{totalCount}</span> logs
+            <span className="text-[10px] sm:text-sm text-slate-400">
+              Showing <span className="font-semibold text-white">{logs.length}</span> of{' '}
+              <span className="font-semibold text-white">{totalCount}</span> logs
             </span>
             {isSearching && (
-              <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 bg-amber-50 text-amber-700 rounded-full text-[8px] sm:text-xs font-medium border border-amber-200">
+              <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 bg-amber-500/10 text-amber-400 rounded-full text-[8px] sm:text-xs font-medium border border-amber-500/30">
                 <Loader2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 animate-spin" />
                 Searching...
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              disabled={currentPage === 1} 
-              onClick={() => handlePageChange(currentPage - 1)}
-              className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-xs"
-            >
-              <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </Button>
-            <div className="px-2 sm:px-3 md:px-4 py-0.5 sm:py-1 bg-white rounded-lg border text-[10px] sm:text-sm font-medium shadow-sm">
-              Page <span className="text-indigo-600">{currentPage}</span> / {totalPages || 1}
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              disabled={currentPage >= totalPages} 
-              onClick={() => handlePageChange(currentPage + 1)}
-              className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-xs"
-            >
-              <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </Button>
-          </div>
-        </div>
-
-    {/* Table */}
-<div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-  <div className="overflow-x-auto">
-    <table className="w-full min-w-[800px] sm:min-w-full text-xs sm:text-sm">
-      <thead>
-        <tr className="bg-gradient-to-r from-gray-50/80 to-indigo-50/80 border-b border-gray-200">
-          <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">#</th>
-          <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">User</th>
-          <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">Action</th>
-          <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">Module</th>
-          <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">Description</th>
-          <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">IP</th>
-          <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">Device</th>
-          <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-gray-700 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap min-w-[100px]">Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        {isSearching ? (
-          <tr>
-            <td colSpan={8} className="text-center py-12 sm:py-16">
-              <div className="flex flex-col items-center gap-3 sm:gap-4">
-                <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 animate-spin text-indigo-500" />
-                <p className="text-xs sm:text-sm text-slate-500 font-medium">Searching logs...</p>
-              </div>
-            </td>
-          </tr>
-        ) : logs.length === 0 ? (
-          <tr>
-            <td colSpan={8} className="text-center py-12 sm:py-16">
-              <div className="flex flex-col items-center gap-2 sm:gap-3">
-                <div className="p-3 sm:p-4 bg-gray-50 rounded-full">
-                  <Activity className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
-                </div>
-                <p className="text-sm sm:text-base text-muted-foreground font-medium">No logs found</p>
-                <p className="text-[10px] sm:text-sm text-muted-foreground/70 text-center px-4">
-                  {searchQuery || moduleFilter !== 'all' || actionFilter !== 'all' 
-                    ? "Try adjusting your search terms or filters"
-                    : "No activity logs available for this user"}
-                </p>
-              </div>
-            </td>
-          </tr>
-        ) : (
-          logs.map((log, index) => (
-            <tr 
-              key={log.id} 
-              className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-transparent transition-all duration-200"
-            >
-              <td className="p-2 sm:p-3 md:p-4 font-medium text-slate-400 text-[10px] sm:text-xs whitespace-nowrap">
-                {(currentPage - 1) * itemsPerPage + index + 1}
-              </td>
-              <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">
-                <div className="flex items-center gap-1.5 sm:gap-3">
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center ring-2 ring-white shadow-md flex-shrink-0">
-                    <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-indigo-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-medium text-xs sm:text-sm text-slate-700 truncate max-w-[60px] sm:max-w-[100px]">{log.user_name}</p>
-                    <p className="text-[8px] sm:text-[10px] text-slate-400 truncate">{log.role}</p>
-                  </div>
-                </div>
-              </td>
-              <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">{getActionBadge(log.action_name)}</td>
-              <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">
-                <Badge variant="outline" className="bg-slate-50/50 border-slate-200 text-slate-600 text-[8px] sm:text-[10px] md:text-xs whitespace-nowrap">
-                  {log.module_name}
-                </Badge>
-              </td>
-              <td className="p-2 sm:p-3 md:p-4 max-w-[100px] sm:max-w-[150px]">
-                <p className="truncate text-xs sm:text-sm text-slate-600" title={log.description}>{log.description}</p>
-              </td>
-              <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">
-                <code className="text-[8px] sm:text-[10px] bg-slate-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-slate-600">{log.ip_address}</code>
-              </td>
-              <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">
-                <span className="text-[8px] sm:text-[10px] text-slate-500">{log.device}</span>
-              </td>
-              <td className="p-2 sm:p-3 md:p-4 min-w-[80px] sm:min-w-[120px] whitespace-nowrap">
-                <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] text-slate-500 whitespace-nowrap">
-                  <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                  {formatDate(log.created_at)}
-                </div>
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
+       <div className="flex items-center gap-1.5 sm:gap-2">
+  <Button 
+    variant="outline" 
+    size="sm" 
+    disabled={currentPage === 1} 
+    onClick={() => handlePageChange(currentPage - 1)}
+    className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors text-xs border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
+  </Button>
+  <div className="px-2 sm:px-3 md:px-4 py-0.5 sm:py-1 bg-white/5 rounded-lg border border-white/10 text-[10px] sm:text-sm font-medium shadow-sm text-white">
+    Page <span className="text-[#8EE147]">{currentPage}</span> / {totalPages || 1}
   </div>
-
-  {/* Pagination */}
-  {logs.length > 0 && (
-    <div className="border-t border-gray-200/60 bg-gradient-to-r from-gray-50/50 to-indigo-50/30 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-[10px] sm:text-sm text-slate-600 whitespace-nowrap">Rows:</span>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-            className="border border-gray-200 rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400"
-          >
-            {itemsPerPageOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] sm:text-sm text-slate-600 whitespace-nowrap">
-            {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}
-          </span>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            disabled={currentPage === 1} 
-            onClick={() => handlePageChange(currentPage - 1)}
-            className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-xs"
-          >
-            <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            disabled={currentPage >= totalPages} 
-            onClick={() => handlePageChange(currentPage + 1)}
-            className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-xs"
-          >
-            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  )}
+  <Button 
+    variant="outline" 
+    size="sm" 
+    disabled={currentPage >= totalPages} 
+    onClick={() => handlePageChange(currentPage + 1)}
+    className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors text-xs border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
+  </Button>
 </div>
+        </div>
 
-        {/* Footer */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-[10px] sm:text-xs text-slate-400 px-2 gap-2">
+        {/* Table - Dark Theme */}
+        <div className="bg-[#0E223B]/50 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl border border-white/10 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[800px] sm:min-w-full text-xs sm:text-sm">
+              <thead>
+                <tr className="bg-gradient-to-r from-[#8EE147]/10 to-[#6EC035]/10 border-b border-white/10">
+                  <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-300 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">#</th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-300 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">User</th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-300 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">Action</th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-300 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">Module</th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-300 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">Description</th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-300 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">IP</th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-300 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap">Device</th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left font-semibold text-slate-300 text-[8px] sm:text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap min-w-[100px]">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isSearching ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-12 sm:py-16">
+                      <div className="flex flex-col items-center gap-3 sm:gap-4">
+                        <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 animate-spin text-[#8EE147]" />
+                        <p className="text-xs sm:text-sm text-slate-400 font-medium">Searching logs...</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : logs.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-12 sm:py-16">
+                      <div className="flex flex-col items-center gap-2 sm:gap-3">
+                        <div className="p-3 sm:p-4 bg-white/5 rounded-full">
+                          <Activity className="h-8 w-8 sm:h-10 sm:w-10 text-slate-500" />
+                        </div>
+                        <p className="text-sm sm:text-base text-slate-300 font-medium">No logs found</p>
+                        <p className="text-[10px] sm:text-sm text-slate-500 text-center px-4">
+                          {searchQuery || moduleFilter !== 'all' || actionFilter !== 'all' 
+                            ? "Try adjusting your search terms or filters"
+                            : "No activity logs available for this user"}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  logs.map((log, index) => (
+                    <tr 
+                      key={log.id} 
+                      className="border-b border-white/5 hover:bg-[#8EE147]/5 transition-all duration-200"
+                    >
+                      <td className="p-2 sm:p-3 md:p-4 font-medium text-slate-500 text-[10px] sm:text-xs whitespace-nowrap">
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 sm:gap-3">
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-[#8EE147]/20 to-[#6EC035]/20 flex items-center justify-center ring-2 ring-[#8EE147]/10 shadow-md flex-shrink-0 border border-[#8EE147]/20">
+                            <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147]" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-xs sm:text-sm text-white truncate max-w-[60px] sm:max-w-[100px]">{log.user_name}</p>
+                            <p className="text-[8px] sm:text-[10px] text-slate-400 truncate">{log.role}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">{getActionBadge(log.action_name)}</td>
+                      <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">
+                        <Badge variant="outline" className="bg-white/5 border-white/10 text-slate-300 text-[8px] sm:text-[10px] md:text-xs whitespace-nowrap">
+                          {log.module_name}
+                        </Badge>
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4 max-w-[100px] sm:max-w-[150px]">
+                        <p className="truncate text-xs sm:text-sm text-slate-300" title={log.description}>{log.description}</p>
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">
+                        <code className="text-[8px] sm:text-[10px] bg-white/5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-slate-300">{log.ip_address}</code>
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4 whitespace-nowrap">
+                        <span className="text-[8px] sm:text-[10px] text-slate-400">{log.device}</span>
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4 min-w-[80px] sm:min-w-[120px] whitespace-nowrap">
+                        <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] text-slate-400 whitespace-nowrap">
+                          <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                          {formatDate(log.created_at)}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination - Dark Theme */}
+          {logs.length > 0 && (
+            <div className="border-t border-white/10 bg-gradient-to-r from-[#8EE147]/5 to-[#6EC035]/5 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-[10px] sm:text-sm text-slate-400 whitespace-nowrap">Rows:</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                    className="border border-white/10 rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-sm bg-[#0E223B] text-white focus:outline-none focus:ring-2 focus:ring-[#8EE147]/20 focus:border-[#8EE147]"
+                  >
+                    {itemsPerPageOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
+             <div className="flex items-center gap-2">
+  <span className="text-[10px] sm:text-sm text-slate-400 whitespace-nowrap">
+    {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}
+  </span>
+  <Button 
+    variant="outline" 
+    size="sm" 
+    disabled={currentPage === 1} 
+    onClick={() => handlePageChange(currentPage - 1)}
+    className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors text-xs border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
+  </Button>
+  <Button 
+    variant="outline" 
+    size="sm" 
+    disabled={currentPage >= totalPages} 
+    onClick={() => handlePageChange(currentPage + 1)}
+    className="h-7 sm:h-8 md:h-9 px-2 sm:px-3 hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors text-xs border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
+  </Button>
+</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer - Dark Theme */}
+        <div className="flex flex-col sm:flex-row items-center justify-between text-[10px] sm:text-xs text-slate-500 px-2 gap-2">
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-center sm:justify-start">
             <span>Total logs: {totalCount}</span>
-            <span className="hidden xs:inline w-px h-4 bg-slate-200"></span>
+            <span className="hidden xs:inline w-px h-4 bg-white/10"></span>
             <span className="text-center">Last updated: {new Date().toLocaleString()}</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-            <span>Live</span>
+            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#8EE147] animate-pulse"></div>
+            <span className="text-slate-400">Live</span>
           </div>
         </div>
       </div>

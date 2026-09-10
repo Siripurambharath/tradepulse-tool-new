@@ -281,16 +281,36 @@ export default function ContactDetailPage() {
       fetchBuyerDetails();
     }
   }, [id, page]);
-
-  const refreshData = async () => {
-    setRefreshing(true);
-    await Promise.all([fetchStats(), fetchBuyerDetails()]);
-    setRefreshing(false);
-    toast({
-      title: "Refreshed",
-      description: "Contact data has been updated",
-    });
-  };
+const refreshData = async () => {
+  setRefreshing(true);
+  await Promise.all([fetchStats(), fetchBuyerDetails()]);
+  setRefreshing(false);
+ toast({
+  title: "Refreshed",
+  description: "Contact data has been updated",
+  className: `
+    bg-[#0E223B]
+    border border-[#8EE147]/30
+    text-white
+    [&>button]:!text-white
+    [&>button]:!bg-transparent
+    [&>button]:!border-0
+    [&>button]:!outline-none
+    [&>button]:!ring-0
+    [&>button]:!shadow-none
+    [&>button:hover]:!text-white
+    [&>button:hover]:!bg-transparent
+    [&>button:focus]:!text-white
+    [&>button:focus]:!bg-transparent
+    [&>button:focus]:!border-0
+    [&>button:focus]:!outline-none
+    [&>button:focus]:!ring-0
+    [&>button:focus-visible]:!border-0
+    [&>button:focus-visible]:!outline-none
+    [&>button:focus-visible]:!ring-0
+  `,
+});
+};
 
   // Filter emails based on search (client-side filtering on current page)
   const filteredEmails = contact.filter(record => {
@@ -324,12 +344,12 @@ export default function ContactDetailPage() {
   const getStatusBadge = (status: string) => {
     if (!status) return <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-0 text-[10px] sm:text-xs">Pending</Badge>;
     if (status.toLowerCase() === 'sent') {
-      return <Badge className="bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-50 text-[10px] sm:text-xs">
-        <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+      return <Badge className="bg-[#8EE147]/20 text-[#0E223B] border border-[#8EE147]/30 hover:bg-[#8EE147]/20 text-[10px] sm:text-xs">
+        <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" style={{ color: '#8EE147' }} />
         Sent
       </Badge>;
     } else if (status.toLowerCase() === 'failed') {
-      return <Badge className="bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200 hover:bg-red-50 text-[10px] sm:text-xs">
+      return <Badge className="bg-red-500/20 text-red-700 border border-red-500/30 hover:bg-red-500/20 text-[10px] sm:text-xs">
         <XCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
         Failed
       </Badge>;
@@ -340,12 +360,12 @@ export default function ContactDetailPage() {
   const getResponseBadge = (response: string | null) => {
     if (!response) return <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-0 text-[10px] sm:text-xs">No Response</Badge>;
     if (response === 'interested') {
-      return <Badge className="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 hover:bg-blue-50 text-[10px] sm:text-xs">
-        <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+      return <Badge className="bg-[#8EE147]/20 text-[#0E223B] border border-[#8EE147]/30 hover:bg-[#8EE147]/20 text-[10px] sm:text-xs">
+        <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" style={{ color: '#8EE147' }} />
         Interested
       </Badge>;
     } else if (response === 'not_interested') {
-      return <Badge className="bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200 hover:bg-red-50 text-[10px] sm:text-xs">
+      return <Badge className="bg-red-500/20 text-red-700 border border-red-500/30 hover:bg-red-500/20 text-[10px] sm:text-xs">
         <XCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
         Not Interested
       </Badge>;
@@ -380,13 +400,13 @@ export default function ContactDetailPage() {
 
   if (loading || statsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#0E223B' }}>
         <div className="text-center">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full blur-xl opacity-20 animate-pulse" />
-            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-blue-200 border-t-blue-600 mx-auto relative" />
+            <div className="absolute inset-0 rounded-full blur-xl opacity-20 animate-pulse" style={{ background: 'linear-gradient(to right, #8EE147, #6EC035)' }} />
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 mx-auto relative" style={{ borderColor: '#8EE14720', borderTopColor: '#8EE147' }} />
           </div>
-          <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-medium text-muted-foreground animate-pulse">
+          <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-medium animate-pulse" style={{ color: '#94A3B8' }}>
             Loading contact details...
           </p>
         </div>
@@ -396,20 +416,20 @@ export default function ContactDetailPage() {
 
   if (error || contact.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8 max-w-md w-full text-center mx-4">
-          <div className="p-3 sm:p-4 bg-gradient-to-r from-red-50 to-rose-50 rounded-full w-fit mx-auto mb-3 sm:mb-4">
-            <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-red-500" />
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#0E223B' }}>
+        <div className="bg-[#0E223B] rounded-2xl shadow-xl border border-white/10 p-4 sm:p-6 md:p-8 max-w-md w-full text-center mx-4">
+          <div className="p-3 sm:p-4 bg-red-500/10 rounded-full w-fit mx-auto mb-3 sm:mb-4">
+            <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-red-400" />
           </div>
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1 sm:mb-2">Contact Not Found</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">{error || "No contact details available"}</p>
-          <p className="text-[10px] sm:text-xs text-muted-foreground/70 mb-4 sm:mb-6">Buyer ID: {id}</p>
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">Contact Not Found</h3>
+          <p className="text-xs sm:text-sm text-slate-400 mb-1 sm:mb-2">{error || "No contact details available"}</p>
+          <p className="text-[10px] sm:text-xs text-slate-500 mb-4 sm:mb-6">Buyer ID: {id}</p>
           <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
-            <Button onClick={() => navigate('/contacts')} variant="outline" className="gap-2 text-sm sm:text-base">
+            <Button onClick={() => navigate('/contacts')} variant="outline" className="gap-2 text-sm sm:text-base text-white border-white/20 hover:bg-white/10">
               <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Back
             </Button>
-            <Button onClick={refreshData} className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-sm sm:text-base">
+            <Button onClick={refreshData} className="gap-2 bg-[#8EE147] text-[#0E223B] hover:bg-[#6EC035] text-sm sm:text-base">
               <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Try Again
             </Button>
@@ -422,9 +442,9 @@ export default function ContactDetailPage() {
   const initialEmail = getInitialEmail();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 p-3 sm:p-4 md:p-6">
+    <div className="min-h-screen p-3 sm:p-4 md:p-6" style={{ backgroundColor: '#0E223B' }}>
       {/* Decorative gradient header */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8EE147] via-[#6EC035] to-[#5AA82E]" />
       
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -433,323 +453,324 @@ export default function ContactDetailPage() {
             <Button 
               variant="ghost" 
               onClick={() => navigate('/contacts')}
-              className="hover:bg-blue-50 hover:text-blue-700 transition-colors text-sm sm:text-base px-2 sm:px-4 flex-shrink-0"
+              className="hover:bg-[#8EE147]/10 hover:text-[#8EE147] transition-colors text-sm sm:text-base px-2 sm:px-4 flex-shrink-0 text-slate-300"
             >
               <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               <span className="hidden xs:inline">Back</span>
             </Button>
             <div className="space-y-0.5 sm:space-y-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex-shrink-0">
-                  <User className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" />
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#8EE147] to-[#6EC035] bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-gradient-to-r from-[#8EE147] to-[#6EC035] rounded-xl flex-shrink-0">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#0E223B]" />
                 </div>
                 <span className="truncate">{initialEmail?.company_name || 'Contact Details'}</span>
               </h1>
-              <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground flex items-center gap-1 sm:gap-2">
-                <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+              <p className="text-[10px] sm:text-xs md:text-sm flex items-center gap-1 sm:gap-2" style={{ color: '#94A3B8' }}>
+                <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-[#8EE147]" />
                 <span className="hidden xs:inline">Buyer ID: {id} • {totalCount} total interactions</span>
                 <span className="xs:hidden">ID: {id} • {totalCount}</span>
               </p>
             </div>
           </div>
-          <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
-            <Button 
-              variant="outline" 
-              onClick={refreshData} 
-              disabled={refreshing}
-              className="hover:bg-blue-50 hover:border-blue-300 transition-colors text-sm sm:text-base px-2.5 sm:px-4"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-              <span className="hidden xs:inline">Refresh</span>
-            </Button>
-          </div>
+   <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
+  <Button 
+    variant="outline" 
+    onClick={refreshData} 
+    disabled={refreshing}
+    className="border-2 border-[#8EE147] bg-transparent text-white hover:bg-transparent hover:text-white hover:border-[#8EE147] transition-all duration-200 text-sm sm:text-base px-2.5 sm:px-4 cursor-pointer"
+  >
+    <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+    <span className="hidden xs:inline">Refresh</span>
+  </Button>
+</div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Total</p>
-                <p className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent mt-0.5 sm:mt-1">{stats.total}</p>
-              </div>
-              <div className="p-1.5 sm:p-2 md:p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-                <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Sent</p>
-                <p className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-600 mt-0.5 sm:mt-1">{stats.sent}</p>
-              </div>
-              <div className="p-1.5 sm:p-2 md:p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl">
-                <Send className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Interested</p>
-                <p className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600 mt-0.5 sm:mt-1">{stats.interested}</p>
-              </div>
-              <div className="p-1.5 sm:p-2 md:p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Not Interested</p>
-                <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-600 mt-0.5 sm:mt-1">{stats.not_interested}</p>
-              </div>
-              <div className="p-1.5 sm:p-2 md:p-3 bg-gradient-to-r from-red-50 to-rose-50 rounded-xl">
-                <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="col-span-2 sm:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-2.5 sm:p-3 md:p-4 hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending</p>
-                <p className="text-lg sm:text-xl md:text-2xl font-bold text-amber-600 mt-0.5 sm:mt-1">{stats.pending}</p>
-              </div>
-              <div className="p-1.5 sm:p-2 md:p-3 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl">
-                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Stats Cards - Dark Theme */}
+     {/* Stats Cards - Dark Theme */}
+<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+  <div className="border border-white/10 shadow-lg rounded-2xl p-2.5 sm:p-3 md:p-4 hover:shadow-xl transition-all duration-200 hover:scale-[1.02]" style={{ backgroundColor: '#0E223B' }}>
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">Total</p>
+        <p className="text-lg sm:text-xl md:text-2xl font-bold text-white mt-0.5 sm:mt-1">{stats.total}</p>
+      </div>
+      <div className="p-1.5 sm:p-2 md:p-3 bg-[#8EE147]/10 rounded-xl border border-[#8EE147]/20">
+        <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+      </div>
+    </div>
+  </div>
+  
+  <div className="border border-white/10 shadow-lg rounded-2xl p-2.5 sm:p-3 md:p-4 hover:shadow-xl transition-all duration-200 hover:scale-[1.02]" style={{ backgroundColor: '#0E223B' }}>
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">Sent</p>
+        <p className="text-lg sm:text-xl md:text-2xl font-bold text-white mt-0.5 sm:mt-1">{stats.sent}</p>
+      </div>
+      <div className="p-1.5 sm:p-2 md:p-3 bg-[#8EE147]/10 rounded-xl border border-[#8EE147]/20">
+        <Send className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+      </div>
+    </div>
+  </div>
+  
+  <div className="border border-white/10 shadow-lg rounded-2xl p-2.5 sm:p-3 md:p-4 hover:shadow-xl transition-all duration-200 hover:scale-[1.02]" style={{ backgroundColor: '#0E223B' }}>
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">Interested</p>
+        <p className="text-lg sm:text-xl md:text-2xl font-bold text-white mt-0.5 sm:mt-1">{stats.interested}</p>
+      </div>
+      <div className="p-1.5 sm:p-2 md:p-3 bg-[#8EE147]/10 rounded-xl border border-[#8EE147]/20">
+        <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+      </div>
+    </div>
+  </div>
+  
+  <div className="border border-white/10 shadow-lg rounded-2xl p-2.5 sm:p-3 md:p-4 hover:shadow-xl transition-all duration-200 hover:scale-[1.02]" style={{ backgroundColor: '#0E223B' }}>
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-red-400/70 uppercase tracking-wider">Not Interested</p>
+        <p className="text-lg sm:text-xl md:text-2xl font-bold text-white mt-0.5 sm:mt-1">{stats.not_interested}</p>
+      </div>
+      <div className="p-1.5 sm:p-2 md:p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+        <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />
+      </div>
+    </div>
+  </div>
+  
+  <div className="col-span-2 sm:col-span-1 border border-white/10 shadow-lg rounded-2xl p-2.5 sm:p-3 md:p-4 hover:shadow-xl transition-all duration-200 hover:scale-[1.02]" style={{ backgroundColor: '#0E223B' }}>
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-amber-400/70 uppercase tracking-wider">Pending</p>
+        <p className="text-lg sm:text-xl md:text-2xl font-bold text-white mt-0.5 sm:mt-1">{stats.pending}</p>
+      </div>
+      <div className="p-1.5 sm:p-2 md:p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+        <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
+      </div>
+    </div>
+  </div>
+</div>
 
-        {/* Contact Information Summary Card */}
-        <Card className="mb-4 sm:mb-6 bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/80 border-0 shadow-sm hover:shadow-md transition-shadow">
+        {/* Contact Information Summary Card - Dark Theme */}
+        <Card className="mb-4 sm:mb-6 border border-white/10 shadow-lg" style={{ backgroundColor: '#0E223B' }}>
           <CardContent className="pt-4 sm:pt-6">
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               <div className="flex items-start gap-2 sm:gap-3 group">
-                <div className="p-1.5 sm:p-2 md:p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
-                  <Building className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
+                <div className="p-1.5 sm:p-2 md:p-2.5 bg-[#8EE147]/10 rounded-xl shadow-sm border border-[#8EE147]/20 flex-shrink-0">
+                  <Building className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Company</p>
-                  <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">{initialEmail?.company_name || '-'}</p>
+                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">Company</p>
+                  <p className="text-xs sm:text-sm font-semibold text-white truncate">{initialEmail?.company_name || '-'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2 sm:gap-3 group">
-                <div className="p-1.5 sm:p-2 md:p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
-                  <AtSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
+                <div className="p-1.5 sm:p-2 md:p-2.5 bg-[#8EE147]/10 rounded-xl shadow-sm border border-[#8EE147]/20 flex-shrink-0">
+                  <AtSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</p>
-                  <a href={`mailto:${initialEmail?.email || initialEmail?.from_email}`} className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors truncate block">
+                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">Email</p>
+                  <a href={`mailto:${initialEmail?.email || initialEmail?.from_email}`} className="text-xs sm:text-sm font-semibold text-[#8EE147] hover:text-[#6EC035] hover:underline transition-colors truncate block">
                     {initialEmail?.email || initialEmail?.from_email || '-'}
                   </a>
                 </div>
               </div>
               <div className="flex items-start gap-2 sm:gap-3 group">
-                <div className="p-1.5 sm:p-2 md:p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
-                  <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
+                <div className="p-1.5 sm:p-2 md:p-2.5 bg-[#8EE147]/10 rounded-xl shadow-sm border border-[#8EE147]/20 flex-shrink-0">
+                  <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</p>
+                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">Phone</p>
                   {initialEmail?.contact_name && /[\d\-+() ]{7,}/.test(initialEmail.contact_name) ? (
                     <a 
                       href={`tel:${initialEmail.contact_name.replace(/\s/g, '')}`}
-                      className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline truncate block"
+                      className="text-xs sm:text-sm font-semibold text-[#8EE147] hover:text-[#6EC035] hover:underline truncate block"
                     >
                       {initialEmail.contact_name}
                     </a>
                   ) : (
-                    <p className="text-xs sm:text-sm font-semibold text-gray-400 truncate">Not available</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-500 truncate">Not available</p>
                   )}
                 </div>
               </div>
               <div className="flex items-start gap-2 sm:gap-3 group">
-                <div className="p-1.5 sm:p-2 md:p-2.5 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
-                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
+                <div className="p-1.5 sm:p-2 md:p-2.5 bg-[#8EE147]/10 rounded-xl shadow-sm border border-[#8EE147]/20 flex-shrink-0">
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Product</p>
-                  <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">{initialEmail?.product_name || '-'}</p>
+                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">Product</p>
+                  <p className="text-xs sm:text-sm font-semibold text-white truncate">{initialEmail?.product_name || '-'}</p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Search and Email History */}
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-gray-50/50 to-blue-50/50 p-3 sm:p-4 md:p-6">
+        {/* Search and Email History - Dark Theme */}
+        <Card className="border border-white/10 shadow-lg" style={{ backgroundColor: '#0E223B' }}>
+          <CardHeader className="border-b border-white/10 bg-gradient-to-r from-[#8EE147]/5 to-[#6EC035]/5 p-3 sm:p-4 md:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg shadow-md">
-                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                <div className="p-1.5 sm:p-2 bg-gradient-to-r from-[#8EE147] to-[#6EC035] rounded-lg shadow-md">
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-[#0E223B]" />
                 </div>
                 <div>
-                  <CardTitle className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                  <CardTitle className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-[#8EE147] to-[#6EC035] bg-clip-text text-transparent">
                     Email History
                   </CardTitle>
-                  <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground hidden xs:block">All email interactions with this contact</p>
+                  <p className="text-[10px] sm:text-xs md:text-sm text-slate-400 hidden xs:block">All email interactions with this contact</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
-                <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white rounded-lg shadow-sm border border-gray-100">
-                  <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-500" />
+                <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 text-slate-300">
+                  <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147]" />
                   <span className="hidden xs:inline">{stats.sent} sent</span>
                   <span className="xs:hidden">{stats.sent}</span>
                 </span>
-                <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white rounded-lg shadow-sm border border-gray-100">
-                  <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-500" />
+                <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 text-slate-300">
+                  <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147]" />
                   <span className="hidden xs:inline">{stats.interested} interested</span>
                   <span className="xs:hidden">{stats.interested}</span>
                 </span>
               </div>
             </div>
           </CardHeader>
-       <CardContent className="p-0">
-  <div className="overflow-x-auto">
-    <Table>
-      <TableHeader>
-        <TableRow className="bg-gradient-to-r from-gray-50/80 to-blue-50/80">
-          <TableHead className="font-semibold text-gray-700 text-[10px] sm:text-xs w-8 sm:w-12">#</TableHead>
-          <TableHead className="font-semibold text-gray-700 text-[10px] sm:text-xs whitespace-nowrap">Type</TableHead>
-          <TableHead className="font-semibold text-gray-700 text-[10px] sm:text-xs whitespace-nowrap">Subject</TableHead>
-          <TableHead className="font-semibold text-gray-700 text-[10px] sm:text-xs whitespace-nowrap">Status</TableHead>
-          <TableHead className="font-semibold text-gray-700 text-[10px] sm:text-xs whitespace-nowrap">Response</TableHead>
-          <TableHead className="font-semibold text-gray-700 text-[10px] sm:text-xs whitespace-nowrap">Template</TableHead>
-          <TableHead className="font-semibold text-gray-700 text-[10px] sm:text-xs whitespace-nowrap">Date</TableHead>
-          <TableHead className="font-semibold text-gray-700 text-[10px] sm:text-xs text-center whitespace-nowrap">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {filteredEmails.length > 0 ? (
-          filteredEmails.map((record, index) => (
-            <TableRow 
-              key={record.id} 
-              className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-200 cursor-pointer group"
-              onClick={() => viewMessage(record)}
-            >
-              <TableCell className="font-medium text-gray-600 text-[10px] sm:text-sm">
-                {(page * perPage) + index + 1}
-              </TableCell>
-              <TableCell>
-                {index === 0 && page === 0 ? (
-                  <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-200 text-[10px] sm:text-xs whitespace-nowrap">
-                    <MailOpen className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
-                    Initial
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border-purple-200 text-[10px] sm:text-xs whitespace-nowrap">
-                    <Reply className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
-                    Reply
-                  </Badge>
-                )}
-              </TableCell>
-              <TableCell className="max-w-[80px] sm:max-w-[150px]">
-                <p className="truncate font-medium text-gray-700 group-hover:text-blue-600 transition-colors text-[10px] sm:text-sm">
-                  {record.subject || '-'}
-                </p>
-              </TableCell>
-              <TableCell>{getStatusBadge(record.status)}</TableCell>
-              <TableCell>{getResponseBadge(record.response)}</TableCell>
-              <TableCell>
-                <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1.5 rounded-full text-[8px] sm:text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 max-w-[80px] sm:max-w-[120px] truncate block">
-                  <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 flex-shrink-0" />
-                  {record.template_used || '-'}
-                </span>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
-                  <Clock className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
-                  <span className="hidden sm:inline">{formatDate(record.reply_date || record.responded_at || record.sent_at)}</span>
-                  <span className="sm:hidden">{record.reply_date ? new Date(record.reply_date).toLocaleDateString() : '-'}</span>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gradient-to-r from-[#8EE147]/10 to-[#6EC035]/10 border-b border-white/10">
+                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs w-8 sm:w-12">#</TableHead>
+                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Type</TableHead>
+                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Subject</TableHead>
+                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Status</TableHead>
+                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Response</TableHead>
+                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Template</TableHead>
+                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Date</TableHead>
+                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs text-center whitespace-nowrap">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredEmails.length > 0 ? (
+                    filteredEmails.map((record, index) => (
+                      <TableRow 
+                        key={record.id} 
+                        className="border-b border-white/5 hover:bg-[#8EE147]/5 transition-all duration-200 cursor-pointer group"
+                        onClick={() => viewMessage(record)}
+                      >
+                        <TableCell className="font-medium text-slate-400 text-[10px] sm:text-sm">
+                          {(page * perPage) + index + 1}
+                        </TableCell>
+                        <TableCell>
+                          {index === 0 && page === 0 ? (
+                            <Badge variant="outline" className="bg-[#8EE147]/10 text-[#8EE147] border-[#8EE147]/30 text-[10px] sm:text-xs whitespace-nowrap">
+                              <MailOpen className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                              Initial
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-[10px] sm:text-xs whitespace-nowrap">
+                              <Reply className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                              Reply
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="max-w-[80px] sm:max-w-[150px]">
+                          <p className="truncate font-medium text-slate-300 group-hover:text-[#8EE147] transition-colors text-[10px] sm:text-sm">
+                            {record.subject || '-'}
+                          </p>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(record.status)}</TableCell>
+                        <TableCell>{getResponseBadge(record.response)}</TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1.5 rounded-full text-[8px] sm:text-xs font-medium bg-[#8EE147]/10 text-[#8EE147] border border-[#8EE147]/20 max-w-[80px] sm:max-w-[120px] truncate block">
+                            <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 flex-shrink-0" />
+                            {record.template_used || '-'}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-slate-400 whitespace-nowrap">
+                            <Clock className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
+                            <span className="hidden sm:inline">{formatDate(record.reply_date || record.responded_at || record.sent_at)}</span>
+                            <span className="sm:hidden">{record.reply_date ? new Date(record.reply_date).toLocaleDateString() : '-'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-0.5 sm:gap-1.5 h-7 sm:h-8 md:h-9 px-1.5 sm:px-2 md:px-3 bg-[#8EE147]/10 hover:bg-[#8EE147]/20 text-[#8EE147] hover:text-[#8EE147] rounded-lg transition-colors text-[10px] sm:text-xs whitespace-nowrap"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              viewMessage(record);
+                            }}
+                          >
+                            <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                            <span className="hidden xs:inline">View</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 sm:py-10 md:py-12">
+                        <div className="flex flex-col items-center gap-2 sm:gap-3">
+                          <div className="p-3 sm:p-4 bg-white/5 rounded-full">
+                            <Mail className="h-8 w-8 sm:h-10 sm:w-10 text-slate-500" />
+                          </div>
+                          <p className="text-xs sm:text-sm text-slate-400 font-medium">No emails found</p>
+                          <p className="text-[10px] sm:text-xs text-slate-500">Try adjusting your search</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Summary footer with pagination - Dark Theme */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-white/10 bg-gradient-to-r from-[#8EE147]/5 to-[#6EC035]/5">
+              <p className="text-[10px] sm:text-sm text-slate-400">
+                Showing <span className="font-semibold text-white">{contact.length}</span> of {totalCount} emails
+              </p>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
+                  <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 text-slate-300 whitespace-nowrap">
+                    <MailOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147]" />
+                    <span className="hidden xs:inline">Initial:</span>
+                    <span className="font-semibold text-white">1</span>
+                  </span>
+                  <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 text-slate-300 whitespace-nowrap">
+                    <Reply className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-400" />
+                    <span className="hidden xs:inline">Replies:</span>
+                    <span className="font-semibold text-white">{totalCount - 1}</span>
+                  </span>
                 </div>
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-0.5 sm:gap-1.5 h-7 sm:h-8 md:h-9 px-1.5 sm:px-2 md:px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 rounded-lg transition-colors text-[10px] sm:text-xs whitespace-nowrap"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    viewMessage(record);
-                  }}
-                >
-                  <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  <span className="hidden xs:inline">View</span>
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={8} className="text-center py-8 sm:py-10 md:py-12">
-              <div className="flex flex-col items-center gap-2 sm:gap-3">
-                <div className="p-3 sm:p-4 bg-gray-50 rounded-full">
-                  <Mail className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+
+                {/* Pagination Controls - Dark Theme */}
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={page === 0} 
+                    onClick={() => setPage(p => p - 1)}
+                    className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 text-[#8EE147]" />
+                  </Button>
+                  <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-white/5 rounded-lg border border-white/10 text-[10px] sm:text-xs font-medium text-white whitespace-nowrap">
+                    {page + 1} / {totalPages || 1}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={page + 1 >= totalPages} 
+                    onClick={() => setPage(p => p + 1)}
+                    className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-[#8EE147]" />
+                  </Button>
                 </div>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">No emails found</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground/70">Try adjusting your search</p>
               </div>
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
-  </div>
-
-  {/* Summary footer with pagination */}
-  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/50 to-blue-50/50">
-    <p className="text-[10px] sm:text-sm text-muted-foreground">
-      Showing <span className="font-semibold text-foreground">{contact.length}</span> of {totalCount} emails
-    </p>
-    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-      <div className="flex flex-wrap gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
-        <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">
-          <MailOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-500" />
-          <span className="hidden xs:inline">Initial:</span>
-          <span className="font-semibold text-gray-700">1</span>
-        </span>
-        <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">
-          <Reply className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-500" />
-          <span className="hidden xs:inline">Replies:</span>
-          <span className="font-semibold text-gray-700">{totalCount - 1}</span>
-        </span>
-      </div>
-
-      {/* Pagination Controls */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          disabled={page === 0} 
-          onClick={() => setPage(p => p - 1)}
-          className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3"
-        >
-          <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-        </Button>
-        <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-white rounded-lg border text-[10px] sm:text-xs font-medium whitespace-nowrap">
-          {page + 1} / {totalPages || 1}
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          disabled={page + 1 >= totalPages} 
-          onClick={() => setPage(p => p + 1)}
-          className="hover:bg-blue-50 hover:border-blue-300 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3"
-        >
-          <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
-        </Button>
-      </div>
-    </div>
-  </div>
-</CardContent>
+            </div>
+          </CardContent>
         </Card>
 
         {/* EmailModal */}
@@ -761,22 +782,41 @@ export default function ContactDetailPage() {
           multipleProducts={false}
         />
 
-        {/* View Message Dialog */}
+        {/* View Message Dialog - Dark Theme */}
         <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0 rounded-2xl border-0 shadow-2xl w-[95vw] sm:w-full">
-            <div className="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50">
+<DialogContent
+  className="max-w-2xl max-h-[85vh] overflow-y-auto p-0 rounded-2xl border border-white/10 shadow-2xl w-[95vw] sm:w-full bg-[#0E223B]
+  [&>button]:!text-white
+  [&>button]:!opacity-100
+  [&>button]:!bg-transparent
+  [&>button]:!border-0
+  [&>button]:!outline-none
+  [&>button]:!ring-0
+  [&>button]:!shadow-none
+  [&>button:hover]:!bg-transparent
+  [&>button:hover]:!text-white
+  [&>button:hover]:!border-0
+  [&>button:focus]:!bg-transparent
+  [&>button:focus]:!text-white
+  [&>button:focus]:!border-0
+  [&>button:focus]:!outline-none
+  [&>button:focus]:!ring-0
+  [&>button:focus-visible]:!border-0
+  [&>button:focus-visible]:!outline-none
+  [&>button:focus-visible]:!ring-0"
+>       <div className="p-4 sm:p-6 border-b border-white/10 bg-gradient-to-r from-[#8EE147]/10 via-[#6EC035]/5 to-[#5AA82E]/5">
               <DialogHeader>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
                   <div>
-                    <DialogTitle className="text-base sm:text-lg md:text-xl font-bold flex items-center gap-2 text-gray-800">
-                      <div className="p-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg">
-                        <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                    <DialogTitle className="text-base sm:text-lg md:text-xl font-bold flex items-center gap-2 text-white">
+                      <div className="p-1 bg-gradient-to-r from-[#8EE147] to-[#6EC035] rounded-lg">
+                        <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#0E223B]" />
                       </div>
                       Email Details
                     </DialogTitle>
-                    <DialogDescription className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1.5 text-xs sm:text-sm">
-                      <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-500" />
-                      From: <span className="font-medium text-gray-700 truncate max-w-[150px] sm:max-w-none">{selectedMessage?.email || selectedMessage?.from_email || 'Unknown'}</span>
+                    <DialogDescription className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1.5 text-xs sm:text-sm text-slate-400">
+                      <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147]" />
+                      From: <span className="font-medium text-white truncate max-w-[150px] sm:max-w-none">{selectedMessage?.email || selectedMessage?.from_email || 'Unknown'}</span>
                     </DialogDescription>
                   </div>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -788,66 +828,68 @@ export default function ContactDetailPage() {
             </div>
 
             <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground bg-gray-50 p-1.5 sm:p-2 rounded-lg">
-                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-500" />
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-slate-400 bg-white/5 p-1.5 sm:p-2 rounded-lg border border-white/5">
+                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147]" />
                 {formatDate(selectedMessage?.reply_date || selectedMessage?.responded_at || selectedMessage?.sent_at)}
               </div>
 
               {selectedMessage?.subject && (
                 <div className="space-y-1 sm:space-y-1.5">
-                  <h4 className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
-                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-500" />
+                  <h4 className="text-[10px] sm:text-xs font-semibold text-[#8EE147]/70 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
+                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147]" />
                     Subject
                   </h4>
-                  <p className="text-xs sm:text-sm font-medium text-gray-800 bg-gray-50 p-2 sm:p-3 rounded-xl border border-gray-100 break-words">
+                  <p className="text-xs sm:text-sm font-medium text-white bg-white/5 p-2 sm:p-3 rounded-xl border border-white/10 break-words">
                     {selectedMessage.subject || '-'}
                   </p>
                 </div>
               )}
 
               <div className="space-y-1 sm:space-y-1.5">
-                <h4 className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
-                  <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-500" />
+                <h4 className="text-[10px] sm:text-xs font-semibold text-[#8EE147]/70 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
+                  <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147]" />
                   Message
                 </h4>
-                <div className="p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-100 min-h-[100px] sm:min-h-[120px] max-h-[200px] sm:max-h-[300px] overflow-y-auto">
-                  <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap break-words leading-relaxed">
+                <div className="p-3 sm:p-4 bg-white/5 rounded-xl border border-white/10 min-h-[100px] sm:min-h-[120px] max-h-[200px] sm:max-h-[300px] overflow-y-auto">
+                  <p className="text-xs sm:text-sm text-slate-300 whitespace-pre-wrap break-words leading-relaxed">
                     {selectedMessage?.message || 'No message content'}
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2 sm:pt-4 border-t border-gray-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2 sm:pt-4 border-t border-white/10">
                 <div className="space-y-0.5 sm:space-y-1">
-                  <p className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1 sm:gap-1.5">
-                    <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-blue-500" />
+                  <p className="text-[10px] sm:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider flex items-center gap-1 sm:gap-1.5">
+                    <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
                     Template
                   </p>
-                  <p className="text-xs sm:text-sm font-medium text-gray-800 bg-blue-50/50 p-1.5 sm:p-2 rounded-lg border border-blue-100 break-words whitespace-normal">
+                  <p className="text-xs sm:text-sm font-medium text-white bg-[#8EE147]/10 p-1.5 sm:p-2 rounded-lg border border-[#8EE147]/20 break-words whitespace-normal">
                     {selectedMessage?.template_used || '-'}
                   </p>
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
-                  <p className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1 sm:gap-1.5">
-                    <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-blue-500" />
+                  <p className="text-[10px] sm:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider flex items-center gap-1 sm:gap-1.5">
+                    <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
                     Product
                   </p>
-                  <p className="text-xs sm:text-sm font-medium text-gray-800 bg-indigo-50/50 p-1.5 sm:p-2 rounded-lg border border-indigo-100 break-words">
+                  <p className="text-xs sm:text-sm font-medium text-white bg-[#8EE147]/10 p-1.5 sm:p-2 rounded-lg border border-[#8EE147]/20 break-words">
                     {selectedMessage?.product_name || '-'}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 sm:p-6 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-blue-50/50 flex justify-end">
+
+
+              <div className="flex  sm:p-6  flex-col-reverse sm:flex-row items-center justify-end gap-2 sm:gap-3 pt-1">
               <Button 
-                variant="outline" 
-                onClick={() => setMessageDialogOpen(false)}
-                className="hover:bg-blue-50 hover:border-blue-300 transition-colors text-sm sm:text-base"
-              >
-                Close
-              </Button>
-            </div>
+  variant="outline" 
+    onClick={() => setMessageDialogOpen(false)}
+  className="bg-black text-white border-white/20  text-white hover:bg-white hover:text-[#0E223B] hover:border-white transition-all duration-200 bg-transparent h-8 sm:h-9 w-full sm:w-auto text-xs sm:text-sm"
+>
+  Cancel
+</Button>
+</div>
           </DialogContent>
         </Dialog>
       </div>

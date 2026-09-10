@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { API_URL } from './api';
-import logo from '@/asstes/globplselogo-removebg-preview.png';
+import logo from '@/asstes/globpulsenew.png';
 
 export function AppLayout() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
@@ -250,14 +250,14 @@ export function AppLayout() {
             {/* Right side - User actions */}
             <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
               {/* Theme Toggle */}
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setDark(d => !d)}
                 className="h-8 w-8 text-slate-400 hover:text-[#8EE147] hover:bg-[#8EE147]/10 transition-colors"
               >
                 {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
+              </Button> */}
 
               {/* User Profile Dropdown */}
               <DropdownMenu>

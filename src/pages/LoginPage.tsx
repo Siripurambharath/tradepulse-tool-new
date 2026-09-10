@@ -150,9 +150,9 @@ export default function LoginPage() {
     }
 
     try {
-            // const response = await fetch(`https://globpulsebita.gfeworldwide.com/api/seller/login`, {
+            const response = await fetch(`https://globpulsebita.gfeworldwide.com/api/seller/login`, {
 
-      const response = await fetch(`https://www.globpulse.com/api/seller/login`, {
+      // const response = await fetch(`https://www.globpulse.com/api/seller/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -129,30 +129,30 @@ export default function HistoryDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: '#0E223B' }}>
         <div className="relative">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-[#8EE147]/20 border-t-[#8EE147] rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <Package className="h-5 w-5 sm:h-6 sm:w-6 text-primary animate-pulse" />
+            <Package className="h-5 w-5 sm:h-6 sm:w-6 text-[#8EE147] animate-pulse" />
           </div>
         </div>
-        <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground animate-pulse">Loading details...</p>
+        <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-slate-400 animate-pulse">Loading details...</p>
       </div>
     );
   }
 
   if (error || !entry) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-        <div className="bg-red-50 dark:bg-red-900/20 rounded-full p-4 sm:p-6 mb-3 sm:mb-4">
-          <Package className="h-10 w-10 sm:h-12 sm:w-12 text-red-500" />
+      <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: '#0E223B' }}>
+        <div className="bg-red-500/10 rounded-full p-4 sm:p-6 mb-3 sm:mb-4">
+          <Package className="h-10 w-10 sm:h-12 sm:w-12 text-red-400" />
         </div>
-        <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-1 sm:mb-2">Entry Not Found</h3>
-        <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6 text-center">{error || "The history entry you're looking for doesn't exist."}</p>
+        <h3 className="text-lg sm:text-xl font-semibold text-white mb-1 sm:mb-2">Entry Not Found</h3>
+        <p className="text-xs sm:text-sm text-slate-400 mb-4 sm:mb-6 text-center">{error || "The history entry you're looking for doesn't exist."}</p>
         <Button
           variant="default"
           onClick={() => navigate('/history')}
-          className="gap-2 text-sm sm:text-base"
+          className="gap-2 text-sm sm:text-base bg-[#8EE147] text-[#0E223B] hover:bg-[#6EC035]"
         >
           <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           Back to History
@@ -172,349 +172,354 @@ export default function HistoryDetailPage() {
   const totalPages = pagination?.totalPages || Math.ceil((entry?.counts?.total || 0) / perPage) || 1;
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        className="gap-1.5 sm:gap-2 mb-4 sm:mb-5 md:mb-6 text-muted-foreground hover:text-foreground transition-colors group text-sm sm:text-base px-3 sm:px-4"
-        onClick={() => navigate('/history')}
-      >
-        <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:-translate-x-1" />
-        <span className="hidden xs:inline">Back to History</span>
-        <span className="xs:hidden">Back</span>
-      </Button>
+    <div className="min-h-screen p-3 sm:p-4 md:p-6" style={{ backgroundColor: '#0E223B' }}>
+      {/* Decorative gradient header */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8EE147] via-[#6EC035] to-[#5AA82E]" />
 
-      {/* Header Card */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 rounded-xl sm:rounded-2xl border border-primary/20 p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 md:mb-8">
-        <div className="absolute top-0 right-0 w-32 sm:w-48 md:w-64 h-32 sm:h-48 md:h-64 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-24 sm:w-36 md:w-48 h-24 sm:h-36 md:h-48 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-full blur-2xl"></div>
-        
-        <div className="relative">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-            <div className="flex-1 w-full">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent break-words">
-                  {entry.product}
-                </h1>
-                <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-primary/20 rounded-full text-[10px] sm:text-xs font-semibold text-primary border border-primary/30 whitespace-nowrap">
-                  <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 inline mr-0.5 sm:mr-1" />
-                  {pagination?.totalItems || counts.total} companies
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-muted-foreground">
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                  <span className="hidden xs:inline">
-                    {date.toLocaleDateString('en-US', { 
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })} at {date.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
-                  <span className="xs:hidden">
-                    {date.toLocaleDateString('en-US', { 
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
-                  </span>
-                </div>
-                {multipleProducts > 0 && (
-                  <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-blue-500/10 rounded-full border border-blue-500/20">
-                    <Package className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
-                    <span className="text-blue-600 dark:text-blue-400 font-medium text-xs sm:text-sm">{multipleProducts} products</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          className="gap-1.5 sm:gap-2 mb-4 sm:mb-5 md:mb-6 text-slate-400 hover:text-[#8EE147] transition-colors group text-sm sm:text-base px-3 sm:px-4"
+          onClick={() => navigate('/history')}
+        >
+          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:-translate-x-1" />
+          <span className="hidden xs:inline">Back to History</span>
+          <span className="xs:hidden">Back</span>
+        </Button>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
-        <Card className="p-3 sm:p-4 hover:shadow-lg transition-all hover:scale-[1.02] border-0 shadow-sm bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="p-1.5 sm:p-2 bg-blue-500/20 rounded-lg">
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-lg sm:text-2xl font-bold text-foreground">{counts.total}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">Total Companies</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-3 sm:p-4 hover:shadow-lg transition-all hover:scale-[1.02] border-0 shadow-sm bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="p-1.5 sm:p-2 bg-green-500/20 rounded-lg">
-                <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-lg sm:text-2xl font-bold text-foreground">{counts.emailSent}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">Emails Sent</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-3 sm:p-4 hover:shadow-lg transition-all hover:scale-[1.02] border-0 shadow-sm bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="p-1.5 sm:p-2 bg-purple-500/20 rounded-lg">
-                <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
-              </div>
-              <div>
-                <p className="text-lg sm:text-2xl font-bold text-foreground">{counts.replied}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">Replied ({responseRate}%)</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-3 sm:p-4 hover:shadow-lg transition-all hover:scale-[1.02] border-0 shadow-sm bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="p-1.5 sm:p-2 bg-amber-500/20 rounded-lg">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
-              </div>
-              <div>
-                <p className="text-lg sm:text-2xl font-bold text-foreground">{interestRate}%</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">Interest Rate</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Status Breakdown */}
-      <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-5 md:mb-6 p-3 sm:p-4 bg-muted/30 rounded-xl border border-border">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-green-500/20 rounded-full flex items-center gap-1 sm:gap-2">
-            <ThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
-            <span className="text-xs sm:text-sm font-medium">{counts.interested} Interested</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-red-500/20 rounded-full flex items-center gap-1 sm:gap-2">
-            <ThumbsDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
-            <span className="text-xs sm:text-sm font-medium">{counts.notInterested} Not Interested</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-500/20 rounded-full flex items-center gap-1 sm:gap-2">
-            <Minus className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
-            <span className="text-xs sm:text-sm font-medium">{counts.total - counts.replied} No Response</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Table */}
-      <div className="bg-card rounded-xl sm:rounded-2xl border border-border shadow-xl overflow-hidden">
-        {/* Search Bar */}
-        <div className="p-3 sm:p-4 border-b border-border bg-gradient-to-r from-primary/5 to-transparent">
+        {/* Header Card - Dark Theme */}
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 md:mb-8" style={{ background: 'linear-gradient(135deg, rgba(14,34,59,0.95) 0%, rgba(26,51,85,0.95) 100%)' }}>
+          <div className="absolute top-0 right-0 w-32 sm:w-48 md:w-64 h-32 sm:h-48 md:h-64 bg-[#8EE147]/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 sm:w-36 md:w-48 h-24 sm:h-36 md:h-48 bg-[#6EC035]/5 rounded-full blur-2xl"></div>
+          
           <div className="relative">
-            <Input
-              placeholder="Search companies..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 sm:pl-9 w-full border-gray-200 focus:border-primary rounded-lg bg-white/80 dark:bg-gray-800/80 text-sm sm:text-base h-9 sm:h-10"
-            />
-            <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-          </div>
-          <div className="mt-1.5 sm:mt-2 text-xs text-muted-foreground">
-            {pagination?.totalItems || companies.length} companies total
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex-1 w-full">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#8EE147] to-[#6EC035] bg-clip-text text-transparent break-words">
+                    {entry.product}
+                  </h1>
+                  <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-[#8EE147]/20 rounded-full text-[10px] sm:text-xs font-semibold text-[#8EE147] border border-[#8EE147]/30 whitespace-nowrap">
+                    <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 inline mr-0.5 sm:mr-1" />
+                    {pagination?.totalItems || counts.total} companies
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-slate-400">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-[#8EE147]" />
+                    <span className="hidden xs:inline">
+                      {date.toLocaleDateString('en-US', { 
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })} at {date.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                    <span className="xs:hidden">
+                      {date.toLocaleDateString('en-US', { 
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  {multipleProducts > 0 && (
+                    <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-blue-500/10 rounded-full border border-blue-500/20">
+                      <Package className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400" />
+                      <span className="text-blue-400 font-medium text-xs sm:text-sm">{multipleProducts} products</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs sm:text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <Building2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    <span className="hidden xs:inline">Company</span>
-                    <span className="xs:hidden">Co.</span>
-                  </div>
-                </th>
-                <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    <span className="hidden sm:inline">Product</span>
-                    <span className="sm:hidden">Prod</span>
-                  </div>
-                </th>
-                <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <User className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    <span className="hidden sm:inline">Contact</span>
-                    <span className="sm:hidden">Name</span>
-                  </div>
-                </th>
-                <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <AtSign className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    <span className="hidden md:inline">Email</span>
-                    <span className="md:hidden">@</span>
-                  </div>
-                </th>
-                <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <Send className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    <span className="hidden md:inline">Sent At</span>
-                    <span className="md:hidden">Sent</span>
-                  </div>
-                </th>
-                <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    <span className="hidden lg:inline">Template</span>
-                    <span className="lg:hidden">Tmpl</span>
-                  </div>
-                </th>
-                <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <MessageSquare className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    <span className="hidden md:inline">Response</span>
-                    <span className="md:hidden">Resp</span>
-                  </div>
-                </th>
-                <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCompanies.length > 0 ? (
-                filteredCompanies.map((c: Company, i: number) => (
-                  <tr 
-                    key={i} 
-                    className="border-b border-border/50 hover:bg-muted/20 transition-colors group"
-                  >
-                    <td className="p-2 sm:p-3 md:p-4">
-                      <div className="font-medium text-foreground flex items-center gap-1.5 sm:gap-2">
-                        <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center text-[10px] sm:text-xs font-bold text-primary flex-shrink-0">
-                          {c.companyName?.charAt(0) || 'C'}
+
+        {/* Stats Grid - Dark Theme */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
+          <Card className="p-3 sm:p-4 hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(14,34,59,0.95) 0%, rgba(26,51,85,0.95) 100%)' }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="p-1.5 sm:p-2 bg-[#8EE147]/20 rounded-lg border border-[#8EE147]/30">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-[#8EE147]" />
+                </div>
+                <div>
+                  <p className="text-lg sm:text-2xl font-bold text-white">{counts.total}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">Total Companies</p>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-3 sm:p-4 hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(14,34,59,0.95) 0%, rgba(26,51,85,0.95) 100%)' }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="p-1.5 sm:p-2 bg-[#8EE147]/20 rounded-lg border border-[#8EE147]/30">
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-[#8EE147]" />
+                </div>
+                <div>
+                  <p className="text-lg sm:text-2xl font-bold text-white">{counts.emailSent}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">Emails Sent</p>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-3 sm:p-4 hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(14,34,59,0.95) 0%, rgba(26,51,85,0.95) 100%)' }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="p-1.5 sm:p-2 bg-purple-500/20 rounded-lg border border-purple-500/30">
+                  <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-lg sm:text-2xl font-bold text-white">{counts.replied}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">Replied ({responseRate}%)</p>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-3 sm:p-4 hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(14,34,59,0.95) 0%, rgba(26,51,85,0.95) 100%)' }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="p-1.5 sm:p-2 bg-[#8EE147]/20 rounded-lg border border-[#8EE147]/30">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[#8EE147]" />
+                </div>
+                <div>
+                  <p className="text-lg sm:text-2xl font-bold text-white">{interestRate}%</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">Interest Rate</p>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Status Breakdown - Dark Theme */}
+        <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-5 md:mb-6 p-3 sm:p-4 bg-[#0E223B]/50 rounded-xl border border-white/10">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-[#8EE147]/20 rounded-full flex items-center gap-1 sm:gap-2 border border-[#8EE147]/30">
+              <ThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 text-[#8EE147]" />
+              <span className="text-xs sm:text-sm font-medium text-white">{counts.interested} Interested</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-red-500/20 rounded-full flex items-center gap-1 sm:gap-2 border border-red-500/30">
+              <ThumbsDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-400" />
+              <span className="text-xs sm:text-sm font-medium text-white">{counts.notInterested} Not Interested</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-500/20 rounded-full flex items-center gap-1 sm:gap-2 border border-gray-500/30">
+              <Minus className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
+              <span className="text-xs sm:text-sm font-medium text-white">{counts.total - counts.replied} No Response</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Table - Dark Theme */}
+        <div className="bg-[#0E223B]/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white/10 shadow-xl overflow-hidden">
+          {/* Search Bar */}
+          <div className="p-3 sm:p-4 border-b border-white/10 bg-gradient-to-r from-[#8EE147]/5 to-transparent">
+            <div className="relative">
+              <Input
+                placeholder="Search companies..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 sm:pl-9 w-full border-white/10 focus:border-[#8EE147] rounded-lg bg-white/5 text-white placeholder:text-slate-500 text-sm sm:text-base h-9 sm:h-10"
+              />
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" />
+            </div>
+            <div className="mt-1.5 sm:mt-2 text-xs text-slate-400">
+              {pagination?.totalItems || companies.length} companies total
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-white/10 bg-[#8EE147]/5">
+                  <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Building2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
+                      <span className="hidden xs:inline">Company</span>
+                      <span className="xs:hidden">Co.</span>
+                    </div>
+                  </th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
+                      <span className="hidden sm:inline">Product</span>
+                      <span className="sm:hidden">Prod</span>
+                    </div>
+                  </th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
+                      <span className="hidden sm:inline">Contact</span>
+                      <span className="sm:hidden">Name</span>
+                    </div>
+                  </th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <AtSign className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
+                      <span className="hidden md:inline">Email</span>
+                      <span className="md:hidden">@</span>
+                    </div>
+                  </th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Send className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
+                      <span className="hidden md:inline">Sent At</span>
+                      <span className="md:hidden">Sent</span>
+                    </div>
+                  </th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
+                      <span className="hidden lg:inline">Template</span>
+                      <span className="lg:hidden">Tmpl</span>
+                    </div>
+                  </th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <MessageSquare className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
+                      <span className="hidden md:inline">Response</span>
+                      <span className="md:hidden">Resp</span>
+                    </div>
+                  </th>
+                  <th className="p-2 sm:p-3 md:p-4 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCompanies.length > 0 ? (
+                  filteredCompanies.map((c: Company, i: number) => (
+                    <tr 
+                      key={i} 
+                      className="border-b border-white/5 hover:bg-[#8EE147]/5 transition-colors group"
+                    >
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <div className="font-medium text-white flex items-center gap-1.5 sm:gap-2">
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-[#8EE147]/20 to-[#6EC035]/20 flex items-center justify-center text-[10px] sm:text-xs font-bold text-[#8EE147] flex-shrink-0">
+                            {c.companyName?.charAt(0) || 'C'}
+                          </div>
+                          <span className="text-xs sm:text-sm truncate max-w-[60px] sm:max-w-[100px] md:max-w-[150px]">
+                            {c.companyName}
+                          </span>
                         </div>
-                        <span className="text-xs sm:text-sm truncate max-w-[60px] sm:max-w-[100px] md:max-w-[150px]">
-                          {c.companyName}
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <span className="text-xs sm:text-sm text-slate-300 truncate max-w-[60px] sm:max-w-[100px] block">
+                          {c.product || '-'}
                         </span>
-                      </div>
-                    </td>
-                    <td className="p-2 sm:p-3 md:p-4">
-                      <span className="text-xs sm:text-sm truncate max-w-[60px] sm:max-w-[100px] block">
-                        {c.product || '-'}
-                      </span>
-                    </td>
-                    <td className="p-2 sm:p-3 md:p-4 text-muted-foreground text-xs sm:text-sm truncate max-w-[60px] sm:max-w-[100px]">
-                      {c.contactName || '-'}
-                    </td>
-                    <td className="p-2 sm:p-3 md:p-4">
-                      <a href={`mailto:${c.email}`} className="text-primary hover:underline text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[120px] md:max-w-[180px] block">
-                        {c.email}
-                      </a>
-                    </td>
-                    <td className="p-2 sm:p-3 md:p-4 text-muted-foreground">
-                      {c.sentAt ? (
-                        <div className="flex items-center gap-0.5 sm:gap-1">
-                          <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                          <span className="text-[10px] sm:text-xs hidden xs:inline">
-                            {new Date(c.sentAt).toLocaleDateString()}
-                          </span>
-                          <span className="text-[10px] xs:hidden">
-                            {new Date(c.sentAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                          </span>
-                        </div>
-                      ) : '-'}
-                    </td>
-                    <td className="p-2 sm:p-3 md:p-4">
-                      <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-muted rounded text-[10px] sm:text-xs truncate max-w-[60px] sm:max-w-[100px] block">
-                        {c.templateUsed || '-'}
-                      </span>
-                    </td>
-                    <td className="p-2 sm:p-3 md:p-4">
-                      {c.respondedAt ? (
-                        <div>
-                          <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-muted-foreground">
-                            <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                            <span className="hidden xs:inline">
-                              {new Date(c.respondedAt).toLocaleString()}
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4 text-slate-400 text-xs sm:text-sm truncate max-w-[60px] sm:max-w-[100px]">
+                        {c.contactName || '-'}
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <a href={`mailto:${c.email}`} className="text-[#8EE147] hover:text-[#6EC035] hover:underline text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[120px] md:max-w-[180px] block">
+                          {c.email}
+                        </a>
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4 text-slate-400">
+                        {c.sentAt ? (
+                          <div className="flex items-center gap-0.5 sm:gap-1">
+                            <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0 text-[#8EE147]" />
+                            <span className="text-[10px] sm:text-xs hidden xs:inline">
+                              {new Date(c.sentAt).toLocaleDateString()}
                             </span>
-                            <span className="xs:hidden">
-                              {new Date(c.respondedAt).toLocaleDateString()}
+                            <span className="text-[10px] xs:hidden">
+                              {new Date(c.sentAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                             </span>
                           </div>
-                          {c.message && (
-                            <p className="text-[10px] sm:text-xs text-foreground mt-0.5 sm:mt-1 max-w-[100px] sm:max-w-[150px] md:max-w-[200px] bg-muted/50 p-1 sm:p-2 rounded-lg border border-border truncate">
-                              "{c.message}"
-                            </p>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground text-[10px] sm:text-xs">No response</span>
-                      )}
-                    </td>
-                    <td className="p-2 sm:p-3 md:p-4">
-                      <StatusBadge status={c.status} />
+                        ) : '-'}
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white/5 rounded text-[10px] sm:text-xs text-slate-300 truncate max-w-[60px] sm:max-w-[100px] block border border-white/5">
+                          {c.templateUsed || '-'}
+                        </span>
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4">
+                        {c.respondedAt ? (
+                          <div>
+                            <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-slate-400">
+                              <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0 text-[#8EE147]" />
+                              <span className="hidden xs:inline">
+                                {new Date(c.respondedAt).toLocaleString()}
+                              </span>
+                              <span className="xs:hidden">
+                                {new Date(c.respondedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {c.message && (
+                              <p className="text-[10px] sm:text-xs text-slate-300 mt-0.5 sm:mt-1 max-w-[100px] sm:max-w-[150px] md:max-w-[200px] bg-white/5 p-1 sm:p-2 rounded-lg border border-white/5 truncate">
+                                "{c.message}"
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-slate-500 text-[10px] sm:text-xs">No response</span>
+                        )}
+                      </td>
+                      <td className="p-2 sm:p-3 md:p-4">
+                        <StatusBadge status={c.status} />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="text-center py-8 sm:py-10 md:py-12 text-slate-400">
+                      <div className="flex flex-col items-center gap-2 sm:gap-3">
+                        <Building2 className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-slate-400/20" />
+                        <p className="text-xs sm:text-sm">No companies found</p>
+                      </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={8} className="text-center py-8 sm:py-10 md:py-12 text-muted-foreground">
-                    <div className="flex flex-col items-center gap-2 sm:gap-3">
-                      <Building2 className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-muted-foreground/20" />
-                      <p className="text-xs sm:text-sm">No companies found</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination Footer */}
-        {pagination && pagination.totalPages > 0 && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-border bg-muted/30">
-            <div className="text-[10px] sm:text-sm text-muted-foreground">
-              Showing <span className="font-medium text-foreground">{page * perPage + 1}</span> -{' '}
-              <span className="font-medium text-foreground">{Math.min((page + 1) * perPage, pagination.totalItems)}</span> of{' '}
-              <span className="font-medium text-foreground">{pagination.totalItems}</span> companies
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                disabled={page === 0} 
-                onClick={() => setPage(p => p - 1)}
-                className="hover:bg-primary/10 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3"
-              >
-                <ChevronLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-              </Button>
-              <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-card rounded-lg border text-[10px] sm:text-xs md:text-sm font-medium">
-                {page + 1} / {pagination.totalPages || 1}
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                disabled={page + 1 >= (pagination?.totalPages || 1)} 
-                onClick={() => setPage(p => p + 1)}
-                className="hover:bg-primary/10 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3"
-              >
-                <ChevronRightIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-              </Button>
-            </div>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {/* Pagination Footer - Dark Theme */}
+          {pagination && pagination.totalPages > 0 && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-white/10 bg-[#8EE147]/5">
+              <div className="text-[10px] sm:text-sm text-slate-400">
+                Showing <span className="font-medium text-white">{page * perPage + 1}</span> -{' '}
+                <span className="font-medium text-white">{Math.min((page + 1) * perPage, pagination.totalItems)}</span> of{' '}
+                <span className="font-medium text-white">{pagination.totalItems}</span> companies
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={page === 0} 
+                  onClick={() => setPage(p => p - 1)}
+                  className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 text-white border-white/20"
+                >
+                  <ChevronLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                </Button>
+                <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-white/5 rounded-lg border border-white/10 text-[10px] sm:text-xs md:text-sm font-medium text-white">
+                  {page + 1} / {pagination.totalPages || 1}
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={page + 1 >= (pagination?.totalPages || 1)} 
+                  onClick={() => setPage(p => p + 1)}
+                  className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 text-white border-white/20"
+                >
+                  <ChevronRightIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
