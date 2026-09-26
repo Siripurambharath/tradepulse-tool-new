@@ -38,6 +38,8 @@ import AdminTrackingPagIndetail from "./pages/AdminPage/AdminTrackingPagIndetail
 import { AdminSidebar } from "./components/AdminSidebar";
 import AdminUsersManagement from "./pages/AdminPage/AdminUsersManagement";
 import SsoCallback from "./pages/SsoCallback";
+import AdminDashboard from "./pages/AdminPage/AdminDashboard";
+import AdminBuyers from "./pages/AdminPage/AdminBuyers";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +100,10 @@ const App = () => (
               <Route path="/admin/trackingindetail" element={<AdminTrackingPagIndetail />} />
               <Route path="/admin/users" element={<AdminUsersManagement />} />    
                           <Route path="/admin/users/:sellerId" element={<AdminUsersManagement />} />  
+                                                    <Route path="/admindashboard" element={<AdminDashboard />} />  
+<Route path="/admin/buyers" element={<AdminBuyers />} />
+<Route path="/admin/buyers/:id" element={<AdminBuyers />} />
+
 
             </Route>
           </Route>

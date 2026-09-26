@@ -5,14 +5,14 @@
 
 // local host use
 
-// const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:5000";
 
 // const ACTIVITY_URL = "http://localhost:5001";
 
 
 // test server use
  const ACTIVITY_URL = "https://test-buyers.globpulse.com:9003";
-const API_URL = "https://test-buyers.globpulse.com:9005";
+// const API_URL = "https://test-buyers.globpulse.com:9005";
 
 // const API_URL = "https://test-buyers.globpulse.com";
 

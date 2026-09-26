@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 
 const navItems = [
+    { title: 'Dashboard', url: '/admindashboard', icon: BarChart3 },
   { title: 'Templates', url: '/templates', icon: FileText },
   { title: 'Users', url: '/adminusers', icon: Megaphone },
   { title: 'Single Adding Buyer', url: '/add-buyer', icon: UserPlus },

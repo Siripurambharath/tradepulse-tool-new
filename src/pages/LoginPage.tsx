@@ -23,7 +23,7 @@ export default function LoginPage() {
 
   if (token) {
     if (userRole === 'admin') {
-      return <Navigate to="/templates" replace />;
+      return <Navigate to="/admindashboard" replace />;
     }
     return <Navigate to="/search" replace />;
   }
@@ -141,7 +141,7 @@ export default function LoginPage() {
         localStorage.setItem("seller", JSON.stringify(adminData));
 
         setLoading(false);
-        navigate("/templates");
+        navigate("/admindashboard");
       } catch (error) {
         setLoading(false);
         setError("Login failed. Please try again.");
@@ -195,9 +195,13 @@ export default function LoginPage() {
       } else {
         setError(data.message || "Invalid Email or Password");
       }
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
-    } finally {
+    }catch (err) {
+  console.error("Login API Error:", err);
+  console.error("API URL:", "https://globpulsebita.gfeworldwide.com/api/seller/login");
+  console.error("Email:", email);
+
+  setError("Unable to connect to server. Please check the API.");
+} finally {
       setLoading(false);
     }
   };

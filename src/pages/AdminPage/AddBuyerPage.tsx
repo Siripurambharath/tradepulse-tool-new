@@ -256,7 +256,7 @@
             title: "Success",
             description: "Buyer added successfully!",
           });
-          navigate('/buyers');
+          navigate('/add-buyer');
         } else if (result.duplicate) {
           toast({
             title: "Duplicate Buyer",

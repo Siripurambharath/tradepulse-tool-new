@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
+import * as XLSX from "xlsx";
 import {
   Upload,
   Download,
@@ -161,111 +162,209 @@ const BuyerBulkUpload: React.FC = () => {
       setMessageType("error");
     }
   };
+const handleUpload = async () => {
+  if (!file) {
+    setMessage("❌ Please select an Excel file to upload");
+    setMessageType("error");
+    return;
+  }
 
-  const handleUpload = async () => {
-    if (!file) {
-      setMessage("❌ Please select an Excel file to upload");
+  try {
+    setLoading(true);
+    setMessage("");
+    setMessageType("");
+    setDuplicates([]);
+    setShowDuplicates(false);
+    setSchemaMismatch(null);
+    setUploadStats(null);
+
+    // Read Excel file
+    const arrayBuffer = await file.arrayBuffer();
+
+    const workbook = XLSX.read(arrayBuffer, {
+      type: "array"
+    });
+
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+
+    const rows = XLSX.utils.sheet_to_json(worksheet);
+
+    // Required fields
+    const requiredFields = [
+      "product",
+      "hsn_code",
+      "country",
+      "company_name",
+      "website",
+      "buyer_date",
+      "address",
+      "contact_numbers",
+      "emails"
+    ];
+
+    // Check missing fields row by row
+    const missingRows: string[] = [];
+
+    rows.forEach((row: any, index: number) => {
+      const missingFields = requiredFields.filter(
+        (field) => !String(row[field] || "").trim()
+      );
+
+      if (missingFields.length > 0) {
+        missingRows.push(
+          `Row ${index + 2}: ${missingFields.join(", ")}`
+        );
+      }
+    });
+
+    // Show alert and stop upload
+    if (missingRows.length > 0) {
+      alert(
+        `Missing required fields in Excel:\n\n${missingRows.join("\n")}`
+      );
+
+      setMessage("❌ Please fill all required fields in Excel");
       setMessageType("error");
+
       return;
     }
 
+    // Upload Excel
     const formData = new FormData();
     formData.append("excelFile", file);
 
-    try {
-      setLoading(true);
-      setMessage("");
-      setMessageType("");
-      setDuplicates([]);
-      setShowDuplicates(false);
-      setSchemaMismatch(null);
-      setUploadStats(null);
-
-      const res = await axios.post(
-        `${BASE_URL}/api/buyers/bulk-upload`,
-        formData,
-        { 
-          headers: { "Content-Type": "multipart/form-data" },
-          timeout: 60000
-        }
-      );
-
-      if (res.data.schemaMismatch) {
-        setSchemaMismatch({
-          message: res.data.message || "Schema mismatch detected",
-          missingColumns: res.data.missingColumns || [],
-          extraColumns: res.data.extraColumns || []
-        });
-        setMessage(`❌ ${res.data.message || "Schema mismatch detected"}`);
-        setMessageType("error");
-        return;
+    const res = await axios.post(
+      `${BASE_URL}/api/buyers/bulk-upload`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        },
+        timeout: 60000
       }
+    );
 
-      const insertedCount = res.data.inserted || 0;
-      const skippedCount = res.data.skipped || 0;
-      const duplicateEntries = res.data.duplicates || [];
-      const totalRows = res.data.totalRows || insertedCount + skippedCount + duplicateEntries.length;
-      
-      setUploadStats({
-        inserted: insertedCount,
-        skipped: skippedCount,
-        duplicates: duplicateEntries.length,
-        totalRows: totalRows
+    if (res.data.schemaMismatch) {
+      setSchemaMismatch({
+        message: res.data.message || "Schema mismatch detected",
+        missingColumns: res.data.missingColumns || [],
+        extraColumns: res.data.extraColumns || []
       });
-      
-      if (duplicateEntries.length > 0) {
-        setDuplicates(duplicateEntries);
+
+      setMessage(
+        `❌ ${res.data.message || "Schema mismatch detected"}`
+      );
+      setMessageType("error");
+
+      return;
+    }
+
+    const insertedCount = res.data.inserted || 0;
+    const skippedCount = res.data.skipped || 0;
+    const duplicateEntries = res.data.duplicates || [];
+
+    const totalRows =
+      res.data.totalRows ||
+      insertedCount + skippedCount + duplicateEntries.length;
+
+    setUploadStats({
+      inserted: insertedCount,
+      skipped: skippedCount,
+      duplicates: duplicateEntries.length,
+      totalRows: totalRows
+    });
+
+    if (duplicateEntries.length > 0) {
+      setDuplicates(duplicateEntries);
+    }
+
+    let successMessage = "";
+
+    if (insertedCount > 0) {
+      successMessage = `✅ Successfully uploaded ${insertedCount} buyer${
+        insertedCount > 1 ? "s" : ""
+      }!`;
+    } else if (
+      duplicateEntries.length > 0 &&
+      insertedCount === 0
+    ) {
+      successMessage = `⚠️ All ${
+        duplicateEntries.length
+      } record${
+        duplicateEntries.length > 1 ? "s" : ""
+      } were duplicates and skipped.`;
+    } else {
+      successMessage = "✅ Upload completed!";
+    }
+
+    if (
+      skippedCount > 0 &&
+      duplicateEntries.length === 0
+    ) {
+      successMessage += ` (${skippedCount} row${
+        skippedCount > 1 ? "s" : ""
+      } skipped due to errors)`;
+    }
+
+    if (duplicateEntries.length > 0) {
+      successMessage += ` ${
+        duplicateEntries.length
+      } duplicate(s) found and skipped.`;
+
+      setMessage(successMessage);
+      setMessageType("warning");
+    } else {
+      setMessage(successMessage);
+      setMessageType("success");
+
+      setTimeout(() => {
+        if (duplicateEntries.length === 0) {
+          resetForm();
+        }
+      }, 3000);
+    }
+
+  } catch (err: any) {
+    if (err.response?.data?.schemaMismatch) {
+      const errorData = err.response.data;
+      const missingColumns = errorData.missingColumns || [];
+
+      setSchemaMismatch({
+        message: errorData.message || "Schema mismatch detected",
+        missingColumns,
+        extraColumns: errorData.extraColumns || []
+      });
+
+      if (missingColumns.length > 0) {
+        alert(
+          `Required columns are missing in Excel:\n\n${missingColumns.join(
+            "\n"
+          )}`
+        );
+      } else {
+        alert(
+          errorData.message || "Excel validation failed"
+        );
       }
 
-      let successMessage = "";
-      if (insertedCount > 0) {
-        successMessage = `✅ Successfully uploaded ${insertedCount} buyer${insertedCount > 1 ? 's' : ''}!`;
-      } else if (duplicateEntries.length > 0 && insertedCount === 0) {
-        successMessage = `⚠️ All ${duplicateEntries.length} record${duplicateEntries.length > 1 ? 's' : ''} were duplicates and skipped.`;
-      } else {
-        successMessage = "✅ Upload completed!";
-      }
-      
-      if (skippedCount > 0 && duplicateEntries.length === 0) {
-        successMessage += ` (${skippedCount} row${skippedCount > 1 ? 's' : ''} skipped due to errors)`;
-      }
-      
-      if (duplicateEntries.length > 0) {
-        successMessage += ` ${duplicateEntries.length} duplicate(s) found and skipped.`;
-        setMessage(successMessage);
-        setMessageType("warning");
-      } else {
-        setMessage(successMessage);
-        setMessageType("success");
-        setTimeout(() => {
-          if (duplicateEntries.length === 0) {
-            resetForm();
-          }
-        }, 3000);
-      }
-      
-    } catch (err: any) {
-      if (err.response?.data?.schemaMismatch) {
-        const errorData = err.response.data;
-        setSchemaMismatch({
-          message: errorData.message || "Schema mismatch detected",
-          missingColumns: errorData.missingColumns || [],
-          extraColumns: errorData.extraColumns || []
-        });
-        setMessage(`❌ ${errorData.message || "Schema mismatch detected"}`);
-        setMessageType("error");
-      } else if (err.code === 'ECONNABORTED') {
-        setMessage("❌ Upload timed out. Please try with a smaller file.");
-        setMessageType("error");
-      } else {
-        const errorMsg = err.response?.data?.message || "Upload failed. Please try again.";
-        setMessage(`❌ ${errorMsg}`);
-        setMessageType("error");
-      }
-    } finally {
-      setLoading(false);
+      setMessage(
+        `❌ ${errorData.message || "Schema mismatch detected"}`
+      );
+      setMessageType("error");
+    } else {
+      setMessage(
+        `❌ ${
+          err.response?.data?.message ||
+          "Bulk upload failed"
+        }`
+      );
+      setMessageType("error");
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
