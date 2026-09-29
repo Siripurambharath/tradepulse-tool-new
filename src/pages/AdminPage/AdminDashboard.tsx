@@ -198,7 +198,7 @@ const AdminDashboard: React.FC = () => {
     const fetchLatestBuyers = async () => {
       setLatestLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/buyersnew?limit=5&offset=0`);   
+        const res = await fetch(`${API_BASE}/buyers/latest?limit=5`);   
              const json = await res.json();
         if (json.success) {
           setLatestBuyers(json.data || []);
