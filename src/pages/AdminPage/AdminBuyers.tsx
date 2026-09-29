@@ -19,8 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { API_URL } from '@/components/api';
 
 const API_BASE = API_URL;
-const PAGE_SIZE = 10;
-
+const PAGE_SIZE = 50;
 // ---------- Types ----------
 type ContactItem = { id?: number; contact_number: string };
 type EmailItem = { id?: number; email: string };
@@ -195,29 +194,33 @@ const AdminBuyers: React.FC = () => {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  // ---------- fetch list ----------
   const fetchBuyers = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      params.append('limit', String(PAGE_SIZE));
-      params.append('offset', String((page - 1) * PAGE_SIZE));
-      if (search) params.append('search', search);
+  setLoading(true);
+  setError(null);
+  try {
+    const params = new URLSearchParams();
+    params.append('limit', String(PAGE_SIZE));
+    params.append('offset', String((page - 1) * PAGE_SIZE));
+    if (search) params.append('search', search);
 
-      const res = await fetch(`${API_BASE}/buyersnew?${params.toString()}`);
-      const json = await res.json();
+    const res = await fetch(`${API_BASE}/buyersnew?${params.toString()}`);
+    const json = await res.json();
 
-      if (!json.success) throw new Error(json.error || 'Failed to load buyers');
+    if (!json.success) throw new Error(json.error || 'Failed to load buyers');
 
-      setBuyers(json.data || []);
-      setTotal(json.total ?? json.pagination?.total ?? 0);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
-    } finally {
-      setLoading(false);
+    setBuyers(json.data || []);
+
+    if (page === 1 && typeof json.total === 'number') {
+      setTotal(json.total);
+    } else if (typeof json.total === 'number' && json.total > 0) {
+      setTotal(json.total);
     }
-  }, [page, search]);
+  } catch (err: any) {
+    setError(err.message || 'Something went wrong');
+  } finally {
+    setLoading(false);
+  }
+}, [page, search]);
 
   useEffect(() => {
     fetchBuyers();
