@@ -141,7 +141,6 @@ const Field: React.FC<{ label: string; value: any; full?: boolean }> = ({
   </div>
 );
 
-// ---------- Input row ----------
 const Input: React.FC<{
   label: string;
   value: string;
@@ -157,7 +156,7 @@ const Input: React.FC<{
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full h-9 px-3 text-sm bg-[#0E223B] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30"
+      className="w-full h-9 px-3 text-sm bg-[#0E223B] border border-white/10 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30 [color-scheme:dark]"
     />
   </div>
 );

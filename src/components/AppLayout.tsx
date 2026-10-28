@@ -223,7 +223,7 @@ export function AppLayout() {
             {/* Left side - with sidebar trigger and search */}
             <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
               <div className="hidden md:flex items-center gap-3 flex-1">
-                <SidebarTrigger className="text-slate-400 hover:text-[#8EE147] transition-colors" />
+                {/* <SidebarTrigger className="text-slate-400 hover:text-[#8EE147] transition-colors" /> */}
                 <div className="relative flex-1 max-w-xl">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#8EE147' }} />
                   <Input
@@ -259,8 +259,7 @@ export function AppLayout() {
                 {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button> */}
 
-              {/* User Profile Dropdown */}
-              <DropdownMenu>
+            <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div className="flex items-center gap-1 sm:gap-2 cursor-pointer hover:opacity-80 transition-opacity">
                     <div 
@@ -287,13 +286,13 @@ export function AppLayout() {
                   
                   <DropdownMenuItem 
                     onClick={() => setIsPackageModalOpen(true)}
-                    className="cursor-pointer group transition-colors duration-200 hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10 text-slate-300 hover:text-[#8EE147]"
+                    className="cursor-pointer transition-colors duration-200 hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10"
                   >
                     <div className="flex items-center gap-2 w-full">
-                      <div className="p-1 rounded-md bg-[#8EE147]/10 group-hover:bg-[#8EE147]/20 transition-colors duration-200">
+                      <div className="p-1 rounded-md bg-[#8EE147]/10">
                         <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" style={{ color: '#8EE147' }} />
                       </div>
-                      <span className="text-xs sm:text-sm font-medium transition-colors duration-200">Package Details</span>
+                      <span className="text-xs sm:text-sm font-medium text-white">Package Details</span>
                     </div>
                   </DropdownMenuItem>
                   

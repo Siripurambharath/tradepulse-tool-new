@@ -2055,10 +2055,7 @@ export function EmailModal({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-1 text-xs text-slate-400 bg-white/5 px-2 py-1 rounded-lg border border-white/10">
-                <Sparkles className="h-3 w-3 text-[#8EE147]" />
-                <span>AI Powered</span>
-              </div>
+       
               {/* Close Button */}
               <button
                 onClick={handleClose}

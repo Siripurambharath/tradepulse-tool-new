@@ -149,19 +149,18 @@ export const AdminLayout = () => {
               </DropdownMenu>
             </div>
           </header>
-          
-          {/* Main content - DARK BACKGROUND */}
-          <main 
-            className="flex-1 overflow-auto pt-12 sm:pt-14 p-1.5 sm:p-3 md:p-4 lg:p-6 min-h-[calc(100vh-48px)] sm:min-h-[calc(100vh-56px)]"
-            style={{ 
-              backgroundColor: '#0E223B',
-              color: '#FFFFFF'
-            }}
-          >
-            <div className="max-w-full">
-              <Outlet />
-            </div>
-          </main>
+      {/* Main content - DARK BACKGROUND */}
+<main 
+  className="flex-1 overflow-auto mt-12 sm:mt-10 p-1.5 sm:p-3 md:p-4 lg:p-6"
+  style={{ 
+    backgroundColor: '#0E223B',
+    color: '#FFFFFF'
+  }}
+>
+  <div className="max-w-full">
+    <Outlet />
+  </div>
+</main>
         </div>
       </div>
     </SidebarProvider>

@@ -157,7 +157,7 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password }),  
       });
 
       const data = await response.json();
@@ -197,7 +197,7 @@ export default function LoginPage() {
       }
     }catch (err) {
   console.error("Login API Error:", err);
-  console.error("API URL:", "https://globpulsebita.gfeworldwide.com/api/seller/login");
+  // console.error("API URL:", "https://globpulsebita.gfeworldwide.com/api/seller/login");
   console.error("Email:", email);
 
   setError("Unable to connect to server. Please check the API.");

@@ -31,6 +31,7 @@ import {
   X,
   Eye,
   ArrowRight,
+  TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -124,6 +125,74 @@ const renderEmails = (emails: any): string => {
   return String(emails);
 };
 
+// ---------- Custom tooltip (always shows Buyers + Users) ----------
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: any[];
+  label?: string;
+};
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
+  if (!active || !payload || !payload.length) return null;
+
+  const buyers = payload.find((p) => p.dataKey === 'buyers')?.value ?? 0;
+  const users = payload.find((p) => p.dataKey === 'users')?.value ?? 0;
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#0E223B',
+        border: '1px solid rgba(142, 225, 71, 0.5)',
+        borderRadius: '12px',
+        padding: '10px 14px',
+        boxShadow: '0 8px 24px rgba(142, 225, 71, 0.25)',
+        minWidth: '140px',
+      }}
+    >
+      <p
+        style={{
+          color: '#8EE147',
+          fontWeight: 700,
+          fontSize: '13px',
+          marginBottom: '6px',
+        }}
+      >
+        {label}
+      </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+        <span
+          style={{
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            backgroundColor: '#8EE147',
+            display: 'inline-block',
+          }}
+        />
+        <span style={{ color: '#CBD5E1', fontSize: '12px' }}>Buyers:</span>
+        <span style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 700, marginLeft: 'auto' }}>
+          {Number(buyers).toLocaleString()}
+        </span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span
+          style={{
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            backgroundColor: '#5AA82E',
+            display: 'inline-block',
+          }}
+        />
+        <span style={{ color: '#CBD5E1', fontSize: '12px' }}>Users:</span>
+        <span style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 700, marginLeft: 'auto' }}>
+          {Number(users).toLocaleString()}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 // ---------- Component ----------
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -151,55 +220,77 @@ const AdminDashboard: React.FC = () => {
   // ---- Dropdown options ----
   const [products, setProducts] = useState<string[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
+  const [totalCountries, setTotalCountries] = useState<number>(0);
 
-  // ---------- filter options ----------
+  // ---------- products: fetch once ----------
   useEffect(() => {
-    const fetchFilters = async () => {
+    const fetchProducts = async () => {
       try {
-        const [prodRes, ctryRes] = await Promise.all([
-          fetch(`${API_BASE}/filters/products`),
-          fetch(`${API_BASE}/filters/buyer-countries`),
-        ]);
-        const prodJson = await prodRes.json();
-        const ctryJson = await ctryRes.json();
-
-        setProducts(Array.isArray(prodJson) ? prodJson.map((p: any) => p.product) : []);
-        setCountries(Array.isArray(ctryJson) ? ctryJson.map((c: any) => c.country) : []);
+        const res = await fetch(`${API_BASE}/filters/products`);
+        const json = await res.json();
+        setProducts(Array.isArray(json) ? json.map((p: any) => p.product) : []);
       } catch (err) {
-        console.error('Failed to load filter options', err);
+        console.error('Failed to load products', err);
       }
     };
-    fetchFilters();
+    fetchProducts();
   }, []);
 
-  // ---------- user stats ----------
-  const fetchUserStats = useCallback(async () => {
-    try {
-      const res = await fetch(`${API_BASE}/users/stats`);
-      const json = await res.json();
-      if (json.success) {
-        setUserStats({
-          total_users: json.total_users ?? 0,
-          email_sent_count: json.email_sent_count ?? 0,
-          email_config_count: json.email_config_count ?? 0,
-        });
-      }
-    } catch (err) {
-      console.error('Failed to load user stats', err);
-    }
-  }, []);
-
+  // ---------- countries: re-fetch when product / date filter changes ----------
   useEffect(() => {
-    fetchUserStats();
-  }, [fetchUserStats]);
+    const fetchCountries = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (productFilter && productFilter !== 'all') params.append('product', productFilter);
+        if (fromDate) params.append('from', fromDate);
+        if (toDate) params.append('to', toDate);
+
+        const res = await fetch(`${API_BASE}/filters/buyer-countries-admin?${params.toString()}`);
+        const json = await res.json();
+        const list = Array.isArray(json) ? json.map((c: any) => c.country) : [];
+        setCountries(list);
+        setTotalCountries(list.length);
+      } catch (err) {
+        console.error('Failed to load countries', err);
+      }
+    };
+    fetchCountries();
+  }, [productFilter, fromDate, toDate]);
+
+// ---------- user stats (re-fetch when date filter changes) ----------
+const fetchUserStats = useCallback(async () => {
+  try {
+    const params = new URLSearchParams();
+    if (fromDate) params.append('from', fromDate);
+    if (toDate) params.append('to', toDate);
+
+    const res = await fetch(`${API_BASE}/users/stats?${params.toString()}`);
+    const json = await res.json();
+    if (json.success) {
+      setUserStats({
+        total_users: json.total_users ?? 0,
+        email_sent_count: json.email_sent_count ?? 0,
+        email_config_count: json.email_config_count ?? 0,
+      });
+    }
+  } catch (err) {
+    console.error('Failed to load user stats', err);
+  }
+}, [fromDate, toDate]);
+
+useEffect(() => {
+  fetchUserStats();
+}, [fetchUserStats]);
+
+ 
 
   // ---------- latest 5 buyers ----------
   useEffect(() => {
     const fetchLatestBuyers = async () => {
       setLatestLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/buyers/latest?limit=5`);   
-             const json = await res.json();
+        const res = await fetch(`${API_BASE}/buyers/latest?limit=5`);
+        const json = await res.json();
         if (json.success) {
           setLatestBuyers(json.data || []);
         }
@@ -271,19 +362,19 @@ const AdminDashboard: React.FC = () => {
         title: 'Total Users',
         value: userStats.total_users.toLocaleString(),
         icon: Users,
-        onClick: () => navigate('/admin/users'),
+        onClick: () => navigate('/adminusers'),
       },
       {
         title: 'Email Sent',
         value: userStats.email_sent_count.toLocaleString(),
         icon: Mail,
-        onClick: () => navigate('/admin/users'),
+        onClick: () => navigate('/adminusers'),
       },
       {
         title: 'Email Configured',
         value: userStats.email_config_count.toLocaleString(),
         icon: Settings2,
-        onClick: () => navigate('/admin/users'),
+        onClick: () => navigate('/adminusers'),
       },
     ];
   }, [userStats, navigate]);
@@ -316,21 +407,44 @@ const AdminDashboard: React.FC = () => {
     () => (analytics?.monthly || []).reduce((s, d) => s + (d.users || 0), 0),
     [analytics]
   );
-  const avgBuyersPerMonth = useMemo(() => {
-    const arr = analytics?.monthly || [];
-    return arr.length ? Math.round(totalBuyers / arr.length) : 0;
-  }, [analytics, totalBuyers]);
 
-  const tooltipStyle = {
-    backgroundColor: '#8EE147',
-    border: '1px solid #6EC035',
-    borderRadius: '12px',
-    color: '#000000',
-    fontSize: '12px',
-    fontWeight: 600,
-    padding: '8px 12px',
-    boxShadow: '0 8px 24px rgba(142, 225, 71, 0.35)',
-  };
+  // Avg over ACTIVE months only (months with buyers > 0)
+  const avgBuyersPerMonth = useMemo(() => {
+    const active = (analytics?.monthly || []).filter((m) => (m.buyers || 0) > 0);
+    if (!active.length) return 0;
+    const total = active.reduce((s, m) => s + (m.buyers || 0), 0);
+    return Math.round(total / active.length);
+  }, [analytics]);
+
+  // Peak month (highest buyers)
+  const peakMonth = useMemo(() => {
+    const arr = analytics?.monthly || [];
+    if (!arr.length) return null;
+    return arr.reduce(
+      (best, m) => ((m.buyers || 0) > (best?.buyers || 0) ? m : best),
+      arr[0]
+    );
+  }, [analytics]);
+
+  // Max buyer value (used to decide whether log scale is needed)
+  const maxBuyers = useMemo(() => {
+    return (analytics?.monthly || []).reduce(
+      (m, d) => Math.max(m, d.buyers || 0),
+      0
+    );
+  }, [analytics]);
+
+  // Min non-zero buyer value (to check if a huge gap exists)
+  const minNonZeroBuyers = useMemo(() => {
+    const nonZero = (analytics?.monthly || [])
+      .map((d) => d.buyers || 0)
+      .filter((v) => v > 0);
+    return nonZero.length ? Math.min(...nonZero) : 0;
+  }, [analytics]);
+
+  // Use log scale only if the range is extremely skewed
+  const useLogScale =
+    maxBuyers > 0 && minNonZeroBuyers > 0 && maxBuyers / minNonZeroBuyers >= 100;
 
   return (
     <div className="min-h-screen p-3 sm:p-4 md:p-6" style={{ backgroundColor: '#0E223B' }}>
@@ -363,51 +477,67 @@ const AdminDashboard: React.FC = () => {
               <span className="hidden sm:inline">Filters</span>
             </div>
 
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="h-9 px-2 text-xs bg-[#0E223B] border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30"
-              title="From date"
-            />
-            <span className="text-slate-500 text-xs">→</span>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="h-9 px-2 text-xs bg-[#0E223B] border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30"
-              title="To date"
-            />
+         <input
+  type="date"
+  value={fromDate}
+  onChange={(e) => setFromDate(e.target.value)}
+  className="h-9 px-2 text-xs bg-[#0E223B] border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30 [color-scheme:dark]"
+  title="From date"
+/>
+<span className="text-slate-500 text-xs">→</span>
+<input
+  type="date"
+  value={toDate}
+  onChange={(e) => setToDate(e.target.value)}
+  className="h-9 px-2 text-xs bg-[#0E223B] border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30 [color-scheme:dark]"
+  title="To date"
+/>
 
-            <Select value={productFilter} onValueChange={setProductFilter}>
-              <SelectTrigger className="w-[160px] h-9 text-xs bg-[#0E223B] border-white/10 text-white rounded-xl focus:ring-[#8EE147]/30">
-                <Package className="h-3.5 w-3.5 mr-2 text-[#8EE147]" />
-                <SelectValue placeholder="Product" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#0E223B] border-white/10 text-white max-h-[300px]">
-                <SelectItem value="all">All Products</SelectItem>
-                {products.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+       <Select value={productFilter} onValueChange={setProductFilter}>
+  <SelectTrigger
+    className={`w-[160px] h-9 text-xs bg-[#0E223B] text-white rounded-xl
+      focus:ring-0 focus:ring-offset-0 focus-visible:ring-0
+      ${
+        productFilter !== 'all'
+          ? 'border border-[#8EE147]/60 ring-1 ring-[#8EE147]/30'
+          : 'border border-white/10 ring-0'
+      }`}
+  >
+    <Package className="h-3.5 w-3.5 mr-2 text-[#8EE147]" />
+    <SelectValue placeholder="Product" />
+  </SelectTrigger>
+  <SelectContent className="bg-[#0E223B] border-white/10 text-white max-h-[300px]">
+    <SelectItem value="all">All Products</SelectItem>
+    {products.map((p) => (
+      <SelectItem key={p} value={p}>
+        {p}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
 
-            <Select value={countryFilter} onValueChange={setCountryFilter}>
-              <SelectTrigger className="w-[150px] h-9 text-xs bg-[#0E223B] border-white/10 text-white rounded-xl focus:ring-[#8EE147]/30">
-                <Globe className="h-3.5 w-3.5 mr-2 text-[#8EE147]" />
-                <SelectValue placeholder="Country" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#0E223B] border-white/10 text-white max-h-[300px]">
-                <SelectItem value="all">All Countries</SelectItem>
-                {countries.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <Select value={countryFilter} onValueChange={setCountryFilter}>
+  <SelectTrigger
+    className={`w-[150px] h-9 text-xs bg-[#0E223B] text-white rounded-xl
+      focus:ring-0 focus:ring-offset-0 focus-visible:ring-0
+      ${
+        countryFilter !== 'all'
+          ? 'border border-[#8EE147]/60 ring-1 ring-[#8EE147]/30'
+          : 'border border-white/10 ring-0'
+      }`}
+  >
+    <Globe className="h-3.5 w-3.5 mr-2 text-[#8EE147]" />
+    <SelectValue placeholder="Country" />
+  </SelectTrigger>
+  <SelectContent className="bg-[#0E223B] border-white/10 text-white max-h-[300px]">
+    <SelectItem value="all">All Countries</SelectItem>
+    {countries.map((c) => (
+      <SelectItem key={c} value={c}>
+        {c}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
 
             <Button
               type="button"
@@ -493,7 +623,7 @@ const AdminDashboard: React.FC = () => {
           <CardWrapper>
             <CardHeader className="flex flex-row items-center justify-between pb-2 p-4 sm:p-5">
               <CardTitle className="text-xs sm:text-sm font-medium text-slate-300">
-                Avg. Buyers / Month
+                Avg. Buyers / Active Month
               </CardTitle>
               <div className="p-2 rounded-lg bg-[#8EE147]/10">
                 <PieIcon className="h-4 w-4 sm:h-5 sm:w-5 text-[#8EE147]" />
@@ -501,8 +631,11 @@ const AdminDashboard: React.FC = () => {
             </CardHeader>
             <CardContent className="p-4 sm:p-5 pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-white">
-                {loading ? '—' : (analytics?.totals.avg_buyers_per_month ?? 0).toLocaleString()}
+                {loading ? '—' : avgBuyersPerMonth.toLocaleString()}
               </div>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-1">
+                Excludes months with 0 buyers
+              </p>
             </CardContent>
           </CardWrapper>
 
@@ -517,8 +650,11 @@ const AdminDashboard: React.FC = () => {
             </CardHeader>
             <CardContent className="p-4 sm:p-5 pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-white">
-                {loading ? '—' : countryShare.length}
+                {loading ? '—' : totalCountries.toLocaleString()}
               </div>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-1">
+                Matches current filter
+              </p>
             </CardContent>
           </CardWrapper>
         </div>
@@ -530,6 +666,11 @@ const AdminDashboard: React.FC = () => {
               <CardTitle className="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-[#8EE147]" />
                 Monthly Buyers & Users
+                {useLogScale && (
+                  <span className="ml-2 text-[10px] font-normal px-2 py-0.5 rounded-full bg-[#8EE147]/15 text-[#8EE147] border border-[#8EE147]/30">
+                    log scale
+                  </span>
+                )}
               </CardTitle>
               <CardDescription className="text-xs text-slate-400">
                 {productFilter === 'all' ? 'All products' : productFilter} ·{' '}
@@ -538,6 +679,13 @@ const AdminDashboard: React.FC = () => {
                   ? ` · ${fromDate || '…'} → ${toDate || '…'}`
                   : ' · All time'}
               </CardDescription>
+              {peakMonth && peakMonth.buyers > 0 && maxBuyers > 0 && minNonZeroBuyers > 0 && maxBuyers / minNonZeroBuyers >= 100 && (
+                <p className="text-[11px] text-amber-300/90 mt-2 flex items-center gap-1.5">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  Data is heavily skewed — {peakMonth.month} accounts for{' '}
+                  {((peakMonth.buyers / totalBuyers) * 100).toFixed(1)}% of all buyers.
+                </p>
+              )}
             </CardHeader>
             <CardContent className="p-4 sm:p-5">
               {loading ? (
@@ -557,13 +705,24 @@ const AdminDashboard: React.FC = () => {
                       axisLine={false}
                       tickLine={false}
                     />
-                    <YAxis
-                      tick={{ fill: '#94A3B8', fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
+                    {useLogScale ? (
+                      <YAxis
+                        scale="log"
+                        domain={[1, 'auto']}
+                        allowDataOverflow
+                        tick={{ fill: '#94A3B8', fontSize: 11 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                    ) : (
+                      <YAxis
+                        tick={{ fill: '#94A3B8', fontSize: 11 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                    )}
                     <Tooltip
-                      contentStyle={tooltipStyle}
+                      content={<CustomTooltip />}
                       cursor={{ fill: 'rgba(142,225,71,0.06)' }}
                     />
                     <Legend wrapperStyle={{ fontSize: 12, color: '#94A3B8' }} />
@@ -616,7 +775,18 @@ const AdminDashboard: React.FC = () => {
                           />
                         ))}
                       </Pie>
-                      <Tooltip contentStyle={tooltipStyle} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#0E223B',
+                          border: '1px solid rgba(142, 225, 71, 0.5)',
+                          borderRadius: '12px',
+                          color: '#FFFFFF',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          padding: '8px 12px',
+                          boxShadow: '0 8px 24px rgba(142, 225, 71, 0.25)',
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
 
@@ -684,7 +854,16 @@ const AdminDashboard: React.FC = () => {
                       width={100}
                     />
                     <Tooltip
-                      contentStyle={tooltipStyle}
+                      contentStyle={{
+                        backgroundColor: '#0E223B',
+                        border: '1px solid rgba(142, 225, 71, 0.5)',
+                        borderRadius: '12px',
+                        color: '#FFFFFF',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        padding: '8px 12px',
+                        boxShadow: '0 8px 24px rgba(142, 225, 71, 0.25)',
+                      }}
                       cursor={{ fill: 'rgba(142,225,71,0.06)' }}
                     />
                     <Bar dataKey="value" fill="#6EC035" radius={[0, 6, 6, 0]} name="Buyers" />
@@ -715,10 +894,23 @@ const AdminDashboard: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">Avg. Buyers / Month</p>
+                <p className="text-xs text-slate-400">Avg. Buyers / Active Month</p>
                 <p className="text-xl sm:text-2xl font-bold text-white mt-1">
                   {loading ? '—' : avgBuyersPerMonth.toLocaleString()}
                 </p>
+              </div>
+              <div className="pt-3 border-t border-white/10">
+                <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-[#8EE147]" />
+                  Peak Month
+                </p>
+                {loading || !peakMonth || peakMonth.buyers === 0 ? (
+                  <p className="text-sm text-slate-500 mt-1">—</p>
+                ) : (
+                  <p className="text-xl sm:text-2xl font-bold text-[#8EE147] mt-1">
+                    {peakMonth.month} · {peakMonth.buyers.toLocaleString()}
+                  </p>
+                )}
               </div>
             </CardContent>
           </CardWrapper>
