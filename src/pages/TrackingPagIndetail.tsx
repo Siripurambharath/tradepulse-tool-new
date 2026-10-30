@@ -311,6 +311,22 @@ export default function TrackingDetailPage() {
     setMessageDialogOpen(true);
   };
 
+
+
+
+  const formatPhoneNumbers = (contacts) => {
+  if (!contacts) return "-";
+
+  return String(contacts)
+    .split(",")
+    .map((number) => {
+      const phone = number.trim();
+      return phone.replace(/^(\+?91)\s*(\d{10})$/, "$1 $2");
+    })
+    .join(", ");
+};
+
+
   const getMessagePreview = (message: string) => {
     if (!message) return 'No message content';
     return message.length > 100 ? message.substring(0, 100) + '...' : message;
@@ -489,10 +505,18 @@ export default function TrackingDetailPage() {
                 <div className="p-1.5 sm:p-2 md:p-2.5 bg-[#8EE147]/10 rounded-xl border border-[#8EE147]/20 group-hover:shadow-md transition-shadow flex-shrink-0">
                   <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" style={{ color: '#8EE147' }} />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">Contact</p>
-                  <p className="text-xs sm:text-sm font-semibold text-white truncate">{buyerInfo.contact_name}</p>
-                </div>
+            <div className="min-w-0">
+  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">
+    Contact
+  </p>
+
+  <p
+    className="text-xs sm:text-sm font-semibold text-white truncate"
+    title={formatPhoneNumbers(buyerInfo.contact_name)}
+  >
+    {formatPhoneNumbers(buyerInfo.contact_name)}
+  </p>
+</div>
               </div>
               <div className="flex items-start gap-2 sm:gap-3 group">
                 <div className="p-1.5 sm:p-2 md:p-2.5 bg-[#8EE147]/10 rounded-xl border border-[#8EE147]/20 group-hover:shadow-md transition-shadow flex-shrink-0">
@@ -554,19 +578,19 @@ export default function TrackingDetailPage() {
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-[#8EE147]/10 to-[#6EC035]/10 border-b border-white/10">
-                    <TableHead className="font-semibold text-slate-300 w-8 sm:w-12 text-[10px] sm:text-xs">#</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Type</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Status</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">HSN</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Subject</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hidden md:table-cell">Message</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hidden lg:table-cell">Template</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hidden sm:table-cell">Date</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs text-center whitespace-nowrap">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
+            <TableHeader>
+  <TableRow className="bg-gradient-to-r from-[#8EE147]/10 to-[#6EC035]/10 border-b border-white/10 hover:!bg-transparent data-[state=selected]:!bg-transparent">
+    <TableHead className="font-semibold text-slate-300 w-8 sm:w-12 text-[10px] sm:text-xs">#</TableHead>
+    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Type</TableHead>
+    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Status</TableHead>
+    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">HSN</TableHead>
+    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Subject</TableHead>
+    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hidden md:table-cell">Message</TableHead>
+    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hidden lg:table-cell">Template</TableHead>
+    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hidden sm:table-cell">Date</TableHead>
+    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs text-center whitespace-nowrap">Action</TableHead>
+  </TableRow>
+</TableHeader>
                 <TableBody>
                   {filteredCommunications.length > 0 ? (
                     filteredCommunications.map((comm, index) => (
@@ -577,14 +601,14 @@ export default function TrackingDetailPage() {
 >
                         <TableCell className="font-medium text-slate-400 text-xs sm:text-sm">{index + 1}</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            <div className="p-1 bg-[#8EE147]/10 rounded-lg border border-[#8EE147]/20">
-                              {getTypeIcon(comm)}
-                            </div>
-                            <span className="text-[10px] sm:text-xs font-medium text-slate-400 truncate max-w-[40px] sm:max-w-none">
-                              {comm.display_status}
-                            </span>
-                          </div>
+                        <div className="flex items-center gap-1 sm:gap-2 pointer-events-none select-none">
+  <div className="p-1 bg-[#8EE147]/10 rounded-lg border border-[#8EE147]/20">
+    {getTypeIcon(comm)}
+  </div>
+  <span className="text-[10px] sm:text-xs font-medium text-slate-400 truncate max-w-[40px] sm:max-w-none">
+    {comm.display_status}
+  </span>
+</div>
                         </TableCell>
                         <TableCell>{getStatusBadge(comm)}</TableCell>
                         <TableCell>
@@ -657,23 +681,7 @@ export default function TrackingDetailPage() {
                 <p className="text-[10px] sm:text-sm text-slate-400">
                   Showing <span className="font-semibold text-white">{filteredCommunications.length}</span> of {communications.length}
                 </p>
-                <div className="flex flex-wrap gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
-                  <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 text-slate-300">
-                    <Send className="h-3 w-3 sm:h-3.5 sm:w-3.5" style={{ color: '#8EE147' }} />
-                    <span className="hidden xs:inline">Sent:</span>
-                    <span className="font-semibold text-white">{summary?.sent || 0}</span>
-                  </span>
-                  <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 text-slate-300">
-                    <Reply className="h-3 w-3 sm:h-3.5 sm:w-3.5" style={{ color: '#8EE147' }} />
-                    <span className="hidden xs:inline">Replied:</span>
-                    <span className="font-semibold text-white">{summary?.replied || 0}</span>
-                  </span>
-                  <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 text-slate-300">
-                    <ThumbsUp className="h-3 w-3 sm:h-3.5 sm:w-3.5" style={{ color: '#8EE147' }} />
-                    <span className="hidden xs:inline">Interested:</span>
-                    <span className="font-semibold text-white">{summary?.interested || 0}</span>
-                  </span>
-                </div>
+         
               </div>
             )}
           </CardContent>
@@ -681,15 +689,14 @@ export default function TrackingDetailPage() {
 
         {/* View Message Dialog - Dark Theme */}
         <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0 rounded-2xl border border-white/10 shadow-2xl w-[95vw] sm:w-full bg-[#0E223B]">
-            <div className="p-4 sm:p-6 border-b border-white/10 bg-gradient-to-r from-[#8EE147]/10 via-[#6EC035]/5 to-[#5AA82E]/5">
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0 rounded-2xl border border-white/10 shadow-2xl w-[95vw] sm:w-full bg-[#0E223B] [&>button]:text-white [&>button]:opacity-80 hover:[&>button]:opacity-100">            <div className="p-4 sm:p-6 border-b border-white/10 bg-gradient-to-r from-[#8EE147]/10 via-[#6EC035]/5 to-[#5AA82E]/5">
               <DialogHeader>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
                   <div>
                     <DialogTitle className="text-base sm:text-lg md:text-xl font-bold flex items-center gap-2 text-white">
-                      <div className="p-1 bg-gradient-to-r from-[#8EE147] to-[#6EC035] rounded-lg">
-                        {selectedMessage && getTypeIcon(selectedMessage)}
-                      </div>
+     <div className="p-1 bg-gradient-to-r from-[#8EE147] to-[#6EC035] rounded-lg [&>svg]:text-white [&>svg]:stroke-white [&>svg]:fill-white">
+  {selectedMessage && getTypeIcon(selectedMessage)}
+</div>
                       Message Details
                     </DialogTitle>
                     <DialogDescription className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1.5 text-xs sm:text-sm text-slate-400">
@@ -697,9 +704,7 @@ export default function TrackingDetailPage() {
                       {selectedMessage?.display_status} communication
                     </DialogDescription>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {selectedMessage && getStatusBadge(selectedMessage)}
-                  </div>
+                  
                 </div>
               </DialogHeader>
             </div>
@@ -800,16 +805,18 @@ export default function TrackingDetailPage() {
                 </div>
               </div>
             </div>
-
-            <div className="p-4 sm:p-6 border-t border-white/10 bg-gradient-to-r from-[#8EE147]/5 to-[#6EC035]/5 flex justify-end">
-              <Button 
-                variant="outline" 
-                onClick={() => setMessageDialogOpen(false)}
-                className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors text-sm sm:text-base text-white border-white/20"
-              >
-                Close
-              </Button>
-            </div>
+<div className="p-4 sm:p-6 border-t border-white/10 bg-gradient-to-r from-[#8EE147]/5 to-[#6EC035]/5 flex justify-end">
+  <button
+    type="button"
+    onClick={() => setMessageDialogOpen(false)}
+    className="text-sm sm:text-base border border-white/20 text-white bg-transparent px-4 py-2 rounded-md cursor-pointer"
+    style={{ backgroundColor: 'transparent', color: '#ffffff' }}
+    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#ffffff'; }}
+    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#ffffff'; }}
+  >
+    Close
+  </button>
+</div>
           </DialogContent>
         </Dialog>
       </div>

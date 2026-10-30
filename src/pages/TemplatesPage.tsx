@@ -198,8 +198,8 @@ export default function TemplatesPage() {
         )}
 
         {/* Dialog with reduced height - Dark Theme */}
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent
+<Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
   className="
     bg-[#0E223B]/95
     backdrop-blur-sm
@@ -293,10 +293,15 @@ export default function TemplatesPage() {
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 sm:gap-3 pt-1">
-              <Button 
+    <Button 
   variant="outline" 
-  onClick={() => setOpen(false)}
-  className="bg-black text-white border-white/20  text-white hover:bg-white hover:text-[#0E223B] hover:border-white transition-all duration-200 bg-transparent h-8 sm:h-9 w-full sm:w-auto text-xs sm:text-sm"
+  onClick={() => {
+    setName('');
+    setSubject('');
+    setBody('');
+    setOpen(false);
+  }}
+  className="bg-transparent text-white border-white/20 hover:bg-transparent hover:text-white hover:border-white/20 transition-none h-8 sm:h-9 w-full sm:w-auto text-xs sm:text-sm"
 >
   Cancel
 </Button>

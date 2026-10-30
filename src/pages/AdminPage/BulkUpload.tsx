@@ -381,62 +381,17 @@ const handleUpload = async () => {
       
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
-        <div className="relative mb-4 sm:mb-6 md:mb-8 lg:mb-10">
-          <div className="border border-white/10 shadow-xl rounded-xl sm:rounded-2xl overflow-hidden" style={{ backgroundColor: '#0E223B' }}>
-            <div className="relative p-4 sm:p-6 md:p-8 lg:p-10">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#8EE147]/5 via-[#6EC035]/5 to-[#5AA82E]/5"></div>
-              
-              <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
-                {/* Left Section */}
-                <div className="flex-1 w-full">
-                  <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                    <div className="p-2 sm:p-2.5 md:p-3.5 bg-gradient-to-r from-[#8EE147] to-[#6EC035] rounded-lg sm:rounded-xl flex-shrink-0">
-                      <FileSpreadsheet className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-[#0E223B]" />
-                    </div>
-                    
-                    <div className="min-w-0 flex-1">
-                      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-[#8EE147] to-[#6EC035] bg-clip-text text-transparent truncate">
-                        Bulk Buyer Upload
-                      </h1>
-                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
-                        <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147] flex-shrink-0" />
-                        <span className="text-[10px] sm:text-xs font-medium text-[#8EE147] bg-[#8EE147]/10 px-2 sm:px-2.5 py-0.5 rounded-full border border-[#8EE147]/30">
-                          Enterprise
-                        </span>
-                        <span className="text-[10px] sm:text-xs text-slate-500">•</span>
-                        <span className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-0.5 sm:gap-1">
-                          <Shield className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#8EE147]" />
-                          Secure Upload
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-xs sm:text-sm md:text-base text-slate-400 leading-relaxed">
-                    Upload multiple buyers at once using our Excel template.
-                    <span className="hidden sm:inline"> Streamline your buyer management process with bulk import.</span>
-                  </p>
-                </div>
-                
-                {/* Right Section - Badges */}
-                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 w-full lg:w-auto">
-                  <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-[#8EE147]/10 rounded-lg border border-[#8EE147]/20">
-                    <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147]" />
-                    <span className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147] whitespace-nowrap">Bulk Import</span>
-                  </div>
-                  <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                    <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-emerald-400" />
-                    <span className="text-[8px] sm:text-[10px] md:text-xs font-medium text-emerald-400 whitespace-nowrap">1000+ Records</span>
-                  </div>
-                  <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-purple-400" />
-                    <span className="text-[8px] sm:text-[10px] md:text-xs font-medium text-purple-400 whitespace-nowrap">Quick Upload</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="relative mb-4 sm:mb-6 md:mb-8 lg:mb-10 w-full">
+  <div className="flex items-center gap-3 sm:gap-4">
+    <div className="p-2 sm:p-2.5 md:p-3.5 bg-gradient-to-r from-[#8EE147] to-[#6EC035] rounded-lg sm:rounded-xl flex-shrink-0 shadow-lg shadow-[#8EE147]/20">
+      <FileSpreadsheet className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-[#0E223B]" />
+    </div>
+    
+    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white truncate">
+      Bulk Buyer Upload
+    </h1>
+  </div>
+</div>
 
         {/* Main Card */}
         <div className="border border-white/10 shadow-xl rounded-xl sm:rounded-2xl overflow-hidden" style={{ backgroundColor: '#0E223B' }}>
@@ -484,45 +439,7 @@ const handleUpload = async () => {
             )}
 
             <div className="space-y-4 sm:space-y-5 md:space-y-6">
-              {/* Instructions */}
-              <div className="bg-[#8EE147]/5 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 lg:p-6 border border-[#8EE147]/20">
-                <div className="flex items-start gap-2 sm:gap-3">
-                  <div className="p-1.5 sm:p-2 bg-[#8EE147]/10 rounded-lg flex-shrink-0">
-                    <Info className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#8EE147]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-[#8EE147] mb-1.5 sm:mb-2 text-sm sm:text-base md:text-lg">
-                      📋 Quick Guide
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm text-slate-300">
-                      <ul className="space-y-1 sm:space-y-1.5">
-                        <li className="flex items-start gap-1.5 sm:gap-2">
-                          <span className="text-[#8EE147]">•</span>
-                          <span className="break-words">Download the Excel template below</span>
-                        </li>
-                        <li className="flex items-start gap-1.5 sm:gap-2">
-                          <span className="text-[#8EE147]">•</span>
-                          <span className="break-words">Fill in buyer details in the template</span>
-                        </li>
-                        <li className="flex items-start gap-1.5 sm:gap-2">
-                          <span className="text-[#8EE147]">•</span>
-                          <span className="break-words">Upload the filled Excel file</span>
-                        </li>
-                      </ul>
-                      <ul className="space-y-1 sm:space-y-1.5">
-                        <li className="flex items-start gap-1.5 sm:gap-2">
-                          <span className="text-[#8EE147]">•</span>
-                          <span className="break-words"><span className="font-medium text-white">Duplicate Prevention:</span> Records with same product, company name, and matching contact/email will be skipped</span>
-                        </li>
-                        <li className="flex items-start gap-1.5 sm:gap-2">
-                          <span className="text-[#8EE147]">•</span>
-                          <span className="break-words"><span className="font-medium text-white">Required Columns:</span> product, company_name, contact_numbers, emails</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          
 
               {/* Download Template */}
               <div className="bg-emerald-500/5 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 lg:p-6 border-2 border-dashed border-emerald-500/30">
@@ -532,9 +449,9 @@ const handleUpload = async () => {
                       <Download className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-emerald-400" />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-semibold text-emerald-400 text-sm sm:text-base">Get Started</h4>
-                      <p className="text-xs sm:text-sm text-emerald-400/70 truncate">Download the template to begin</p>
-                    </div>
+  <h4 className="font-semibold text-white text-sm sm:text-base">Get Started</h4>
+  <p className="text-xs sm:text-sm text-white/70 truncate">Download the template to begin</p>
+</div>
                   </div>
                   <button
                     onClick={downloadTemplate}

@@ -273,6 +273,20 @@ const AdminBuyers: React.FC = () => {
     }
   };
 
+  
+  const formatPhoneNumbers = (contacts) => {
+  if (!contacts) return "-";
+
+  return String(contacts)
+    .split(",")
+    .map((number) => {
+      const phone = number.trim();
+      return phone.replace(/^(\+?91)\s*(\d{10})$/, "$1 $2");
+    })
+    .join(", ");
+};
+
+
   const handleSaveEdit = async () => {
     if (!editBuyer) return;
     setSaving(true);
@@ -423,7 +437,7 @@ const AdminBuyers: React.FC = () => {
                       <th className="px-4 py-3 font-medium text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
+                               <tbody>
                     {buyers.map((b) => (
                       <tr
                         key={b.id}
@@ -437,41 +451,52 @@ const AdminBuyers: React.FC = () => {
                         </td>
                         <td className="px-4 py-3 text-slate-400">{b.hsn_code || '—'}</td>
                         <td className="px-4 py-3 text-slate-300">{b.country || '—'}</td>
-                        <td className="px-4 py-3 text-slate-400 truncate max-w-[200px]">
+                        
+                        {/* EMAIL WITH TOOLTIP */}
+                        <td 
+                          className="px-4 py-3 text-slate-400 truncate max-w-[200px] cursor-default"
+                          title={renderEmails(b.emails)}
+                        >
                           {renderEmails(b.emails)}
                         </td>
-                        <td className="px-4 py-3 text-slate-400">
-                          {renderContacts(b.contacts)}
-                        </td>
-                        <td className="px-4 py-3 text-right whitespace-nowrap">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleView(b.id)}
-                            className="h-8 px-2 text-[#8EE147] hover:bg-[#8EE147]/10"
-                            title="View"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEdit(b.id)}
-                            className="h-8 px-2 text-blue-400 hover:bg-blue-400/10"
-                            title="Edit"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setDeleteBuyer(b)}
-                            className="h-8 px-2 text-red-400 hover:bg-red-400/10"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </td>
+                        
+                    {/* PHONE WITH TOOLTIP */}
+<td
+  className="px-4 py-3 text-slate-400 truncate max-w-[150px] cursor-default"
+  title={formatPhoneNumbers(renderContacts(b.contacts))}
+>
+  {formatPhoneNumbers(renderContacts(b.contacts))}
+</td>
+                        
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+  <Button
+    size="sm"
+    variant="ghost"
+    onClick={() => handleView(b.id)}
+    className="h-8 px-2 text-[#8EE147] hover:bg-[#8EE147]/10 hover:text-white"
+    title="View"
+  >
+    <Eye className="h-3.5 w-3.5" />
+  </Button>
+  <Button
+    size="sm"
+    variant="ghost"
+    onClick={() => handleEdit(b.id)}
+    className="h-8 px-2 text-blue-400 hover:bg-blue-400/10 hover:text-white"
+    title="Edit"
+  >
+    <Pencil className="h-3.5 w-3.5" />
+  </Button>
+  <Button
+    size="sm"
+    variant="ghost"
+    onClick={() => setDeleteBuyer(b)}
+    className="h-8 px-2 text-red-400 hover:bg-red-400/10 hover:text-white"
+    title="Delete"
+  >
+    <Trash2 className="h-3.5 w-3.5" />
+  </Button>
+</td>
                       </tr>
                     ))}
                   </tbody>
@@ -530,8 +555,12 @@ const AdminBuyers: React.FC = () => {
             <Field label="Reason" value={viewBuyer.reason} full />
             <Field label="Notes" value={viewBuyer.classification_notes} full />
             <Field label="Emails" value={renderEmails(viewBuyer.emails)} full />
-            <Field label="Contacts" value={renderContacts(viewBuyer.contacts)} full />
-          </div>
+          <Field
+  label="Contacts"
+  value={formatPhoneNumbers(renderContacts(viewBuyer.contacts))}
+  full
+/>
+</div>
         </Modal>
       )}
 
@@ -631,28 +660,28 @@ const AdminBuyers: React.FC = () => {
               }
               full
             />
-            <Input
-              label="Contacts (comma separated)"
-              value={normalizeContacts(editBuyer.contacts).join(', ')}
-              onChange={(v) =>
-                setEditBuyer({
-                  ...editBuyer,
-                  contacts: v
-                    .split(',')
-                    .map((s) => s.trim())
-                    .filter(Boolean)
-                    .map((contact_number) => ({ contact_number })),
-                })
-              }
-              full
-            />
+         <Input
+  label="Contacts (comma separated)"
+  value={formatPhoneNumbers(normalizeContacts(editBuyer.contacts).join(', '))}
+  onChange={(v) =>
+    setEditBuyer({
+      ...editBuyer,
+      contacts: v
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((contact_number) => ({ contact_number })),
+    })
+  }
+  full
+/>  
           </div>
 
           <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-white/10">
             <Button
               variant="ghost"
               onClick={() => setEditBuyer(null)}
-              className="text-slate-300 hover:bg-white/10"
+              className="text-slate-300 "
             >
               Cancel
             </Button>

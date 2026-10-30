@@ -40,7 +40,7 @@ import AdminUsersManagement from "./pages/AdminPage/AdminUsersManagement";
 import SsoCallback from "./pages/SsoCallback";
 import AdminDashboard from "./pages/AdminPage/AdminDashboard";
 import AdminBuyers from "./pages/AdminPage/AdminBuyers";
-
+import EmailPortDetails from "./pages/EmailPortDetails";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -79,7 +79,10 @@ const App = () => (
               <Route path="/emailconfig" element={<EmailConfiguration />} />
               <Route path="/trackingindetail/:id" element={<TrackingPagIndetail />} />
               <Route path="/contactsindetail/:id" element={<ContactDetailPage />} />
-            
+            <Route
+  path="/email-port-details"
+  element={<EmailPortDetails />}
+/>
               <Route path="/admin/history" element={<AdminHistoryPage />} />
               <Route path="/admin/historydetail/:id" element={<AdminHistoryDetail />} />
             

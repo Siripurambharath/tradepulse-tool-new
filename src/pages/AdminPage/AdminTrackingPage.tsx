@@ -202,7 +202,7 @@ export default function AdminTrackingPage() {
         return;
       }
 
-      const response = await axios.get(`${API_URL}/api/tracking/page?${params.toString()}`);
+      const response = await axios.get(`${API_URL}/api/tracking/page/new?${params.toString()}`);
       
       if (response.data.success) {
         const data = response.data.data;

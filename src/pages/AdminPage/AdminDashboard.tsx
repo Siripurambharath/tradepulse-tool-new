@@ -1,5 +1,5 @@
 // src/pages/AdminDashboard.tsx
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart,
@@ -218,22 +218,53 @@ const AdminDashboard: React.FC = () => {
   const [latestLoading, setLatestLoading] = useState<boolean>(true);
 
   // ---- Dropdown options ----
-  const [products, setProducts] = useState<string[]>([]);
-  const [countries, setCountries] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [countries, setCountries] = useState<any[]>([]);
   const [totalCountries, setTotalCountries] = useState<number>(0);
 
-  // ---------- products: fetch once ----------
+  // ---- Product dropdown infinite scroll ----
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsHasMore, setProductsHasMore] = useState(false);
+  const productsOffsetRef = useRef(0);
+  const productsFetchingRef = useRef(false);
+  const PRODUCTS_LIMIT = 50;
+
+  // ---------- products: fetch once (with infinite scroll support) ----------
+  const fetchProducts = async (reset = false) => {
+    if (productsFetchingRef.current) return;
+    productsFetchingRef.current = true;
+    setProductsLoading(true);
+
+    try {
+      const offset = reset ? 0 : productsOffsetRef.current;
+      const res = await fetch(
+        `${API_BASE}/filters/dropdown/products?limit=${PRODUCTS_LIMIT}&offset=${offset}`
+      );
+      const json = await res.json();
+      const list: any[] = Array.isArray(json) ? json : json?.data ?? [];
+      const hasMore: boolean = Array.isArray(json) ? false : !!json?.has_more;
+
+      setProducts((prev) => {
+        const seen = new Set(prev.map((p) => p.product));
+        const merged = reset
+          ? list
+          : [...prev, ...list.filter((p) => !seen.has(p.product))];
+        productsOffsetRef.current = merged.length;
+        return merged;
+      });
+      setProductsHasMore(hasMore);
+    } catch (err) {
+      console.error('fetchProducts failed:', err);
+    } finally {
+      productsFetchingRef.current = false;
+      setProductsLoading(false);
+    }
+  };
+
+  // Initial products load
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/filters/products`);
-        const json = await res.json();
-        setProducts(Array.isArray(json) ? json.map((p: any) => p.product) : []);
-      } catch (err) {
-        console.error('Failed to load products', err);
-      }
-    };
-    fetchProducts();
+    fetchProducts(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ---------- countries: re-fetch when product / date filter changes ----------
@@ -247,42 +278,41 @@ const AdminDashboard: React.FC = () => {
 
         const res = await fetch(`${API_BASE}/filters/buyer-countries-admin?${params.toString()}`);
         const json = await res.json();
-        const list = Array.isArray(json) ? json.map((c: any) => c.country) : [];
+        const list = Array.isArray(json) ? json : json?.data ?? json?.countries ?? [];
         setCountries(list);
         setTotalCountries(list.length);
       } catch (err) {
         console.error('Failed to load countries', err);
+        setCountries([]);
       }
     };
     fetchCountries();
   }, [productFilter, fromDate, toDate]);
 
-// ---------- user stats (re-fetch when date filter changes) ----------
-const fetchUserStats = useCallback(async () => {
-  try {
-    const params = new URLSearchParams();
-    if (fromDate) params.append('from', fromDate);
-    if (toDate) params.append('to', toDate);
+  // ---------- user stats (re-fetch when date filter changes) ----------
+  const fetchUserStats = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      if (fromDate) params.append('from', fromDate);
+      if (toDate) params.append('to', toDate);
 
-    const res = await fetch(`${API_BASE}/users/stats?${params.toString()}`);
-    const json = await res.json();
-    if (json.success) {
-      setUserStats({
-        total_users: json.total_users ?? 0,
-        email_sent_count: json.email_sent_count ?? 0,
-        email_config_count: json.email_config_count ?? 0,
-      });
+      const res = await fetch(`${API_BASE}/users/stats?${params.toString()}`);
+      const json = await res.json();
+      if (json.success) {
+        setUserStats({
+          total_users: json.total_users ?? 0,
+          email_sent_count: json.email_sent_count ?? 0,
+          email_config_count: json.email_config_count ?? 0,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load user stats', err);
     }
-  } catch (err) {
-    console.error('Failed to load user stats', err);
-  }
-}, [fromDate, toDate]);
+  }, [fromDate, toDate]);
 
-useEffect(() => {
-  fetchUserStats();
-}, [fetchUserStats]);
-
- 
+  useEffect(() => {
+    fetchUserStats();
+  }, [fetchUserStats]);
 
   // ---------- latest 5 buyers ----------
   useEffect(() => {
@@ -442,6 +472,18 @@ useEffect(() => {
     return nonZero.length ? Math.min(...nonZero) : 0;
   }, [analytics]);
 
+  const formatPhoneNumbers = (contacts: any) => {
+    if (!contacts) return "-";
+
+    return String(contacts)
+      .split(",")
+      .map((number) => {
+        const phone = number.trim();
+        return phone.replace(/^(\+?91)\s*(\d{10})$/, "$1 $2");
+      })
+      .join(", ");
+  };
+
   // Use log scale only if the range is extremely skewed
   const useLogScale =
     maxBuyers > 0 && minNonZeroBuyers > 0 && maxBuyers / minNonZeroBuyers >= 100;
@@ -477,67 +519,95 @@ useEffect(() => {
               <span className="hidden sm:inline">Filters</span>
             </div>
 
-         <input
-  type="date"
-  value={fromDate}
-  onChange={(e) => setFromDate(e.target.value)}
-  className="h-9 px-2 text-xs bg-[#0E223B] border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30 [color-scheme:dark]"
-  title="From date"
-/>
-<span className="text-slate-500 text-xs">→</span>
-<input
-  type="date"
-  value={toDate}
-  onChange={(e) => setToDate(e.target.value)}
-  className="h-9 px-2 text-xs bg-[#0E223B] border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30 [color-scheme:dark]"
-  title="To date"
-/>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="h-9 px-2 text-xs bg-[#0E223B] border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30 [color-scheme:dark]"
+              title="From date"
+            />
+            <span className="text-slate-500 text-xs">→</span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="h-9 px-2 text-xs bg-[#0E223B] border border-white/10 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8EE147]/30 [color-scheme:dark]"
+              title="To date"
+            />
 
-       <Select value={productFilter} onValueChange={setProductFilter}>
-  <SelectTrigger
-    className={`w-[160px] h-9 text-xs bg-[#0E223B] text-white rounded-xl
-      focus:ring-0 focus:ring-offset-0 focus-visible:ring-0
-      ${
-        productFilter !== 'all'
-          ? 'border border-[#8EE147]/60 ring-1 ring-[#8EE147]/30'
-          : 'border border-white/10 ring-0'
-      }`}
-  >
-    <Package className="h-3.5 w-3.5 mr-2 text-[#8EE147]" />
-    <SelectValue placeholder="Product" />
-  </SelectTrigger>
-  <SelectContent className="bg-[#0E223B] border-white/10 text-white max-h-[300px]">
-    <SelectItem value="all">All Products</SelectItem>
-    {products.map((p) => (
-      <SelectItem key={p} value={p}>
-        {p}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
+            {/* Product Dropdown with Infinite Scroll */}
+            <Select value={productFilter} onValueChange={setProductFilter}>
+              <SelectTrigger
+                className={`w-[160px] h-9 text-xs bg-[#0E223B] text-white rounded-xl
+                  focus:ring-0 focus:ring-offset-0 focus-visible:ring-0
+                  ${
+                    productFilter !== 'all'
+                      ? 'border border-[#8EE147]/60 ring-1 ring-[#8EE147]/30'
+                      : 'border border-white/10 ring-0'
+                  }`}
+              >
+                <Package className="h-3.5 w-3.5 mr-2 text-[#8EE147]" />
+                <SelectValue placeholder="Product" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#0E223B] border-white/10 text-white max-h-[300px]">
+                <SelectItem value="all">All Products</SelectItem>
+                <div
+                  className="max-h-64 overflow-y-auto"
+                  onScroll={(e) => {
+                    const el = e.currentTarget;
+                    if (
+                      el.scrollTop + el.clientHeight >= el.scrollHeight - 40 &&
+                      productsHasMore &&
+                      !productsLoading
+                    ) {
+                      fetchProducts(false);
+                    }
+                  }}
+                >
+                  {products.map((p) => (
+                    <SelectItem key={p.product} value={p.product}>
+                      {p.product}
+                    </SelectItem>
+                  ))}
+                  {productsLoading && (
+                    <div className="flex items-center justify-center py-2">
+                      <Loader2 className="h-4 w-4 animate-spin text-[#8EE147]" />
+                    </div>
+                  )}
+                  {!productsHasMore && products.length > 0 && (
+                    <div className="px-2 py-1 text-[10px] text-slate-400 text-center">
+                      — end of list —
+                    </div>
+                  )}
+                </div>
+              </SelectContent>
+            </Select>
 
-        <Select value={countryFilter} onValueChange={setCountryFilter}>
-  <SelectTrigger
-    className={`w-[150px] h-9 text-xs bg-[#0E223B] text-white rounded-xl
-      focus:ring-0 focus:ring-offset-0 focus-visible:ring-0
-      ${
-        countryFilter !== 'all'
-          ? 'border border-[#8EE147]/60 ring-1 ring-[#8EE147]/30'
-          : 'border border-white/10 ring-0'
-      }`}
-  >
-    <Globe className="h-3.5 w-3.5 mr-2 text-[#8EE147]" />
-    <SelectValue placeholder="Country" />
-  </SelectTrigger>
-  <SelectContent className="bg-[#0E223B] border-white/10 text-white max-h-[300px]">
-    <SelectItem value="all">All Countries</SelectItem>
-    {countries.map((c) => (
-      <SelectItem key={c} value={c}>
-        {c}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
+            {/* Country Dropdown */}
+            <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <SelectTrigger
+                className={`w-[150px] h-9 text-xs bg-[#0E223B] text-white rounded-xl
+                  focus:ring-0 focus:ring-offset-0 focus-visible:ring-0
+                  ${
+                    countryFilter !== 'all'
+                      ? 'border border-[#8EE147]/60 ring-1 ring-[#8EE147]/30'
+                      : 'border border-white/10 ring-0'
+                  }`}
+              >
+                <Globe className="h-3.5 w-3.5 mr-2 text-[#8EE147]" />
+                <SelectValue placeholder="Country" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#0E223B] border-white/10 text-white max-h-[300px]">
+                <SelectItem value="all">All Countries</SelectItem>
+                <div className="max-h-64 overflow-y-auto">
+                  {countries.map((c: any, idx: number) => (
+                    <SelectItem key={`${c.country}-${idx}`} value={c.country}>
+                      {c.country}
+                    </SelectItem>
+                  ))}
+                </div>
+              </SelectContent>
+            </Select>
 
             <Button
               type="button"
@@ -976,12 +1046,23 @@ useEffect(() => {
                         </td>
                         <td className="px-4 py-3 text-slate-400">{b.hsn_code || '—'}</td>
                         <td className="px-4 py-3 text-slate-300">{b.country || '—'}</td>
-                        <td className="px-4 py-3 text-slate-400 truncate max-w-[200px]">
+
+                        {/* EMAIL WITH TOOLTIP - Normal Cursor */}
+                        <td
+                          className="px-4 py-3 text-slate-400 truncate max-w-[200px] cursor-default"
+                          title={renderEmails(b.emails)}
+                        >
                           {renderEmails(b.emails)}
                         </td>
-                        <td className="px-4 py-3 text-slate-400">
-                          {renderContacts(b.contacts)}
+
+                        {/* PHONE WITH TOOLTIP - Normal Cursor */}
+                        <td
+                          className="px-4 py-3 text-slate-400 truncate max-w-[150px] cursor-default"
+                          title={formatPhoneNumbers(renderContacts(b.contacts))}
+                        >
+                          {formatPhoneNumbers(renderContacts(b.contacts))}
                         </td>
+
                         <td className="px-4 py-3 text-right">
                           <Button
                             type="button"

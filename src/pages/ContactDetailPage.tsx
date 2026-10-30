@@ -341,6 +341,19 @@ const refreshData = async () => {
     }];
   };
 
+
+  const formatPhoneNumbers = (contacts) => {
+  if (!contacts) return "-";
+
+  return String(contacts)
+    .split(",")
+    .map((number) => {
+      const phone = number.trim();
+      return phone.replace(/^(\+?91)\s*(\d{10})$/, "$1 $2");
+    })
+    .join(", ");
+};
+
   const getStatusBadge = (status: string) => {
     if (!status) return <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-0 text-[10px] sm:text-xs">Pending</Badge>;
     if (status.toLowerCase() === 'sent') {
@@ -357,21 +370,21 @@ const refreshData = async () => {
     return <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-0 text-[10px] sm:text-xs">{status}</Badge>;
   };
 
-  const getResponseBadge = (response: string | null) => {
-    if (!response) return <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-0 text-[10px] sm:text-xs">No Response</Badge>;
-    if (response === 'interested') {
-      return <Badge className="bg-[#8EE147]/20 text-[#0E223B] border border-[#8EE147]/30 hover:bg-[#8EE147]/20 text-[10px] sm:text-xs">
-        <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" style={{ color: '#8EE147' }} />
-        Interested
-      </Badge>;
-    } else if (response === 'not_interested') {
-      return <Badge className="bg-red-500/20 text-red-700 border border-red-500/30 hover:bg-red-500/20 text-[10px] sm:text-xs">
-        <XCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
-        Not Interested
-      </Badge>;
-    }
-    return <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-0 text-[10px] sm:text-xs">{response}</Badge>;
-  };
+ const getResponseBadge = (response: string | null) => {
+  if (!response) return <Badge variant="secondary" className="bg-gray-100 text-gray-500 border-0 text-[10px] sm:text-xs">No Response</Badge>;
+  if (response === 'interested') {
+    return <Badge className="bg-[#8EE147]/20 text-white border border-[#8EE147]/30 hover:bg-[#8EE147]/20 text-[10px] sm:text-xs">
+      <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" style={{ color: '#8EE147' }} />
+      Interested
+    </Badge>;
+  } else if (response === 'not_interested') {
+    return <Badge className="bg-red-500/20 text-white border border-red-500/30 hover:bg-red-500/20 text-[10px] sm:text-xs">
+      <XCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+      Not Interested
+    </Badge>;
+  }
+  return <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-0 text-[10px] sm:text-xs">{response}</Badge>;
+};
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
@@ -573,24 +586,32 @@ const refreshData = async () => {
                   </a>
                 </div>
               </div>
-              <div className="flex items-start gap-2 sm:gap-3 group">
-                <div className="p-1.5 sm:p-2 md:p-2.5 bg-[#8EE147]/10 rounded-xl shadow-sm border border-[#8EE147]/20 flex-shrink-0">
-                  <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">Phone</p>
-                  {initialEmail?.contact_name && /[\d\-+() ]{7,}/.test(initialEmail.contact_name) ? (
-                    <a 
-                      href={`tel:${initialEmail.contact_name.replace(/\s/g, '')}`}
-                      className="text-xs sm:text-sm font-semibold text-[#8EE147] hover:text-[#6EC035] hover:underline truncate block"
-                    >
-                      {initialEmail.contact_name}
-                    </a>
-                  ) : (
-                    <p className="text-xs sm:text-sm font-semibold text-slate-500 truncate">Not available</p>
-                  )}
-                </div>
-              </div>
+            <div className="flex items-start gap-2 sm:gap-3 group">
+  <div className="p-1.5 sm:p-2 md:p-2.5 bg-[#8EE147]/10 rounded-xl shadow-sm border border-[#8EE147]/20 flex-shrink-0">
+    <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
+  </div>
+
+  <div className="min-w-0">
+    <p className="text-[8px] sm:text-[10px] md:text-xs font-medium text-[#8EE147]/70 uppercase tracking-wider">
+      Contact
+    </p>
+
+    {initialEmail?.contact_name &&
+    /[\d\-+() ]{7,}/.test(initialEmail.contact_name) ? (
+      <a
+        href={`tel:${initialEmail.contact_name.replace(/[^\d+]/g, "")}`}
+        title={formatPhoneNumbers(initialEmail.contact_name)}
+        className="text-xs sm:text-sm font-semibold text-[#8EE147] hover:text-[#6EC035] hover:underline truncate block"
+      >
+        {formatPhoneNumbers(initialEmail.contact_name)}
+      </a>
+    ) : (
+      <p className="text-xs sm:text-sm font-semibold text-slate-500 truncate">
+        Not available
+      </p>
+    )}
+  </div>
+</div>
               <div className="flex items-start gap-2 sm:gap-3 group">
                 <div className="p-1.5 sm:p-2 md:p-2.5 bg-[#8EE147]/10 rounded-xl shadow-sm border border-[#8EE147]/20 flex-shrink-0">
                   <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
@@ -635,141 +656,126 @@ const refreshData = async () => {
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-[#8EE147]/10 to-[#6EC035]/10 border-b border-white/10">
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs w-8 sm:w-12">#</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Type</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Subject</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Status</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Response</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Template</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap">Date</TableHead>
-                    <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs text-center whitespace-nowrap">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredEmails.length > 0 ? (
-                    filteredEmails.map((record, index) => (
-                      <TableRow 
-                        key={record.id} 
-                        className="border-b border-white/5 hover:bg-[#8EE147]/5 transition-all duration-200 cursor-pointer group"
-                        onClick={() => viewMessage(record)}
-                      >
-                        <TableCell className="font-medium text-slate-400 text-[10px] sm:text-sm">
-                          {(page * perPage) + index + 1}
-                        </TableCell>
-                        <TableCell>
-                          {index === 0 && page === 0 ? (
-                            <Badge variant="outline" className="bg-[#8EE147]/10 text-[#8EE147] border-[#8EE147]/30 text-[10px] sm:text-xs whitespace-nowrap">
-                              <MailOpen className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
-                              Initial
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-[10px] sm:text-xs whitespace-nowrap">
-                              <Reply className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
-                              Reply
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="max-w-[80px] sm:max-w-[150px]">
-                          <p className="truncate font-medium text-slate-300 group-hover:text-[#8EE147] transition-colors text-[10px] sm:text-sm">
-                            {record.subject || '-'}
-                          </p>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(record.status)}</TableCell>
-                        <TableCell>{getResponseBadge(record.response)}</TableCell>
-                        <TableCell>
-                          <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1.5 rounded-full text-[8px] sm:text-xs font-medium bg-[#8EE147]/10 text-[#8EE147] border border-[#8EE147]/20 max-w-[80px] sm:max-w-[120px] truncate block">
-                            <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 flex-shrink-0" />
-                            {record.template_used || '-'}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-slate-400 whitespace-nowrap">
-                            <Clock className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
-                            <span className="hidden sm:inline">{formatDate(record.reply_date || record.responded_at || record.sent_at)}</span>
-                            <span className="sm:hidden">{record.reply_date ? new Date(record.reply_date).toLocaleDateString() : '-'}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="gap-0.5 sm:gap-1.5 h-7 sm:h-8 md:h-9 px-1.5 sm:px-2 md:px-3 bg-[#8EE147]/10 hover:bg-[#8EE147]/20 text-[#8EE147] hover:text-[#8EE147] rounded-lg transition-colors text-[10px] sm:text-xs whitespace-nowrap"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              viewMessage(record);
-                            }}
-                          >
-                            <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                            <span className="hidden xs:inline">View</span>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 sm:py-10 md:py-12">
-                        <div className="flex flex-col items-center gap-2 sm:gap-3">
-                          <div className="p-3 sm:p-4 bg-white/5 rounded-full">
-                            <Mail className="h-8 w-8 sm:h-10 sm:w-10 text-slate-500" />
-                          </div>
-                          <p className="text-xs sm:text-sm text-slate-400 font-medium">No emails found</p>
-                          <p className="text-[10px] sm:text-xs text-slate-500">Try adjusting your search</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+        <Table>
+  <TableHeader>
+    <TableRow className="bg-gradient-to-r from-[#8EE147]/10 to-[#6EC035]/10 border-b border-white/10 hover:!bg-transparent data-[state=selected]:!bg-transparent">
+      <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs w-8 sm:w-12 hover:!bg-transparent">#</TableHead>
+      <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hover:!bg-transparent">Type</TableHead>
+      <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hover:!bg-transparent">Subject</TableHead>
+      <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hover:!bg-transparent">Status</TableHead>
+      <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hover:!bg-transparent">Response</TableHead>
+      <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hover:!bg-transparent">Template</TableHead>
+      <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs whitespace-nowrap hover:!bg-transparent">Date</TableHead>
+      <TableHead className="font-semibold text-slate-300 text-[10px] sm:text-xs text-center whitespace-nowrap hover:!bg-transparent">Actions</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {filteredEmails.length > 0 ? (
+      filteredEmails.map((record, index) => (
+        <TableRow 
+          key={record.id} 
+          className="border-b border-white/5 hover:bg-[#8EE147]/5 transition-all duration-200 cursor-pointer group"
+          onClick={() => viewMessage(record)}
+        >
+          <TableCell className="font-medium text-slate-400 text-[10px] sm:text-sm">
+            {(page * perPage) + index + 1}
+          </TableCell>
+          <TableCell>
+            {index === 0 && page === 0 ? (
+              <Badge variant="outline" className="bg-[#8EE147]/10 text-[#8EE147] border-[#8EE147]/30 text-[10px] sm:text-xs whitespace-nowrap">
+                <MailOpen className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                Initial
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-[10px] sm:text-xs whitespace-nowrap">
+                <Reply className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                Reply
+              </Badge>
+            )}
+          </TableCell>
+          <TableCell className="max-w-[80px] sm:max-w-[150px]">
+            {/* Removed group-hover:text-[#8EE147] from here */}
+            <p className="truncate font-medium text-slate-300 transition-colors text-[10px] sm:text-sm">
+              {record.subject || '-'}
+            </p>
+          </TableCell>
+          <TableCell>{getStatusBadge(record.status)}</TableCell>
+          <TableCell>{getResponseBadge(record.response)}</TableCell>
+          <TableCell>
+            <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-3 py-0.5 sm:py-1.5 rounded-full text-[8px] sm:text-xs font-medium bg-[#8EE147]/10 text-[#8EE147] border border-[#8EE147]/20 max-w-[80px] sm:max-w-[120px] truncate block">
+              <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 flex-shrink-0" />
+              {record.template_used || '-'}
+            </span>
+          </TableCell>
+          <TableCell>
+            <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-slate-400 whitespace-nowrap">
+              <Clock className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
+              <span className="hidden sm:inline">{formatDate(record.reply_date || record.responded_at || record.sent_at)}</span>
+              <span className="sm:hidden">{record.reply_date ? new Date(record.reply_date).toLocaleDateString() : '-'}</span>
+            </div>
+          </TableCell>
+          <TableCell>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-0.5 sm:gap-1.5 h-7 sm:h-8 md:h-9 px-1.5 sm:px-2 md:px-3 bg-[#8EE147]/10 hover:bg-[#8EE147]/20 text-[#8EE147] hover:text-[#8EE147] rounded-lg transition-colors text-[10px] sm:text-xs whitespace-nowrap"
+              onClick={(e) => {
+                e.stopPropagation();
+                viewMessage(record);
+              }}
+            >
+              <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span className="hidden xs:inline">View</span>
+            </Button>
+          </TableCell>
+        </TableRow>
+      ))
+    ) : (
+      <TableRow>
+        <TableCell colSpan={8} className="text-center py-8 sm:py-10 md:py-12">
+          <div className="flex flex-col items-center gap-2 sm:gap-3">
+            <div className="p-3 sm:p-4 bg-white/5 rounded-full">
+              <Mail className="h-8 w-8 sm:h-10 sm:w-10 text-slate-500" />
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 font-medium">No emails found</p>
+            <p className="text-[10px] sm:text-xs text-slate-500">Try adjusting your search</p>
+          </div>
+        </TableCell>
+      </TableRow>
+    )}
+  </TableBody>
+</Table>
             </div>
 
-            {/* Summary footer with pagination - Dark Theme */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-white/10 bg-gradient-to-r from-[#8EE147]/5 to-[#6EC035]/5">
-              <p className="text-[10px] sm:text-sm text-slate-400">
-                Showing <span className="font-semibold text-white">{contact.length}</span> of {totalCount} emails
-              </p>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <div className="flex flex-wrap gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
-                  <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 text-slate-300 whitespace-nowrap">
-                    <MailOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147]" />
-                    <span className="hidden xs:inline">Initial:</span>
-                    <span className="font-semibold text-white">1</span>
-                  </span>
-                  <span className="flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 text-slate-300 whitespace-nowrap">
-                    <Reply className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-400" />
-                    <span className="hidden xs:inline">Replies:</span>
-                    <span className="font-semibold text-white">{totalCount - 1}</span>
-                  </span>
-                </div>
-
-                {/* Pagination Controls - Dark Theme */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    disabled={page === 0} 
-                    onClick={() => setPage(p => p - 1)}
-                    className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 text-[#8EE147]" />
-                  </Button>
-                  <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-white/5 rounded-lg border border-white/10 text-[10px] sm:text-xs font-medium text-white whitespace-nowrap">
-                    {page + 1} / {totalPages || 1}
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    disabled={page + 1 >= totalPages} 
-                    onClick={() => setPage(p => p + 1)}
-                    className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-[#8EE147]" />
-                  </Button>
-                </div>
-              </div>
-            </div>
+       {/* Summary footer with pagination - Dark Theme */}
+<div className="flex flex-col sm:flex-row items-start sm:items-center justify-end gap-2 sm:gap-3 p-3 sm:p-4 border-t border-white/10 bg-gradient-to-r from-[#8EE147]/5 to-[#6EC035]/5">
+  <div className="flex flex-wrap items-center gap-2 sm:gap-3 ml-auto">
+    {/* Pagination Controls - Dark Theme */}
+    <div className="flex items-center gap-1.5 sm:gap-2">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        disabled={page === 0} 
+        onClick={() => setPage(p => p - 1)}
+        className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 text-[#8EE147]" />
+      </Button>
+      <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-white/5 rounded-lg border border-white/10 text-[10px] sm:text-xs font-medium text-white whitespace-nowrap">
+        {page + 1} / {totalPages || 1}
+      </div>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        disabled={page + 1 >= totalPages} 
+        onClick={() => setPage(p => p + 1)}
+        className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 border border-white/20 bg-transparent text-white hover:text-[#8EE147] disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-[#8EE147]" />
+      </Button>
+    </div>
+  </div>
+</div>
           </CardContent>
         </Card>
 

@@ -279,7 +279,7 @@ export default function TrackingPage() {
         params.search = searchQuery.trim();
       }
 
-      const response = await axios.get(`${API_URL}/api/tracking/page`, { params });
+      const response = await axios.get(`${API_URL}/api/tracking/page/new`, { params });
       
       if (response.data.success) {
         setTrackingData(response.data.data);
@@ -369,22 +369,22 @@ export default function TrackingPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'sent':
-        return <Badge className="bg-[#8EE147]/20 text-[#0E223B] border border-[#8EE147]/30 hover:bg-[#8EE147]/30">
+        return <Badge className="bg-[#8EE147]/20 text-white border border-[#8EE147]/30 hover:bg-[#8EE147]/30">
           <Send className="h-3 w-3 mr-1" style={{ color: '#8EE147' }} />
           Sent
         </Badge>;
       case 'replied':
-        return <Badge className="bg-[#8EE147]/20 text-[#0E223B] border border-[#8EE147]/30 hover:bg-[#8EE147]/30">
+        return <Badge className="bg-[#8EE147]/20 text-white border border-[#8EE147]/30 hover:bg-[#8EE147]/30">
           <Reply className="h-3 w-3 mr-1" style={{ color: '#8EE147' }} />
           Replied
         </Badge>;
       case 'interested':
-        return <Badge className="bg-[#8EE147]/20 text-[#0E223B] border border-[#8EE147]/30 hover:bg-[#8EE147]/30">
+        return <Badge className="bg-[#8EE147]/20 text-white border border-[#8EE147]/30 hover:bg-[#8EE147]/30">
           <ThumbsUp className="h-3 w-3 mr-1" style={{ color: '#8EE147' }} />
           Interested
         </Badge>;
       case 'not_interested':
-        return <Badge className="bg-red-500/20 text-red-700 border border-red-500/30 hover:bg-red-500/30">
+        return <Badge className="bg-red-500/20 text-white border border-red-500/30 hover:bg-red-500/30">
           <ThumbsDown className="h-3 w-3 mr-1" />
           Not Interested
         </Badge>;
@@ -725,24 +725,26 @@ export default function TrackingPage() {
                             {item.hsn_code || '-'}
                           </span>
                         </td>
-                        <td className="p-3 sm:p-4">{getStatusBadge(item.current_status)}</td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#8EE147]/10 rounded-full whitespace-nowrap border border-[#8EE147]/20">
-                            <MessageSquare className="h-3.5 w-3.5" style={{ color: '#8EE147' }} />
-                            <span className="font-bold" style={{ color: '#8EE147' }}>{item.interaction_count || 0}</span>
-                          </div>
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-lg text-xs whitespace-nowrap text-slate-300">
+                            {item.current_status || '-'}
+                          </span>
                         </td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="gap-1.5 h-8 sm:h-9 px-3 sm:px-4 bg-[#8EE147]/10 hover:bg-[#8EE147]/20 text-[#8EE147] hover:text-[#8EE147] rounded-lg transition-colors text-xs sm:text-sm"
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-lg text-xs whitespace-nowrap text-slate-300">
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            {item.interaction_count || 0}
+                          </span>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <button
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs whitespace-nowrap text-slate-300 transition-colors"
                             onClick={() => viewDetails(item)}
                           >
                             <Eye className="h-3.5 w-3.5" />
                             View
                             <ArrowUpRight className="h-3 w-3" />
-                          </Button>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -767,12 +769,6 @@ export default function TrackingPage() {
                   <p className="text-xs sm:text-sm text-slate-400">
                     Showing <span className="font-semibold text-white">{filteredData.length}</span> sent emails
                   </p>
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg shadow-sm border border-white/10 whitespace-nowrap text-slate-300">
-                      <Send className="h-3.5 w-3.5" style={{ color: '#8EE147' }} />
-                      Total: <span className="font-semibold text-white">{counts.sent}</span>
-                    </span>
-                  </div>
                 </div>
               )}
             </div>
@@ -857,24 +853,26 @@ export default function TrackingPage() {
                             {item.hsn_code || '-'}
                           </span>
                         </td>
-                        <td className="p-3 sm:p-4">{getStatusBadge(item.current_status)}</td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#8EE147]/10 rounded-full whitespace-nowrap border border-[#8EE147]/20">
-                            <MessageSquare className="h-3.5 w-3.5" style={{ color: '#8EE147' }} />
-                            <span className="font-bold" style={{ color: '#8EE147' }}>{item.interaction_count || 0}</span>
-                          </div>
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-lg text-xs whitespace-nowrap text-slate-300">
+                            {item.current_status || '-'}
+                          </span>
                         </td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="gap-1.5 h-8 sm:h-9 px-3 sm:px-4 bg-[#8EE147]/10 hover:bg-[#8EE147]/20 text-[#8EE147] hover:text-[#8EE147] rounded-lg transition-colors text-xs sm:text-sm"
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-lg text-xs whitespace-nowrap text-slate-300">
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            {item.interaction_count || 0}
+                          </span>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <button
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs whitespace-nowrap text-slate-300 transition-colors"
                             onClick={() => viewDetails(item)}
                           >
                             <Eye className="h-3.5 w-3.5" />
                             View
                             <ArrowUpRight className="h-3 w-3" />
-                          </Button>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -989,24 +987,26 @@ export default function TrackingPage() {
                             {item.hsn_code || '-'}
                           </span>
                         </td>
-                        <td className="p-3 sm:p-4">{getStatusBadge(item.current_status)}</td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#8EE147]/10 rounded-full whitespace-nowrap border border-[#8EE147]/20">
-                            <MessageSquare className="h-3.5 w-3.5" style={{ color: '#8EE147' }} />
-                            <span className="font-bold" style={{ color: '#8EE147' }}>{item.interaction_count || 0}</span>
-                          </div>
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-lg text-xs whitespace-nowrap text-slate-300">
+                            {item.current_status || '-'}
+                          </span>
                         </td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="gap-1.5 h-8 sm:h-9 px-3 sm:px-4 bg-[#8EE147]/10 hover:bg-[#8EE147]/20 text-[#8EE147] hover:text-[#8EE147] rounded-lg transition-colors text-xs sm:text-sm"
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-lg text-xs whitespace-nowrap text-slate-300">
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            {item.interaction_count || 0}
+                          </span>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <button
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs whitespace-nowrap text-slate-300 transition-colors"
                             onClick={() => viewDetails(item)}
                           >
                             <Eye className="h-3.5 w-3.5" />
                             View
                             <ArrowUpRight className="h-3 w-3" />
-                          </Button>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -1121,24 +1121,26 @@ export default function TrackingPage() {
                             {item.hsn_code || '-'}
                           </span>
                         </td>
-                        <td className="p-3 sm:p-4">{getStatusBadge(item.current_status)}</td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-500/10 rounded-full whitespace-nowrap border border-red-500/20">
-                            <MessageSquare className="h-3.5 w-3.5 text-red-400" />
-                            <span className="font-bold text-red-400">{item.interaction_count || 0}</span>
-                          </div>
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-lg text-xs whitespace-nowrap text-slate-300">
+                            {item.current_status || '-'}
+                          </span>
                         </td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="gap-1.5 h-8 sm:h-9 px-3 sm:px-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-400 rounded-lg transition-colors text-xs sm:text-sm"
+                        <td className="p-3 sm:p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-lg text-xs whitespace-nowrap text-slate-300">
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            {item.interaction_count || 0}
+                          </span>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <button
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs whitespace-nowrap text-slate-300 transition-colors"
                             onClick={() => viewDetails(item)}
                           >
                             <Eye className="h-3.5 w-3.5" />
                             View
                             <ArrowUpRight className="h-3 w-3" />
-                          </Button>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -1204,19 +1206,19 @@ export default function TrackingPage() {
                     pageNum = pagination.currentPage - 2 + i;
                   }
                   return (
-                    <Button
-                      key={pageNum}
-                      variant={pageNum === pagination.currentPage ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => goToPage(pageNum)}
-                      className={`h-8 sm:h-9 w-8 sm:w-9 p-0 text-xs ${
-                        pageNum === pagination.currentPage ? 
-                          "bg-gradient-to-r from-[#8EE147] to-[#6EC035] text-[#0E223B] hover:from-[#7DD13A] hover:to-[#5AA82E]" : 
-                          "hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors text-white border-white/20"
-                      }`}
-                    >
-                      {pageNum}
-                    </Button>
+                <Button
+  key={pageNum}
+  variant={pageNum === pagination.currentPage ? "default" : "outline"}
+  size="sm"
+  onClick={() => goToPage(pageNum)}
+  className={`h-8 sm:h-9 w-8 sm:w-9 p-0 text-xs ${
+    pageNum === pagination.currentPage ? 
+      "bg-gradient-to-r from-[#8EE147] to-[#6EC035] text-[#0E223B] hover:from-[#7DD13A] hover:to-[#5AA82E] border-transparent" : 
+      "bg-[#1A3355] hover:bg-[#2A4A6B] text-white border-white/20 transition-colors"
+  }`}
+>
+  {pageNum}
+</Button>
                   );
                 })}
               </div>

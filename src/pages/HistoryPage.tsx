@@ -3346,11 +3346,6 @@ export default function HistoryPage() {
                     })}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#8EE147]/20 text-[#8EE147] rounded-full text-xs font-medium backdrop-blur-sm border border-[#8EE147]/30">
-                  <Zap className="h-3.5 w-3.5" />
-                  <span>Live</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#8EE147] animate-ping"></span>
-                </div>
               </div>
             </div>
           </div>
@@ -3566,42 +3561,40 @@ export default function HistoryPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <div className="text-sm text-slate-400">
-              Showing {page * perPage + 1} - {Math.min((page + 1) * perPage, totalCount)} of {totalCount} entries
-            </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                disabled={page === 0} 
-                onClick={() => setPage((p) => p - 1)}
-                className="hover:bg-[#1A3355] transition-all h-9 px-3 rounded-lg"
-                style={{ 
-                  borderColor: '#2A4A6B', 
-                  color: '#8EE147',
-                  backgroundColor: '#0E223B'
-                }}
-              >
-                <ChevronLeft className="h-4 w-4" style={{ color: '#8EE147' }} />
-              </Button>
-              <div className="px-3 py-1.5 bg-[#1A3355] backdrop-blur-sm rounded-lg border text-sm font-medium" style={{ borderColor: '#2A4A6B', color: '#94A3B8' }}>
-                {page + 1} / {totalPages || 1}
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                disabled={page + 1 >= totalPages} 
-                onClick={() => setPage((p) => p + 1)}
-                className="hover:bg-[#1A3355] transition-all h-9 px-3 rounded-lg"
-                style={{ 
-                  borderColor: '#2A4A6B', 
-                  color: '#8EE147',
-                  backgroundColor: '#0E223B'
-                }}
-              >
-                <ChevronRightIcon className="h-4 w-4" style={{ color: '#8EE147' }} />
-              </Button>
-            </div>
+          
+          <div className="flex items-center gap-2 ml-auto">
+  <Button 
+    variant="outline" 
+    size="sm" 
+    disabled={page === 0} 
+    onClick={() => setPage((p) => p - 1)}
+    className="hover:bg-[#1A3355] transition-all h-9 px-3 rounded-lg"
+    style={{ 
+      borderColor: '#2A4A6B', 
+      color: '#8EE147',
+      backgroundColor: '#0E223B'
+    }}
+  >
+    <ChevronLeft className="h-4 w-4" style={{ color: '#8EE147' }} />
+  </Button>
+  <div className="px-3 py-1.5 bg-[#1A3355] backdrop-blur-sm rounded-lg border text-sm font-medium" style={{ borderColor: '#2A4A6B', color: '#94A3B8' }}>
+    {page + 1} / {totalPages || 1}
+  </div>
+  <Button 
+    variant="outline" 
+    size="sm" 
+    disabled={page + 1 >= totalPages} 
+    onClick={() => setPage((p) => p + 1)}
+    className="hover:bg-[#1A3355] transition-all h-9 px-3 rounded-lg"
+    style={{ 
+      borderColor: '#2A4A6B', 
+      color: '#8EE147',
+      backgroundColor: '#0E223B'
+    }}
+  >
+    <ChevronRightIcon className="h-4 w-4" style={{ color: '#8EE147' }} />
+  </Button>
+</div>
           </motion.div>
         )}
 
@@ -3620,22 +3613,7 @@ export default function HistoryPage() {
             <span className="w-px h-4 bg-white/10" />
             <span>Auto-refresh every 60s</span>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="text-xs text-slate-400 hover:text-[#8EE147] flex items-center gap-1 transition-colors">
-              <Download className="h-3.5 w-3.5" />
-              Export
-            </button>
-            <button className="text-xs text-slate-400 hover:text-[#8EE147] flex items-center gap-1 transition-colors">
-              <Share2 className="h-3.5 w-3.5" />
-              Share
-            </button>
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <span className="flex items-center gap-1.5">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#8EE147] animate-pulse" />
-                Live
-              </span>
-            </div>
-          </div>
+        
         </motion.div>
       </div>
     </div>

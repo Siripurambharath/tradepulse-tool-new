@@ -8,7 +8,7 @@ import {
   ChevronRight, ArrowRight, Check, X
 } from 'lucide-react';
 import { Eye, EyeOff } from 'lucide-react';
-
+import { useNavigate } from "react-router-dom";
 // Activity Log Helper Functions
 const getDeviceInfo = () => {
   const userAgent = navigator.userAgent;
@@ -88,7 +88,7 @@ export default function EmailConfiguration() {
   const [emailSent, setEmailSent] = useState(0);
   const [sendingTest, setSendingTest] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
+const navigate = useNavigate();
   useEffect(() => {
     fetchConfig();
     createActivityLog(39, 12, 'Viewed email configuration page');
@@ -513,7 +513,7 @@ export default function EmailConfiguration() {
               </div>
 
               {/* API Key */}
-              <div className="col-span-1 sm:col-span-2 space-y-1.5">
+              {/* <div className="col-span-1 sm:col-span-2 space-y-1.5">
                 <label className="text-xs sm:text-sm font-medium text-slate-300 flex items-center gap-2">
                   <Key className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8EE147]" />
                   API Key
@@ -529,7 +529,7 @@ export default function EmailConfiguration() {
                   className="w-full border border-white/10 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 text-white focus:border-[#8EE147] focus:ring-2 focus:ring-[#8EE147]/20 transition-all duration-200 outline-none text-sm sm:text-base placeholder:text-slate-500"
                   placeholder="Enter API Key"
                 />
-              </div>
+              </div> */}
             </div>
 
             {/* Status Messages - Dark Theme */}
@@ -551,6 +551,24 @@ export default function EmailConfiguration() {
 
             {/* Action Buttons - Dark Theme */}
             <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-white/10">
+<button
+  type="button"
+  onClick={() =>
+    navigate("/email-port-details", {
+      state: { provider: formData.provider.trim() },
+    })
+  }
+ className={`rounded-lg border border-lime-400 bg-lime-500/10 px-4 py-2 text-sm font-medium text-lime-400 transition-all duration-500 hover:bg-lime-500/20 ${
+  emailConfig === 1 && emailSent === 1
+    ? ""
+    : "animate-[pulse_1s_ease-in-out_infinite]"
+}`}
+>
+  <span className="flex items-center gap-2">
+    <Server className="h-4 w-4" />
+    Port Details
+  </span>
+</button>
               <button
                 onClick={handleSave}
                 disabled={loading}
@@ -567,10 +585,10 @@ export default function EmailConfiguration() {
                     <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden xs:inline">Save Configuration</span>
                     <span className="xs:hidden">Save</span>
+
                   </>
                 )}
               </button>
-
               <button
                 onClick={sendTestMail}
                 disabled={emailConfig !== 1 || emailSent === 1 || sendingTest}

@@ -127,6 +127,21 @@ export default function HistoryDetailPage() {
       c.status?.toLowerCase().includes(q);
   }) || [];
 
+
+
+  const formatPhoneNumbers = (contacts) => {
+  if (!contacts) return "-";
+
+  return String(contacts)
+    .split(",")
+    .map((number) => {
+      const phone = number.trim();
+      return phone.replace(/^(\+?91)\s*(\d{10})$/, "$1 $2");
+    })
+    .join(", ");
+};
+
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: '#0E223B' }}>
@@ -397,128 +412,145 @@ export default function HistoryDetailPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                {filteredCompanies.length > 0 ? (
-                  filteredCompanies.map((c: Company, i: number) => (
-                    <tr 
-                      key={i} 
-                      className="border-b border-white/5 hover:bg-[#8EE147]/5 transition-colors group"
-                    >
-                      <td className="p-2 sm:p-3 md:p-4">
-                        <div className="font-medium text-white flex items-center gap-1.5 sm:gap-2">
-                          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-[#8EE147]/20 to-[#6EC035]/20 flex items-center justify-center text-[10px] sm:text-xs font-bold text-[#8EE147] flex-shrink-0">
-                            {c.companyName?.charAt(0) || 'C'}
-                          </div>
-                          <span className="text-xs sm:text-sm truncate max-w-[60px] sm:max-w-[100px] md:max-w-[150px]">
-                            {c.companyName}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-2 sm:p-3 md:p-4">
-                        <span className="text-xs sm:text-sm text-slate-300 truncate max-w-[60px] sm:max-w-[100px] block">
-                          {c.product || '-'}
-                        </span>
-                      </td>
-                      <td className="p-2 sm:p-3 md:p-4 text-slate-400 text-xs sm:text-sm truncate max-w-[60px] sm:max-w-[100px]">
-                        {c.contactName || '-'}
-                      </td>
-                      <td className="p-2 sm:p-3 md:p-4">
-                        <a href={`mailto:${c.email}`} className="text-[#8EE147] hover:text-[#6EC035] hover:underline text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[120px] md:max-w-[180px] block">
-                          {c.email}
-                        </a>
-                      </td>
-                      <td className="p-2 sm:p-3 md:p-4 text-slate-400">
-                        {c.sentAt ? (
-                          <div className="flex items-center gap-0.5 sm:gap-1">
-                            <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0 text-[#8EE147]" />
-                            <span className="text-[10px] sm:text-xs hidden xs:inline">
-                              {new Date(c.sentAt).toLocaleDateString()}
-                            </span>
-                            <span className="text-[10px] xs:hidden">
-                              {new Date(c.sentAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                            </span>
-                          </div>
-                        ) : '-'}
-                      </td>
-                      <td className="p-2 sm:p-3 md:p-4">
-                        <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white/5 rounded text-[10px] sm:text-xs text-slate-300 truncate max-w-[60px] sm:max-w-[100px] block border border-white/5">
-                          {c.templateUsed || '-'}
-                        </span>
-                      </td>
-                      <td className="p-2 sm:p-3 md:p-4">
-                        {c.respondedAt ? (
-                          <div>
-                            <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-slate-400">
-                              <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0 text-[#8EE147]" />
-                              <span className="hidden xs:inline">
-                                {new Date(c.respondedAt).toLocaleString()}
-                              </span>
-                              <span className="xs:hidden">
-                                {new Date(c.respondedAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                            {c.message && (
-                              <p className="text-[10px] sm:text-xs text-slate-300 mt-0.5 sm:mt-1 max-w-[100px] sm:max-w-[150px] md:max-w-[200px] bg-white/5 p-1 sm:p-2 rounded-lg border border-white/5 truncate">
-                                "{c.message}"
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-slate-500 text-[10px] sm:text-xs">No response</span>
-                        )}
-                      </td>
-                      <td className="p-2 sm:p-3 md:p-4">
-                        <StatusBadge status={c.status} />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={8} className="text-center py-8 sm:py-10 md:py-12 text-slate-400">
-                      <div className="flex flex-col items-center gap-2 sm:gap-3">
-                        <Building2 className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-slate-400/20" />
-                        <p className="text-xs sm:text-sm">No companies found</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
+       <tbody>
+  {filteredCompanies.length > 0 ? (
+    filteredCompanies.map((c: Company, i: number) => (
+      <tr 
+        key={i} 
+        className="border-b border-white/5 hover:bg-[#8EE147]/5 transition-colors group"
+      >
+        <td className="p-2 sm:p-3 md:p-4">
+          <div className="font-medium text-white flex items-center gap-1.5 sm:gap-2">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-[#8EE147]/20 to-[#6EC035]/20 flex items-center justify-center text-[10px] sm:text-xs font-bold text-[#8EE147] flex-shrink-0">
+              {c.companyName?.charAt(0) || 'C'}
+            </div>
+            <span className="text-xs sm:text-sm truncate max-w-[60px] sm:max-w-[100px] md:max-w-[150px]">
+              {c.companyName}
+            </span>
+          </div>
+        </td>
+        <td className="p-2 sm:p-3 md:p-4">
+          <span className="text-xs sm:text-sm text-slate-300 truncate max-w-[60px] sm:max-w-[100px] block">
+            {c.product || '-'}
+          </span>
+        </td>
+      {/* CONTACT / PHONE COLUMN - Clickable with formatted phone number */}
+<td className="p-2 sm:p-3 md:p-4 text-slate-400 text-xs sm:text-sm truncate max-w-[60px] sm:max-w-[100px]">
+  {c.contactName ? (
+    <a
+      href={`tel:${c.contactName.replace(/[^\d+]/g, "")}`}
+      className="hover:text-[#8EE147] hover:underline transition-colors block truncate"
+      title={formatPhoneNumbers(c.contactName)}
+    >
+      {formatPhoneNumbers(c.contactName)}
+    </a>
+  ) : (
+    '-'
+  )}
+</td>
+
+        {/* EMAIL COLUMN - Clickable to send email */}
+        <td className="p-2 sm:p-3 md:p-4">
+          <a 
+            href={`mailto:${c.email}`} 
+            className="text-[#8EE147] hover:text-[#6EC035] hover:underline text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[120px] md:max-w-[180px] block"
+            title={`Email ${c.email}`}
+          >
+            {c.email}
+          </a>
+        </td>
+        
+        <td className="p-2 sm:p-3 md:p-4 text-slate-400">
+          {c.sentAt ? (
+            <div className="flex items-center gap-0.5 sm:gap-1">
+              <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0 text-[#8EE147]" />
+              <span className="text-[10px] sm:text-xs hidden xs:inline">
+                {new Date(c.sentAt).toLocaleDateString()}
+              </span>
+              <span className="text-[10px] xs:hidden">
+                {new Date(c.sentAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+          ) : '-'}
+        </td>
+        <td className="p-2 sm:p-3 md:p-4">
+          <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white/5 rounded text-[10px] sm:text-xs text-slate-300 truncate max-w-[60px] sm:max-w-[100px] block border border-white/5">
+            {c.templateUsed || '-'}
+          </span>
+        </td>
+        <td className="p-2 sm:p-3 md:p-4">
+          {c.respondedAt ? (
+            <div>
+              <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-slate-400">
+                <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0 text-[#8EE147]" />
+                <span className="hidden xs:inline">
+                  {new Date(c.respondedAt).toLocaleString()}
+                </span>
+                <span className="xs:hidden">
+                  {new Date(c.respondedAt).toLocaleDateString()}
+                </span>
+              </div>
+              {c.message && (
+                <p className="text-[10px] sm:text-xs text-slate-300 mt-0.5 sm:mt-1 max-w-[100px] sm:max-w-[150px] md:max-w-[200px] bg-white/5 p-1 sm:p-2 rounded-lg border border-white/5 truncate">
+                  "{c.message}"
+                </p>
+              )}
+            </div>
+          ) : (
+            <span className="text-slate-500 text-[10px] sm:text-xs">No response</span>
+          )}
+        </td>
+        <td className="p-2 sm:p-3 md:p-4">
+          <StatusBadge status={c.status} />
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan={8} className="text-center py-8 sm:py-10 md:py-12 text-slate-400">
+        <div className="flex flex-col items-center gap-2 sm:gap-3">
+          <Building2 className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-slate-400/20" />
+          <p className="text-xs sm:text-sm">No companies found</p>
+        </div>
+      </td>
+    </tr>
+  )}
+</tbody>
             </table>
           </div>
 
-          {/* Pagination Footer - Dark Theme */}
-          {pagination && pagination.totalPages > 0 && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-3 sm:p-4 border-t border-white/10 bg-[#8EE147]/5">
-              <div className="text-[10px] sm:text-sm text-slate-400">
-                Showing <span className="font-medium text-white">{page * perPage + 1}</span> -{' '}
-                <span className="font-medium text-white">{Math.min((page + 1) * perPage, pagination.totalItems)}</span> of{' '}
-                <span className="font-medium text-white">{pagination.totalItems}</span> companies
-              </div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  disabled={page === 0} 
-                  onClick={() => setPage(p => p - 1)}
-                  className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 text-white border-white/20"
-                >
-                  <ChevronLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                </Button>
-                <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-white/5 rounded-lg border border-white/10 text-[10px] sm:text-xs md:text-sm font-medium text-white">
-                  {page + 1} / {pagination.totalPages || 1}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  disabled={page + 1 >= (pagination?.totalPages || 1)} 
-                  onClick={() => setPage(p => p + 1)}
-                  className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 text-white border-white/20"
-                >
-                  <ChevronRightIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                </Button>
-              </div>
+             {/* Pagination Footer - Dark Theme */}
+      {pagination && pagination.totalPages > 0 && (
+        <div className="flex items-center justify-end gap-2 sm:gap-3 p-3 sm:p-4 border-t border-white/10 bg-[#8EE147]/5 w-full">
+          
+          
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={page === 0} 
+              onClick={() => setPage(p => p - 1)}
+              className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 border-white/20 bg-[#0E223B] disabled:opacity-50"
+            >
+              <ChevronLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 !text-white !stroke-white" />
+            </Button>
+            
+            <div className="px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-white/5 rounded-lg border border-white/10 text-[10px] sm:text-xs md:text-sm font-medium text-white">
+              {page + 1} / {pagination.totalPages || 1}
             </div>
-          )}
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={page + 1 >= (pagination?.totalPages || 1)} 
+              onClick={() => setPage(p => p + 1)}
+              className="hover:bg-[#8EE147]/10 hover:border-[#8EE147]/30 transition-colors h-7 sm:h-8 md:h-9 px-2 sm:px-3 border-white/20 bg-[#0E223B] disabled:opacity-50"
+            >
+              <ChevronRightIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 !text-white !stroke-white" />
+            </Button>
+          </div>
+        </div>
+      )}
         </div>
       </div>
     </div>

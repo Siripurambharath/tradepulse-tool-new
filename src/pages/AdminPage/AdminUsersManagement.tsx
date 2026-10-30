@@ -62,7 +62,6 @@ const AdminUsersManagement = () => {
                 <div className="p-2 sm:p-2.5 md:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#8EE147] to-[#6EC035] shadow-xl shadow-[#8EE147]/30">
                   <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-[#0E223B]" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-[#8EE147] rounded-full ring-2 ring-[#0E223B] animate-pulse"></div>
               </div>
               <div className="min-w-0">
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-[#8EE147] to-[#6EC035] bg-clip-text text-transparent tracking-tight truncate">
@@ -132,10 +131,7 @@ const AdminUsersManagement = () => {
 
         {/* Footer - Dark Theme */}
         <div className="flex items-center justify-end text-[10px] sm:text-xs text-slate-500 px-2">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8EE147]" />
-            <span className="text-slate-400">Premium Dashboard</span>
-          </div>
+      
         </div>
       </div>
     </div>

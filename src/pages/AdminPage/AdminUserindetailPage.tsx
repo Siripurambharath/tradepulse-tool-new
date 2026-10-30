@@ -633,10 +633,7 @@ const AdminUserindetailPage = () => {
             <span className="hidden xs:inline w-px h-4 bg-white/10"></span>
             <span className="text-center">Last updated: {new Date().toLocaleString()}</span>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#8EE147] animate-pulse"></div>
-            <span className="text-slate-400">Live</span>
-          </div>
+          
         </div>
       </div>
     </div>

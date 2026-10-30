@@ -530,108 +530,134 @@ const AddBuyerPage = () => {
               </div>
 
               {/* Confidence Level and Reason */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
-                <div className="space-y-1.5 sm:space-y-2">
-                  <Label className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-300 flex items-center gap-1.5 sm:gap-2">
-                    <Target className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147] flex-shrink-0" />
-                    <span className="truncate">Confidence Level</span>
-                  </Label>
-                  <Select
-                    value={formData.confidence_level}
-                    onValueChange={(value) => handleSelectChange('confidence_level', value)}
-                  >
-                    <SelectTrigger className="border-white/10 focus:border-[#8EE147] focus:ring-2 focus:ring-[#8EE147]/20 rounded-xl transition-all duration-200 h-9 sm:h-10 md:h-11 text-xs sm:text-sm bg-white/5 text-white">
-                      <SelectValue placeholder="Select confidence level" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#0E223B] border-white/10 text-white">
-                      <SelectItem value="high" className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">
-                        <span className="flex items-center gap-1.5 sm:gap-2">
-                          <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" />
-                          <span className="text-xs sm:text-sm">High</span>
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="medium" className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">
-                        <span className="flex items-center gap-1.5 sm:gap-2">
-                          <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" />
-                          <span className="text-xs sm:text-sm">Medium</span>
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="low" className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">
-                        <span className="flex items-center gap-1.5 sm:gap-2">
-                          <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-400" />
-                          <span className="text-xs sm:text-sm">Low</span>
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5 sm:space-y-2">
-                  <Label className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-300 flex items-center gap-1.5 sm:gap-2">
-                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147] flex-shrink-0" />
-                    <span className="truncate">Reason</span>
-                  </Label>
-                  <Input
-                    id="reason"
-                    name="reason"
-                    value={formData.reason}
-                    onChange={handleInputChange}
-                    placeholder="Enter reason"
-                    className="border-white/10 focus:border-[#8EE147] focus:ring-2 focus:ring-[#8EE147]/20 rounded-xl transition-all duration-200 h-9 sm:h-10 md:h-11 text-xs sm:text-sm bg-white/5 text-white placeholder:text-slate-500"
-                  />
-                </div>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+  <div className="space-y-1.5 sm:space-y-2">
+    <Label className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-300 flex items-center gap-1.5 sm:gap-2">
+      <Target className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147] flex-shrink-0" />
+      <span className="truncate">Confidence Level</span>
+    </Label>
+    <Select
+      value={formData.confidence_level}
+      onValueChange={(value) => handleSelectChange('confidence_level', value)}
+    >
+      <SelectTrigger className="border-white/10 focus:border-[#8EE147] focus:ring-2 focus:ring-[#8EE147]/20 rounded-xl transition-all duration-200 h-9 sm:h-10 md:h-11 text-xs sm:text-sm bg-white/5 text-white">
+        <SelectValue placeholder="Select confidence level" />
+      </SelectTrigger>
+      <SelectContent className="bg-[#0E223B] border-white/10 text-white">
+        
+        <SelectItem 
+          value="high" 
+          className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10 hover:text-white focus:text-white cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5 sm:gap-2">
+            <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" />
+            <span className="text-xs sm:text-sm text-white">High</span>
+          </span>
+        </SelectItem>
+        
+        <SelectItem 
+          value="medium" 
+          className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10 hover:text-white focus:text-white cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5 sm:gap-2">
+            <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" />
+            <span className="text-xs sm:text-sm text-white">Medium</span>
+          </span>
+        </SelectItem>
+        
+        <SelectItem 
+          value="low" 
+          className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10 hover:text-white focus:text-white cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5 sm:gap-2">
+            <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-400" />
+            <span className="text-xs sm:text-sm text-white">Low</span>
+          </span>
+        </SelectItem>
+        
+      </SelectContent>
+    </Select>
+  </div>
+  <div className="space-y-1.5 sm:space-y-2">
+    <Label className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-300 flex items-center gap-1.5 sm:gap-2">
+      <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147] flex-shrink-0" />
+      <span className="truncate">Reason</span>
+    </Label>
+    <Input
+      id="reason"
+      name="reason"
+      value={formData.reason}
+      onChange={handleInputChange}
+      placeholder="Enter reason"
+      className="border-white/10 focus:border-[#8EE147] focus:ring-2 focus:ring-[#8EE147]/20 rounded-xl transition-all duration-200 h-9 sm:h-10 md:h-11 text-xs sm:text-sm bg-white/5 text-white placeholder:text-slate-500"
+    />
+  </div>
+</div>
 
-              {/* Classification Notes and Manual Verification */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
-                <div className="space-y-1.5 sm:space-y-2">
-                  <Label className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-300 flex items-center gap-1.5 sm:gap-2">
-                    <Layers className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147] flex-shrink-0" />
-                    <span className="truncate">Classification Notes</span>
-                  </Label>
-                  <Input
-                    id="classification_notes"
-                    name="classification_notes"
-                    value={formData.classification_notes}
-                    onChange={handleInputChange}
-                    placeholder="Enter classification notes"
-                    className="border-white/10 focus:border-[#8EE147] focus:ring-2 focus:ring-[#8EE147]/20 rounded-xl transition-all duration-200 h-9 sm:h-10 md:h-11 text-xs sm:text-sm bg-white/5 text-white placeholder:text-slate-500"
-                  />
-                </div>
-                <div className="space-y-1.5 sm:space-y-2">
-                  <Label className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-300 flex items-center gap-1.5 sm:gap-2">
-                    <Shield className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147] flex-shrink-0" />
-                    <span className="truncate">Manual Verification</span>
-                  </Label>
-                  <Select
-                    value={formData.manual_verification}
-                    onValueChange={(value) => handleSelectChange('manual_verification', value)}
-                  >
-                    <SelectTrigger className="border-white/10 focus:border-[#8EE147] focus:ring-2 focus:ring-[#8EE147]/20 rounded-xl transition-all duration-200 h-9 sm:h-10 md:h-11 text-xs sm:text-sm bg-white/5 text-white">
-                      <SelectValue placeholder="Select verification" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#0E223B] border-white/10 text-white">
-                      <SelectItem value="Yes" className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">
-                        <span className="flex items-center gap-1.5 sm:gap-2">
-                          <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" />
-                          <span className="text-xs sm:text-sm">Yes</span>
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="No" className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">
-                        <span className="flex items-center gap-1.5 sm:gap-2">
-                          <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-400" />
-                          <span className="text-xs sm:text-sm">No</span>
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="Pending" className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10">
-                        <span className="flex items-center gap-1.5 sm:gap-2">
-                          <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" />
-                          <span className="text-xs sm:text-sm">Pending</span>
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+         {/* Classification Notes and Manual Verification */}
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+  <div className="space-y-1.5 sm:space-y-2">
+    <Label className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-300 flex items-center gap-1.5 sm:gap-2">
+      <Layers className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147] flex-shrink-0" />
+      <span className="truncate">Classification Notes</span>
+    </Label>
+    <Input
+      id="classification_notes"
+      name="classification_notes"
+      value={formData.classification_notes}
+      onChange={handleInputChange}
+      placeholder="Enter classification notes"
+      className="border-white/10 focus:border-[#8EE147] focus:ring-2 focus:ring-[#8EE147]/20 rounded-xl transition-all duration-200 h-9 sm:h-10 md:h-11 text-xs sm:text-sm bg-white/5 text-white placeholder:text-slate-500"
+    />
+  </div>
+  <div className="space-y-1.5 sm:space-y-2">
+    <Label className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-300 flex items-center gap-1.5 sm:gap-2">
+      <Shield className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-[#8EE147] flex-shrink-0" />
+      <span className="truncate">Manual Verification</span>
+    </Label>
+    <Select
+      value={formData.manual_verification}
+      onValueChange={(value) => handleSelectChange('manual_verification', value)}
+    >
+      <SelectTrigger className="border-white/10 focus:border-[#8EE147] focus:ring-2 focus:ring-[#8EE147]/20 rounded-xl transition-all duration-200 h-9 sm:h-10 md:h-11 text-xs sm:text-sm bg-white/5 text-white">
+        <SelectValue placeholder="Select verification" />
+      </SelectTrigger>
+      <SelectContent className="bg-[#0E223B] border-white/10 text-white">
+        
+        <SelectItem 
+          value="Yes" 
+          className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10 hover:text-white focus:text-white cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5 sm:gap-2">
+            <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" />
+            <span className="text-xs sm:text-sm text-white">Yes</span>
+          </span>
+        </SelectItem>
+        
+        <SelectItem 
+          value="No" 
+          className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10 hover:text-white focus:text-white cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5 sm:gap-2">
+            <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-400" />
+            <span className="text-xs sm:text-sm text-white">No</span>
+          </span>
+        </SelectItem>
+        
+        <SelectItem 
+          value="Pending" 
+          className="hover:bg-[#8EE147]/10 focus:bg-[#8EE147]/10 hover:text-white focus:text-white cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5 sm:gap-2">
+            <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" />
+            <span className="text-xs sm:text-sm text-white">Pending</span>
+          </span>
+        </SelectItem>
+        
+      </SelectContent>
+    </Select>
+  </div>
+</div>
 
               {/* Contacts Section */}
               <div className="space-y-3 sm:space-y-4 pt-2">

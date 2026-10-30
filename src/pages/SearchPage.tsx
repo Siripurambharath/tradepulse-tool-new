@@ -36,6 +36,8 @@ interface Buyer {
   emails: string;
   phone_revealed: boolean;
   email_revealed: boolean;
+    response: 'interested' | 'not_interested' | 'replied' | null; 
+
 }
 
 // Activity Log Helper Functions
@@ -97,6 +99,22 @@ const createActivityLog = async (actionId: number, moduleId: number, description
   }
 };
 
+
+  
+
+  const formatPhoneNumbers = (contacts) => {
+  if (!contacts) return "-";
+
+  return String(contacts)
+    .split(",")
+    .map((number) => {
+      const phone = number.trim();
+      return phone.replace(/^(\+?91)\s*(\d{10})$/, "$1 $2");
+    })
+    .join(", ");
+};
+
+
 /* ---------- Small visual helpers (avatar + status pill) ---------- */
 
 const AVATAR_PALETTE = [
@@ -157,6 +175,21 @@ function StatusPill({ state }: { state: RevealState }) {
   );
 }
 
+
+function getResponseButtonClass(
+  current: Buyer['response'],
+  target: 'interested' | 'not_interested'
+): string {
+  const isActive = current === target;
+  if (target === 'interested') {
+    return isActive
+      ? 'p-1.5 rounded-lg bg-[#8EE147] text-[#0E223B] ring-2 ring-[#8EE147]/50 shadow-sm'
+      : 'p-1.5 rounded-lg text-[#8EE147] opacity-50 hover:opacity-100 hover:bg-[#1A3355]';
+  }
+  return isActive
+    ? 'p-1.5 rounded-lg bg-rose-500 text-white ring-2 ring-rose-400/50 shadow-sm'
+    : 'p-1.5 rounded-lg text-rose-400 opacity-50 hover:opacity-100 hover:bg-[#1A3355]';
+}
 /* -------------------------------------------------------------- */
 
 /* Buyer Detail Modal */
@@ -175,8 +208,11 @@ function BuyerDetailModal({
     { label: 'HSN Code', value: buyer.hsn_code, icon: <Hash className="h-4 w-4" style={{ color: '#8EE147' }} /> },
     { label: 'Country', value: buyer.country, icon: <Globe className="h-4 w-4" style={{ color: '#8EE147' }} /> },
     { label: 'Website', value: buyer.website, icon: <Globe className="h-4 w-4" style={{ color: '#8EE147' }} /> },
-    { label: 'Contacts', value: buyer.contacts, icon: <User className="h-4 w-4" style={{ color: '#8EE147' }} /> },
-    { label: 'Emails', value: buyer.emails, icon: <AtSign className="h-4 w-4" style={{ color: '#8EE147' }} /> },
+{
+  label: 'Contacts',
+  value: formatPhoneNumbers(buyer.contacts),
+  icon: <User className="h-4 w-4" style={{ color: '#8EE147' }} />
+},    { label: 'Emails', value: buyer.emails, icon: <AtSign className="h-4 w-4" style={{ color: '#8EE147' }} /> },
     {
       label: 'Date',
       value: buyer.buyer_date
@@ -326,7 +362,12 @@ export default function SearchPage() {
   const [countries, setCountries] = useState<any[]>([]);
   const [countryFilter, setCountryFilter] = useState('all');
   const [productFilter, setProductFilter] = useState('all');
-  const [products, setProducts] = useState<any[]>([]);
+ const [products, setProducts] = useState<any[]>([]);
+const [productsLoading, setProductsLoading] = useState(false);
+const [productsHasMore, setProductsHasMore] = useState(false);
+const productsOffsetRef = useRef(0);
+const productsFetchingRef = useRef(false);
+const PRODUCTS_LIMIT = 50;
   const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -414,19 +455,51 @@ export default function SearchPage() {
       }
     };
   }, []);
+const fetchProducts = async (reset = false) => {
+  if (productsFetchingRef.current) return;
+  productsFetchingRef.current = true;
+  setProductsLoading(true);
 
-  const loadFilters = async () => {
-    try {
-      const [countryRes, productRes] = await Promise.all([
-        fetch(`${API}/filters/buyer-countries`),
-        fetch(`${API}/filters/products`),
-      ]);
-      setCountries(await countryRes.json());
-      setProducts(await productRes.json());
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  try {
+    const offset = reset ? 0 : productsOffsetRef.current;
+    const res = await fetch(
+      `${API}/filters/dropdown/products?limit=${PRODUCTS_LIMIT}&offset=${offset}`
+    );
+    const json = await res.json();
+    const list: any[] = Array.isArray(json) ? json : json?.data ?? [];
+    const hasMore: boolean = Array.isArray(json) ? false : !!json?.has_more;
+
+    setProducts((prev) => {
+      const seen = new Set(prev.map((p) => p.product));
+      const merged = reset
+        ? list
+        : [...prev, ...list.filter((p) => !seen.has(p.product))];
+      productsOffsetRef.current = merged.length;
+      return merged;
+    });
+    setProductsHasMore(hasMore);
+  } catch (err) {
+    console.error('fetchProducts failed:', err);
+  } finally {
+    productsFetchingRef.current = false;
+    setProductsLoading(false);
+  }
+};
+
+const loadFilters = async () => {
+  try {
+    const countryRes = await fetch(`${API}/filters/buyer-countries`);
+    const countryJson = await countryRes.json();
+    const countryList = Array.isArray(countryJson)
+      ? countryJson
+      : countryJson?.data ?? countryJson?.countries ?? [];
+    setCountries(Array.isArray(countryList) ? countryList : []);
+  } catch (err) {
+    console.error(err);
+    setCountries([]);
+  }
+  await fetchProducts(true);
+};
 
   useEffect(() => {
     fetchData();
@@ -605,6 +678,11 @@ export default function SearchPage() {
       const data = await response.json();
 
       if (data.success) {
+          setRows((prev) =>
+          prev.map((row) =>
+            row.buyer_id === buyer.buyer_id ? { ...row, response: responseType } : row
+          )
+        );
         toast.success(`${responseType === 'interested' ? '✓ Interested' : '✗ Not Interested'} recorded!`);
 
         const actionId = responseType === 'interested' ? 6 : 7;
@@ -672,6 +750,20 @@ export default function SearchPage() {
           .filter((recipient) => recipient.email)
       );
   };
+
+  const formatPhoneNumbers = (contacts) => {
+  if (!contacts) return "-";
+
+  return String(contacts)
+    .split(",")
+    .map((number) => {
+      const phone = number.trim();
+
+      return phone.replace(/^(\+?91)\s*(\d{10})$/, "$1 $2");
+    })
+    .join(", ");
+};
+
 
   const getLockedSelectedCount = () => {
     return getSelectedBuyers().filter((r) => !r.email_revealed).length;
@@ -783,53 +875,87 @@ export default function SearchPage() {
             <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" style={{ color: '#8EE147' }} />
             <SelectValue placeholder="Country" />
           </SelectTrigger>
-          <SelectContent style={{ backgroundColor: '#1A3355', borderColor: '#2A4A6B' }}>
-            <SelectItem value="all" className="text-white hover:bg-[#2A4A6B]">All Countries</SelectItem>
-            {countries.map((c) => (
-              <SelectItem
-                key={c.country}
-                value={c.country}
-                onClick={() => handleCountryDropdown(c.country)}
-                className="text-white hover:bg-[#2A4A6B]"
-              >
-                {c.country}
-              </SelectItem>
-            ))}
-          </SelectContent>
+       <SelectContent style={{ backgroundColor: '#1A3355', borderColor: '#2A4A6B' }}>
+  <SelectItem value="all" className="text-white hover:bg-[#2A4A6B]">
+    All Countries
+  </SelectItem>
+
+  <div className="max-h-64 overflow-y-auto">
+    {countries.map((c) => (
+      <SelectItem
+        key={c.country}
+        value={c.country}
+        onClick={() => handleCountryDropdown(c.country)}
+        className="text-white hover:bg-[#2A4A6B]"
+      >
+        {c.country}
+      </SelectItem>
+    ))}
+  </div>
+</SelectContent>
         </Select>
       </div>
 
-      {/* Product Dropdown */}
-      <div className="relative w-full sm:w-36 lg:w-44">
-        <Select value={productFilter} onValueChange={handleProductFilter}>
-          <SelectTrigger
-            className={`w-full rounded-lg sm:rounded-xl h-8 sm:h-10 text-[11px] sm:text-sm text-white
-              focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:outline-none
-              ${
-                productFilter !== 'all'
-                  ? 'border border-[#8EE147]/60 ring-1 ring-[#8EE147]/30'
-                  : 'border border-[#2A4A6B] ring-0'
-              }`}
-            style={{ backgroundColor: '#1A3355' }}
-          >
-            <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" style={{ color: '#8EE147' }} />
-            <SelectValue placeholder="Product" />
-          </SelectTrigger>
-          <SelectContent style={{ backgroundColor: '#1A3355', borderColor: '#2A4A6B' }}>
-            <SelectItem value="all" className="text-white hover:bg-[#2A4A6B]">All Products</SelectItem>
-            {products.map((p) => (
-              <SelectItem
-                key={p.product}
-                value={p.product}
-                onClick={() => handleProductDropdown(p.product)}
-                className="text-white hover:bg-[#2A4A6B]"
-              >
-                {p.product}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    {/* Product Dropdown (infinite scroll) */}
+<div className="relative w-full sm:w-36 lg:w-44">
+  <Select value={productFilter} onValueChange={handleProductFilter}>
+    <SelectTrigger
+      className={`w-full rounded-lg sm:rounded-xl h-8 sm:h-10 text-[11px] sm:text-sm text-white
+        focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:outline-none
+        ${
+          productFilter !== 'all'
+            ? 'border border-[#8EE147]/60 ring-1 ring-[#8EE147]/30'
+            : 'border border-[#2A4A6B] ring-0'
+        }`}
+      style={{ backgroundColor: '#1A3355' }}
+    >
+      <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" style={{ color: '#8EE147' }} />
+      <SelectValue placeholder="Product" />
+    </SelectTrigger>
+
+ <SelectContent style={{ backgroundColor: '#1A3355', borderColor: '#2A4A6B' }}>
+  <SelectItem value="all" className="text-white hover:bg-[#2A4A6B]">
+    All Products
+  </SelectItem>
+
+  <div
+    className="max-h-64 overflow-y-auto"
+    onScroll={(e) => {
+      const el = e.currentTarget;
+      if (
+        el.scrollTop + el.clientHeight >= el.scrollHeight - 40 &&
+        productsHasMore &&
+        !productsLoading
+      ) {
+        fetchProducts(false);
+      }
+    }}
+  >
+    {products.map((p) => (
+      <SelectItem
+        key={p.product}
+        value={p.product}
+        onClick={() => handleProductDropdown(p.product)}
+        className="text-white hover:bg-[#2A4A6B]"
+      >
+        {p.product}
+      </SelectItem>
+    ))}
+
+    {productsLoading && (
+      <div className="flex items-center justify-center py-2">
+        <Loader2 className="h-4 w-4 animate-spin" style={{ color: '#8EE147' }} />
       </div>
+    )}
+    {!productsHasMore && products.length > 0 && (
+      <div className="px-2 py-1 text-[10px] text-slate-400 text-center">
+        — end of list —
+      </div>
+    )}
+  </div>
+</SelectContent>
+  </Select>
+</div>
     </div>
   </div>
 </div>
@@ -981,9 +1107,12 @@ export default function SearchPage() {
                         <td className="px-3 py-2.5">
                           {r.phone_revealed ? (
                             <div className="flex items-center gap-1">
-                              <span className="text-sm text-slate-300 truncate max-w-[120px]" title={r.contacts}>
-                                {r.contacts}
-                              </span>
+   <span
+  className="text-sm text-slate-300 truncate max-w-[120px]"
+  title={formatPhoneNumbers(r.contacts)}
+>
+  {formatPhoneNumbers(r.contacts)}
+</span>
                               <CopyButton
                                 value={r.contacts}
                                 type="phone"
@@ -1092,31 +1221,32 @@ export default function SearchPage() {
                             >
                               <Eye className="h-3.5 w-3.5" />
                             </button>
-                            <button
-                              onClick={() => storeResponse(r, 'interested')}
-                              disabled={submittingId === r.buyer_id}
-                              title="Mark interested"
-                              className="p-1.5 rounded-lg hover:bg-[#1A3355] transition-colors disabled:opacity-40"
-                              style={{ color: '#8EE147' }}
-                            >
-                              {submittingId === r.buyer_id ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <ThumbsUp className="h-3.5 w-3.5" />
-                              )}
-                            </button>
-                            <button
-                              onClick={() => storeResponse(r, 'not_interested')}
-                              disabled={submittingId === r.buyer_id}
-                              title="Mark not interested"
-                              className="p-1.5 rounded-lg hover:bg-[#1A3355] text-rose-400 hover:text-rose-300 transition-colors disabled:opacity-40"
-                            >
-                              {submittingId === r.buyer_id ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <ThumbsDown className="h-3.5 w-3.5" />
-                              )}
-                            </button>
+                        <button
+  onClick={() => storeResponse(r, 'interested')}
+  disabled={submittingId === r.buyer_id}
+  title={r.response === 'interested' ? 'Marked interested' : 'Mark interested'}
+  aria-pressed={r.response === 'interested'}
+  className={`${getResponseButtonClass(r.response, 'interested')} transition-all disabled:opacity-40 disabled:cursor-not-allowed`}
+>
+  {submittingId === r.buyer_id ? (
+    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+  ) : (
+    <ThumbsUp className="h-3.5 w-3.5" fill={r.response === 'interested' ? 'currentColor' : 'none'} />
+  )}
+</button>
+                           <button
+  onClick={() => storeResponse(r, 'not_interested')}
+  disabled={submittingId === r.buyer_id}
+  title={r.response === 'not_interested' ? 'Marked not interested' : 'Mark not interested'}
+  aria-pressed={r.response === 'not_interested'}
+  className={`${getResponseButtonClass(r.response, 'not_interested')} transition-all disabled:opacity-40 disabled:cursor-not-allowed`}
+>
+  {submittingId === r.buyer_id ? (
+    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+  ) : (
+    <ThumbsDown className="h-3.5 w-3.5" fill={r.response === 'not_interested' ? 'currentColor' : 'none'} />
+  )}
+</button>
                           </div>
                         </td>
                       </tr>
